@@ -142,8 +142,22 @@ export const listQuerySchema = z.object({
   dir: z.enum(['asc', 'desc'], { error: (i) => MSG.unknownValue('sort direction', String(i.input)) }).default('asc'),
   salaryMin: salarySchema.optional(),
   salaryMax: salarySchema.optional(),
-  page: z.coerce.number().int().min(1).default(1),
-  pageSize: z.coerce.number().pipe(z.union([z.literal(25), z.literal(50), z.literal(100)])).default(25),
+  page: z.string().optional().transform((s, ctx) => {
+    if (s === undefined) return 1;
+    if (!/^\d+$/.test(s) || Number(s) < 1) {
+      ctx.addIssue({ code: 'custom', message: MSG.page(s) });
+      return z.NEVER;
+    }
+    return Number(s);
+  }),
+  pageSize: z.string().optional().transform((s, ctx) => {
+    if (s === undefined) return 25;
+    if (s !== '25' && s !== '50' && s !== '100') {
+      ctx.addIssue({ code: 'custom', message: MSG.pageSize(s) });
+      return z.NEVER;
+    }
+    return Number(s) as 25 | 50 | 100;
+  }),
 }).superRefine((q, ctx) => {
   const usesSalary = q.sort === 'salary' || q.salaryMin !== undefined || q.salaryMax !== undefined;
   if (usesSalary && q.country?.length !== 1) ctx.addIssue({ code: 'custom', path: ['country'], message: MSG.salaryNeedsOneCountry });

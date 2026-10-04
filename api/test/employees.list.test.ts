@@ -115,7 +115,7 @@ test('salary sort and range need exactly one country', async () => {
   expect(codes(await list('?country=US&salaryMin=100000&salaryMax=150000&sort=salary'))).toEqual(['E000003', 'E000002']);
 });
 
-test.fails('rejects invalid query values naming the value', async () => {
+test('rejects invalid query values naming the value', async () => {
   const { list } = await setup();
   const cases: [string, Record<string, string>][] = [
     ['?pageSize=1000', { pageSize: 'Page size must be 25, 50 or 100, not "1000".' }],
