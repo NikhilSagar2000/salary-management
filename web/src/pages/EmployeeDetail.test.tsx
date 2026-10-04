@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { expect, test } from 'vitest';
 import { fakeApi } from '../test/fakeApi.ts';
@@ -124,4 +124,29 @@ test('cancel appears only on scheduled changes', async () => {
   await waitFor(() => expect(calls.some((c) => c.url.pathname.endsWith('/changes/3/cancel'))).toBe(true));
   expect(calls.find((c) => c.url.pathname.endsWith('/cancel'))!.body).toEqual({ version: 4 });
   await waitFor(() => expect(calls.filter((c) => c.url.pathname === '/api/employees/E000123')).toHaveLength(2)); // reloaded
+});
+
+test.fails('change job or pay sends a dated change with only what changed', async () => {
+  const calls = open(undefined, { 'POST /api/employees/E000123/changes': () => ({ status: 201, body: { code: 'E000123', version: 5 } }) });
+  await userEvent.click(await screen.findByRole('button', { name: 'Change job or pay' }));
+  const dialog = await screen.findByRole('dialog', { name: 'Change job or pay' });
+  expect(within(dialog).getByLabelText('Salary')).toHaveValue('145,000'); // starts from the current job
+
+  fireEvent.change(within(dialog).getByLabelText('Effective date'), { target: { value: '2026-11-01' } });
+  await userEvent.click(within(dialog).getByRole('textbox', { name: 'Country' }));
+  await userEvent.click(await screen.findByRole('option', { name: 'Germany' }));
+  await userEvent.click(within(dialog).getByRole('button', { name: 'Save change' }));
+  expect(await within(dialog).findByText('Moving to another country needs a salary in the new currency.')).toBeInTheDocument();
+  expect(within(dialog).getByLabelText('Salary')).toHaveFocus();
+
+  await userEvent.clear(within(dialog).getByLabelText('Salary'));
+  await userEvent.type(within(dialog).getByLabelText('Salary'), '90000');
+  await userEvent.click(within(dialog).getByRole('textbox', { name: 'Level' }));
+  await userEvent.click(await screen.findByRole('option', { name: 'L5' }));
+  await userEvent.type(within(dialog).getByLabelText('Note'), 'Moving to Berlin');
+  await userEvent.click(within(dialog).getByRole('button', { name: 'Save change' }));
+  await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  expect(calls.find((c) => c.method === 'POST')!.body).toEqual({
+    version: 4, effectiveDate: '2026-11-01', country: 'DE', level: 5, salary: 90000, note: 'Moving to Berlin',
+  });
 });
