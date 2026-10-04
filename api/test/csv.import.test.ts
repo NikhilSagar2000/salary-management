@@ -32,3 +32,17 @@ test('accepts comma or semicolon, BOM, any column order and header case', async 
   expect(shuffled.body.problems).toEqual([]);
   expect(shuffled.body.rows[0]).toMatchObject({ code: 'E000009', salary: 95000, level: 2, currency: 'USD', hireDate: '2025-01-15' });
 });
+
+test.fails("allows the export's status and leave columns only when empty", async () => {
+  const { preview } = await setup();
+  const header = `${HEADER},currency,manager_code,status,leave_date,leave_reason`;
+  const ok = await preview([header, row(1, ',BRL,,,,'), row(2, ',,,,,')].join('\n'));
+  expect(ok.body.problems).toEqual([]);
+  const bad = await preview([header, row(1, ',USD,,,,'), row(2, ',,,active,,'), row(3, ',,,,2026-12-31,Moving')].join('\n'));
+  expect(bad.body.problems).toEqual([
+    { line: 2, column: 'currency', message: 'Currency must be BRL for country BR.' },
+    { line: 3, column: 'status', message: 'Leave this column empty: import only adds new employees.' },
+    { line: 4, column: 'leave_date', message: 'Leave this column empty: import only adds new employees.' },
+    { line: 4, column: 'leave_reason', message: 'Leave this column empty: import only adds new employees.' },
+  ]);
+});
