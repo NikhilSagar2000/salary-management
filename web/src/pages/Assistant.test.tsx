@@ -234,7 +234,7 @@ test('sending a question scrolls the chat to it', async () => {
   scrolled.mockRestore();
 });
 
-test.fails('words the server takes back are cleared from the answer and kept as a step', async () => {
+test('words the server takes back are cleared from the answer and kept as a step', async () => {
   start('/assistant/2', {
     'POST /api/chats/2/messages': () => ({
       status: 200,

@@ -8,6 +8,7 @@ export type Sources = { groups: Extract<Source, { kind: 'group' }>[]; people: Ex
 export type AnswerEvent =
   | { type: 'step'; text: string }
   | { type: 'token'; text: string }
+  | { type: 'reset' } // the words streamed so far were narration before a lookup: clear them (they follow as a step)
   | { type: 'sources'; sources: Sources; basedOnData: boolean }
   | { type: 'done' };
 export type HistoryMessage = { role: 'user' | 'assistant'; content: string };
@@ -53,6 +54,7 @@ export async function answerQuestion(opts: {
     const lastRound = round === MAX_TOOL_ROUNDS;
     if (lastRound) messages.push({ role: 'user', content: OUT_OF_LOOKUPS });
     const calls: Extract<ModelEvent, { type: 'tool_call' }>[] = [];
+    text = ''; // the answer is the last round's words only (AST-10: its first words are the answer's first words)
     for await (const event of opts.model({ messages, tools: lastRound ? [] : TOOLS, signal: opts.signal })) {
       if (event.type === 'token') {
         text += event.text;
@@ -61,6 +63,10 @@ export async function answerQuestion(opts: {
       if (event.type === 'tool_call' && !lastRound) calls.push(event);
     }
     if (!calls.length) break;
+    if (text.trim()) {
+      opts.onEvent({ type: 'reset' });
+      opts.onEvent({ type: 'step', text: text.trim() });
+    }
     messages.push({
       role: 'assistant', content: null,
       tool_calls: calls.map((c): ToolCall => ({ id: c.id, type: 'function', function: { name: c.name, arguments: JSON.stringify(c.args) } })),

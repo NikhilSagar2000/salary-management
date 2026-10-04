@@ -74,6 +74,7 @@ export function ChatView({ id, listTitle, onChanged, onDeleted }: { id: number; 
         const d = data as { text: string; sources: Sources; basedOnData: boolean; message: string };
         if (type === 'step') patch(aid, (m) => ({ steps: [...(m.steps ?? []), d.text] }));
         if (type === 'token') patch(aid, (m) => ({ content: m.content + d.text }));
+        if (type === 'reset') patch(aid, () => ({ content: '' })); // narration before a lookup; it comes back as a step
         if (type === 'sources') end = { ...end, sources: d.sources, basedOnData: d.basedOnData };
         if (type === 'error') end = { status: 'error', content: d.message };
       });

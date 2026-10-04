@@ -71,6 +71,7 @@ export function assistantRoutes({ db, clock, model, config }: { db: pg.Pool; clo
     let partial = '';
     const send = (e: AnswerEvent) => {
       if (e.type === 'token') partial += e.text;
+      if (e.type === 'reset') partial = '';
       const { type, ...data } = e;
       if (!stop.signal.aborted) res.write(`event: ${type}\ndata: ${JSON.stringify(data)}\n\n`);
     };

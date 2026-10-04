@@ -116,7 +116,7 @@ test('badly shaped tool arguments go back to the model as an error, not a failed
   expect(answer.text).toBe('Fixed.');
 });
 
-test.fails('words written before a lookup become a step, so the answer is only the final reply (AST-10)', async () => {
+test('words written before a lookup become a step, so the answer is only the final reply (AST-10)', async () => {
   const { events, answer } = await ask([
     [{ type: 'token', text: 'Let me check the data first. ' },
       { type: 'tool_call', id: 'c1', name: 'aggregate', args: { metric: 'salary', filters: { country: ['US'] } } }, { type: 'done' }],
