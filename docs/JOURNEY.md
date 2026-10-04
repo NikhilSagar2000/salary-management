@@ -650,6 +650,7 @@ is done (hashes copied from `git log`).
 - AST-10 rechecked with the real model after the fix: the answer starts "The data can't answer this because…". npm run smoke:model gained --only-data-cant-answer. 5 free requests left today.
 - Phase 6 complete: 99 QA cases, 87 pass, 12 failed and fixed test-first, none open; the model smoke test and AST-10 ran with the real key; lessons 7–8 added.
 - Phase 7 · Q43–Q44 logged (D70); history checked (one author, personal email; no work email, keys or hashes); remote origin added with the personal key; pushed master to GitHub.
+- Phase 7 · render.yaml Blueprint: one free web service in Singapore, build with dev dependencies, start the API (migrates, serves the web build), health check /api/health, secrets entered in Render (DATABASE_URL, APP_PASSWORD_HASH, OPENROUTER_API_KEY); fallbacks ordered by the smoke test (qwen last). Rehearsed locally in production mode on port 4799: health ok, pages served, API 401 signed out.
 
 ---
 

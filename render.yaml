@@ -1,0 +1,29 @@
+# Render Blueprint (D33, D66): one free web service; the API also serves the built web app.
+# The database is Neon; paste its connection string as DATABASE_URL when Render asks.
+# Secrets marked `sync: false` are entered in the Render dashboard, never committed.
+services:
+  - type: web
+    name: acme-salary
+    runtime: node
+    plan: free
+    region: singapore
+    # Dev dependencies (Vite, TypeScript) are needed to build the web app.
+    buildCommand: npm ci --include=dev && npm run build -w web
+    # Applies pending migrations, then listens on $PORT.
+    startCommand: npm start -w api
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: APP_PASSWORD_HASH
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: OPENROUTER_MODEL
+        value: apodex/apodex-1.1-mini:free
+      - key: OPENROUTER_FALLBACK_MODELS
+        value: nvidia/nemotron-3-ultra-550b-a55b:free,liquid/lfm-2.5-2.6b:free,qwen/qwen3.8-27b:free
