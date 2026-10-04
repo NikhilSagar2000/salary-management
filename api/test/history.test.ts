@@ -30,3 +30,11 @@ test("a change keeps the fields it doesn't touch", async () => {
     country: 'BR', department: 'Engineering', role: 'Software Engineer', level: 4, manager_id: null, salary: 133000, currency: 'BRL',
   });
 });
+
+test("a change dated before a scheduled one leaves the scheduled one's fields intact", async () => {
+  const { db, change } = await setup();
+  expect((await change({ effectiveDate: '2027-01-01', salary: 110000 })).status).toBe(201); // scheduled raise
+  expect((await change({ effectiveDate: '2026-11-01', role: 'Data Engineer', level: 4, salary: 105000 })).status).toBe(201);
+  expect(await stateOn(db, '2026-11-15')).toMatchObject({ role: 'Data Engineer', level: 4, salary: 105000 });
+  expect(await stateOn(db, '2027-01-02')).toMatchObject({ role: 'Data Engineer', level: 4, salary: 110000, currency: 'BRL' });
+});
