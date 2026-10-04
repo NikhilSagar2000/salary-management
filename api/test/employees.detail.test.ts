@@ -51,3 +51,43 @@ test('shows the manager with a has-left flag and the direct reports', async () =
   await agent.post(`/api/employees/${bruno}/leave`).send({ version: 1, leaveDate: '2026-09-30' });
   expect((await agent.get('/api/employees/E000123')).body.current.manager).toEqual({ code: bruno, name: 'Bruno Lima', hasLeft: true });
 });
+
+test.fails("timeline lists each change with from → to, and marks scheduled, cancelled, won't-apply and leave events", async () => {
+  const { agent, db } = await setup();
+  await agent.post('/api/employees').send(newEmployee);
+  const post = (body: object) => agent.post('/api/employees/E000123/changes').send(body);
+  await post({ version: 1, effectiveDate: '2025-01-01', level: 4, salary: 145000, note: 'Promotion' });
+  await post({ version: 2, effectiveDate: '2027-01-01', salary: 150000 });
+  await post({ version: 3, effectiveDate: '2027-02-01', salary: 155000 });
+  const cancelId = (await db.query("SELECT id FROM job_changes WHERE effective_date = '2027-01-01'")).rows[0].id;
+  await agent.post(`/api/employees/E000123/changes/${cancelId}/cancel`).send({ version: 4 });
+  await agent.post('/api/employees/E000123/leave').send({ version: 5, leaveDate: '2026-12-31', reason: 'Moving abroad' });
+
+  const { timeline } = (await agent.get('/api/employees/E000123')).body;
+  const brl = (amount: number | null) => (amount === null ? null : { amount, currency: 'BRL' });
+  expect(timeline.map(({ id: _id, ...rest }: { id?: number }) => rest)).toEqual([
+    {
+      type: 'change', date: '2024-02-29', hire: true, note: null, scheduled: false, cancelled: false, wontApply: false,
+      changes: [
+        { field: 'country', from: null, to: 'BR' },
+        { field: 'department', from: null, to: 'Engineering' },
+        { field: 'role', from: null, to: 'Software Engineer' },
+        { field: 'level', from: null, to: 3 },
+        { field: 'salary', from: null, to: brl(133000) },
+      ],
+    },
+    {
+      type: 'change', date: '2025-01-01', hire: false, note: 'Promotion', scheduled: false, cancelled: false, wontApply: false,
+      changes: [{ field: 'level', from: 3, to: 4 }, { field: 'salary', from: brl(133000), to: brl(145000) }],
+    },
+    { type: 'left', date: '2026-12-31', reason: 'Moving abroad' },
+    {
+      type: 'change', date: '2027-01-01', hire: false, note: null, scheduled: true, cancelled: true, wontApply: false,
+      changes: [{ field: 'salary', from: brl(145000), to: brl(150000) }],
+    },
+    {
+      type: 'change', date: '2027-02-01', hire: false, note: null, scheduled: true, cancelled: false, wontApply: true,
+      changes: [{ field: 'salary', from: brl(145000), to: brl(155000) }],
+    },
+  ]);
+});
