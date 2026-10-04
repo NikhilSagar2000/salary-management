@@ -92,7 +92,7 @@ test('a 429 becomes rate_limited', async () => {
   expect(((await failure(openRouterModel({ baseUrl: midStream, apiKey: 'k', models: ['m'] })(request))) as ModelError).kind).toBe('rate_limited');
 });
 
-test.fails('network error, 5xx and a 60 s timeout become unavailable', async () => {
+test('network error, 5xx and a 60 s timeout become unavailable', async () => {
   const kind = async (cfg: Parameters<typeof openRouterModel>[0], signal = new AbortController().signal) =>
     ((await failure(openRouterModel(cfg)({ ...request, signal }))) as ModelError | null)?.kind;
   expect(await kind({ baseUrl: 'http://127.0.0.1:9/api/v1', apiKey: 'k', models: ['m'] })).toBe('unavailable'); // nothing listens
