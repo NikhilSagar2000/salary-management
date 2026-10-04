@@ -234,6 +234,7 @@ is done (hashes copied from `git log`).
   Compose project is named `acme-salary` so this app gets its own volume.
 - Task 1 · red: health check test (`infra.test.ts` › "health answers ok").
 - Task 1 · green: `GET /api/health` answers `{ ok: true }`.
+- Task 1 · red: migration runner test (`infra.test.ts` › "migrations apply once and are recorded").
 
 ---
 
