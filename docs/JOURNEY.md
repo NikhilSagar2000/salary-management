@@ -563,6 +563,7 @@ is done (hashes copied from `git log`).
 - Final review fix 5 · red: a "Based on" group links to the employee list only when the list can show exactly those people; groups with hire or leave dates, a manager, named people, a past date or change history are named without a link (AST-8).
 - Final review fix 5 · green: listQueryOf returns null for filters the list doesn't have (named people, hire or leave dates, manager); change-history groups, raise-% groups, past-date groups and hire-year or manager groupings carry no list link; the page names such a group (with its headcount) as plain text, and "and N more" is a link only when the first group has one (AST-8).
 - Phase 5 complete: tasks 1–29 and the final review's six fixes; 164 unit and API tests and 22 end-to-end tests pass; the build ledger (rulings, investigations) is copied into tasks/todo.md under "Phase 5 review" with the deferred minors.
+- Minor fix 9 · red: test connections start with the 60 s statement timeout without racing the first query (no pg deprecation warning).
 
 ---
 
