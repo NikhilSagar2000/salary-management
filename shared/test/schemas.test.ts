@@ -10,7 +10,7 @@ function errorsOf(input: unknown): Record<string, string> {
   return out;
 }
 
-test.fails('employee schema requires each field with a plain message', () => {
+test('employee schema requires each field with a plain message', () => {
   expect(errorsOf({})).toEqual({
     code: 'Employee code must be E followed by 6 digits, like E000123.',
     firstName: 'Enter a first name.',
