@@ -273,6 +273,7 @@ is done (hashes copied from `git log`).
 - Task 4 · red: history guard and job-change shape tests (EMP-12).
 - Task 4 · green: `job_changes` (changed fields only, `manager_set`, currency must match country, a country needs a salary, `cancelled_at` settable once), `leave_events`; triggers refuse editing or deleting history and deleting employees (EMP-12). Two first-draft bugs caught by the tests: a shared trigger read a column one table lacks, and the country-needs-salary check was missing.
 - Task 5 · red: next-code test (EMP-1).
+- Task 5 · green: `GET /api/employees/next-code` (highest + 1); `POST /api/employees` validates with the shared schema and saves the person.
 
 ---
 

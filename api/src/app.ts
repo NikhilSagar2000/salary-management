@@ -4,6 +4,7 @@ import { authRoutes, requireSession } from './auth/routes.ts';
 import { deleteSession, SESSION_COOKIE, sessionToken } from './auth/sessions.ts';
 import type { ErrorRequestHandler } from 'express';
 import type { Clock } from './clock.ts';
+import { employeeRoutes } from './employees/routes.ts';
 
 export type Config = { passwordHash: string; production: boolean };
 
@@ -25,6 +26,7 @@ export function createApp(deps: { db: pg.Pool; clock: Clock; config: Config }) {
     await deleteSession(deps.db, sessionToken(req.get('cookie')));
     res.clearCookie(SESSION_COOKIE, { path: '/' }).status(204).end();
   });
+  app.use(employeeRoutes(deps));
   app.use(errorHandler);
   return app;
 }

@@ -6,7 +6,7 @@ export const newEmployee = {
   hireDate: '2024-02-29', country: 'BR', department: 'Engineering', role: 'Software Engineer', level: 3, salary: 133000,
 };
 
-test.fails('suggests the next free code', async () => {
+test('suggests the next free code', async () => {
   const { app } = await testApp();
   const agent = await signIn(app);
   expect((await agent.get('/api/employees/next-code')).body).toEqual({ code: 'E000001' });
