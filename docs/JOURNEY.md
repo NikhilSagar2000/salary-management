@@ -207,6 +207,19 @@ Follow-up: added TIME-1 to `docs/SPEC.md` (browser timezone via `X-Timezone`, UT
 fallback), changed the planned clock interface and Task 1/20 tests, and updated `CLAUDE.md`.
 Then started phase 5.
 
+### Phase 5 report (question dialog, 2026-10-05)
+
+Reported phase 5 done (tasks 1–29, the final review and its six fixes; 164 unit and API
+tests and 22 end-to-end tests pass) and asked:
+
+| # | Question | Options offered | Answer |
+|---|---|---|---|
+| Q41 | What should I do with the nine small issues the reviewer found? | Fix all nine now (Recommended) · Fix only the user-facing ones · Leave them for now | "Fix all nine now (Recommended)" |
+| Q42 | The code is on master, local only, with no GitHub remote. What should happen with it now? | Push master now so CI runs (Recommended) · Keep it local until deploy | "Keep it local until deploy" |
+
+**My reply:** fixing the nine test-first before phase 6 (D68); no remote or push until the
+deploy approval (D69).
+
 ---
 
 ## 3. Timeline
@@ -627,6 +640,8 @@ accepted when Nikhil approved the plan (P4).
 | D65 | UI look (refines D24) | Q24 "calm, data-dense, light + dark" | – | System fonts, Mantine lightly restyled, one accent colour, tables first. Not used: cream backgrounds, hero/marketing layouts, numbered section labels, italic accent words, monospace labels, pill buttons, gradients, decorative illustrations, emoji | A tool for scanning numbers, not a landing page; **for Nikhil to adjust** | C |
 | D66 | Serving the web app | D33 one service | – | The API serves the built web app from Task 27 (needed by the end-to-end server); dev uses Vite on 4731 with a proxy to 4732 | Same origin in production; nothing to serve before the UI exists | C |
 | D67 | Unknown fields in write requests | Strict vs lenient schemas | Refuse · ignore | Ignored; identity fields (code, hire date) are refused explicitly | The only client is our UI; a strict refusal message would be technical | C |
+| D68 | Reviewer's minor findings | Final review left nine Minor items | Fix all · user-facing only · leave | Fix all nine test-first before manual QA | Small, contained fixes; QA then starts from a cleaner base | N (Q41) |
+| D69 | When the code leaves this machine | No remote yet; CI unproven on GitHub | Push now · keep local until deploy | Keep local until the deploy approval; CI first runs then | Nikhil's choice | N (Q42) |
 
 ---
 
