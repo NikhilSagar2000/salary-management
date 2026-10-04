@@ -23,7 +23,7 @@ test('returns a page of 25 with the total; 50 and 100 allowed', async () => {
 
 const codes = (res: { body: { rows: { code: string }[] } }) => res.body.rows.map((r) => r.code);
 
-test.fails('search matches part of name, email or code ignoring case and accents', async () => {
+test('search matches part of name, email or code ignoring case and accents', async () => {
   const { list } = await setup([
     { code: 'E000001', firstName: 'Lena', lastName: 'Müller', country: 'DE' },
     { code: 'E000002', firstName: 'José', lastName: 'Álvarez', workEmail: 'jose.alvarez@acme.example', country: 'BR' },

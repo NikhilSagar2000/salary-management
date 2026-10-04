@@ -330,6 +330,7 @@ is done (hashes copied from `git log`).
 - Task 11 · red: list paging (LIST-1); `insertPeople` fixture inserts people straight into the database.
 - Task 11 · green: `GET /api/employees` pages (25 default; 25/50/100) with the total; migration 005 adds `unaccent`, `pg_trgm`, an indexed search expression and `current_state(today)`. Postgres 17 evaluates index expressions with a safe search_path, so the search functions are schema-qualified (first run failed on that).
 - Task 11 · red: search by name, email or code ignoring case and accents (LIST-2).
+- Task 11 · green: `q` matches part of the full name, work email or code, ignoring case and accents (trigram-indexed); blank search is no search (LIST-2).
 
 ---
 
