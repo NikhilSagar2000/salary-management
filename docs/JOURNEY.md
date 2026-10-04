@@ -267,6 +267,7 @@ is done (hashes copied from `git log`).
 - Task 3 · test: AUTH-6 leak test over responses and console output (passes; mutation that put the hash in the 401 body made it fail, reverted). Red: malformed JSON must get a plain 400, not a stack trace.
 - Task 3 · green: one error handler answers 400 "The request couldn't be read…" for unreadable bodies and a plain 500 otherwise; details only in the server log.
 - Task 3 · red: `hash-password` script test.
+- Task 3 · green: `npm run hash-password` reads a password from stdin and prints the `APP_PASSWORD_HASH` value.
 
 ---
 

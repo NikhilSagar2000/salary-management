@@ -161,7 +161,7 @@ is written just before the task starts, from the interfaces that exist at that p
   separators, decimals, negatives and exponents" (review focus 4) ·
   `shared/test/format.test.ts` › "money shows currency code and separators; dates like
   4 Oct 2026" (UI-2).
-- [ ] **Task 3: Sign-in.** Files: `api/src/auth/*`, `scripts/hash-password.ts`, migration for
+- [x] **Task 3: Sign-in.** Files: `api/src/auth/*`, `scripts/hash-password.ts`, migration for
   `sessions`. Tests: `auth.test.ts` › "rejects /api requests without a session" (AUTH-1) ·
   "signs in with the right password and sets a 7-day httpOnly cookie" · "rejects a wrong
   password with a plain message" (AUTH-2) · "locks sign-in for 15 minutes after 5 wrong
@@ -431,18 +431,18 @@ Files: `api/db/migrations/001_sessions.sql`, `api/src/auth/{password,sessions,ro
 Session = random 32-byte token in an httpOnly cookie `acme_session`; Postgres stores only its
 SHA-256 and expiry, so no signing secret is needed. Lockout counts live in memory (one server).
 
-- [ ] Step 1: "rejects /api requests without a session": `GET /api/session` and
+- [x] Step 1: "rejects /api requests without a session": `GET /api/session` and
   `GET /api/employees` → 401 `{ error: 'Please sign in.' }`; `/api/health` stays open.
-- [ ] Step 2: "signs in with the right password and sets a 7-day httpOnly cookie":
+- [x] Step 2: "signs in with the right password and sets a 7-day httpOnly cookie":
   `POST /api/session` → 204, cookie `HttpOnly; SameSite=Lax; Max-Age=604800; Path=/`, then
   `GET /api/session` → 200; Secure only when `production: true`. Session expires after 7 days.
-- [ ] Step 3: "rejects a wrong password with a plain message": 401 "That password isn't right."
-- [ ] Step 4: "locks sign-in for 15 minutes after 5 wrong tries from one IP": 6th try (even the
+- [x] Step 3: "rejects a wrong password with a plain message": 401 "That password isn't right."
+- [x] Step 4: "locks sign-in for 15 minutes after 5 wrong tries from one IP": 6th try (even the
   right password) → 429 "Too many tries. Wait 15 minutes and try again."; 15 minutes later the
   right password works.
-- [ ] Step 5: "sign-out makes the old cookie stop working": `DELETE /api/session` → 204, old
+- [x] Step 5: "sign-out makes the old cookie stop working": `DELETE /api/session` → 204, old
   cookie → 401.
-- [ ] Step 6: "no response or log line contains the password hash or API key" (AUTH-6):
+- [x] Step 6: "no response or log line contains the password hash or API key" (AUTH-6):
   a negative property, so no red commit; proven by a mutation check (temporarily leak the
   hash, watch it fail, revert).
-- [ ] Task check: `npm test`, `npm run typecheck`.
+- [x] Task check: `npm test`, `npm run typecheck`.

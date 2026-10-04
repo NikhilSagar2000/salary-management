@@ -105,7 +105,7 @@ test('malformed requests get a plain message, never internals', async () => {
   expect(res.text).not.toMatch(/at .*\.(ts|js):\d+/);
 });
 
-test.fails('hash-password script prints a hash that signs in with that password', () => {
+test('hash-password script prints a hash that signs in with that password', () => {
   const out = execFileSync(process.execPath, ['src/hash-password.ts'], { input: 'a new password\n', encoding: 'utf8' });
   const hash = out.trim().split('\n').at(-1)!;
   return Promise.all([verifyPassword('a new password', hash), verifyPassword('another', hash)]).then(([right, wrong]) => {
