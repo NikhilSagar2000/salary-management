@@ -164,6 +164,13 @@ test('free requests left are shown when known', async () => {
   expect(await screen.findByText('37 free model requests left today')).toBeInTheDocument();
 });
 
+test.fails('the chat shows no free-request count (removed, D72)', async () => {
+  const calls = start('/assistant/2', { 'GET /api/assistant/status': () => ({ status: 200, body: { freeRequestsLeft: 37 } }) });
+  await screen.findByRole('heading', { name: 'Median pay in Brazil' });
+  expect(calls.some((c) => c.url.pathname === '/api/assistant/status')).toBe(false);
+  expect(screen.queryByText(/free model requests? left/)).not.toBeInTheDocument();
+});
+
 test('announces once when the answer finishes', async () => {
   const hold = gate();
   start('/assistant/2', {

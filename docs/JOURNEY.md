@@ -266,6 +266,36 @@ overview, so the median and counting rules keep their tests. Spec and plan updat
 
 **My reply:** investigated before changing anything (below in the build log).
 
+### P9 (2026-10-05, during phase 7)
+
+> 1 free model request left today hide these lines
+
+**My reply:** removed the "N free model requests left today" line under the question box
+(AST-16) and the API endpoint that only fed it (D72). `npm run smoke:model` still prints the
+quota for whoever runs it.
+
+### P10 (2026-10-05, during phase 7; sent while P9 was in progress)
+
+> also [Image #2] can we hide these once the thinking and processing part is done ?
+
+(Image #2: an answer's lookup steps, "Looking up people…" twice and "Looking up people:
+matching "Shubham"…".)
+
+**My reply:** the lookup steps now show only while an answer is being worked out and go away
+when it finishes, stops or fails (D73). Saved answers never kept their steps, so a live answer
+now looks the same as a reopened one.
+
+### P11 (2026-10-05, during phase 7; sent while P9 was in progress)
+
+> [Image #3] this whole section has same scroll. chat new chat should have seperate scroll and the chat itself should have seperate
+
+(Image #3: the assistant page on a desktop; the chat list, the messages and the question box
+all move with one page scroll.)
+
+**My reply:** the assistant page now fills the window below the top bar. The chat list scrolls
+on its own, the messages scroll on their own, and the question box stays below the messages
+(D74, new criterion AST-19).
+
 ---
 
 ## 3. Timeline
@@ -676,6 +706,7 @@ is done (hashes copied from `git log`).
 - P8 fixed · green: the model client sends at most three models (OpenRouter's limit); OpenRouter's error text rides in the ModelError and every unavailable answer is written to the server log with it (the browser still sees the plain message). Smoke test check 3 now uses the app's own configured list; render.yaml keeps two fallbacks; .env.example says so. Nikhil's .env lists three fallbacks, so the client uses the first two of them.
 - Follow-up to 0545fb0: the smoke-test, render.yaml and .env.example edits that commit's line describes failed to apply in that step (a text mismatch in my edit script); applied here.
 - Lesson 9 added: a smoke test sends exactly what the app sends (P8).
+- P9–P11 logged (D72–D74). Red: the chat shows no free-request count and never asks for it.
 
 ---
 
@@ -757,6 +788,9 @@ accepted when Nikhil approved the plan (P4).
 | D69 | When the code leaves this machine | No remote yet; CI unproven on GitHub | Push now · keep local until deploy | Keep local until the deploy approval; CI first runs then | Nikhil's choice | N (Q42) |
 | D70 | Phase 7 go-ahead | Phase 6 done; deploy needs GitHub, Neon, Render | Push + deploy · push only · not yet | Push master to GitHub, then deploy on Neon + Render free tiers; Nikhil creates accounts and keys | Nikhil's approval | N (Q43, Q44) |
 | D71 | Pay summary on the employee list | Nikhil: "we dont need this" (P7) | Keep · remove from the page · remove page and API | Remove it from the page and the list API (no other user); statistics tests move to the pay overview | Nikhil's call; the API work had no other use | N (P7, replaces part of Q18) |
+| D72 | Free requests left in the chat | Nikhil: "hide these lines" (P9) | Keep · hide in the page · remove page line and endpoint | Remove the line and `/api/assistant/status`; the quota reader stays for the smoke test | Nikhil's call; nothing else used the endpoint | N (P9, replaces AST-16) |
+| D73 | Lookup steps after an answer finishes | Nikhil: "hide these once the thinking and processing part is done" (P10) | Keep · collapse behind a toggle · hide | Hide when the answer finishes, stops or fails | Nikhil asked to hide them; saved answers never had steps, so live and reopened answers now match | N (P10, amends AST-3) |
+| D74 | Scrolling on the assistant page | Nikhil: chat list and chat "should have seperate scroll" (P11) | One page scroll · separate scroll areas | The page fills the window; the chat list and the messages scroll separately; the question box stays below the messages | Nikhil's call | N (P11, new AST-19) |
 
 ---
 
