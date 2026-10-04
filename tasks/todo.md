@@ -637,3 +637,17 @@ Tests run `generateSeed()` once per file and write it to the test database.
 - [x] Step 10: "managers employed, more senior, no loops" (SEED-10).
 - [x] `npm run seed` loads the dev database; seed time measured for JOURNEY section 7.
 - [x] Task check: `npm test`.
+
+### Task 14: CSV export
+
+Files: `api/src/csv/{format,export}.ts`, `api/src/employees/list.ts` (shared filter builder),
+routes, `api/test/csv.export.test.ts`. `GET /api/employees.csv?<list query>` → every matching
+row (no paging) in list order, `text/csv; charset=utf-8`, BOM, comma-separated, filename
+`employees-<today>.csv`. Columns (CSV-1): code, first_name, last_name, gender, work_email,
+country, department, role, level (number), salary, currency, hire_date, manager_code, status,
+leave_date, leave_reason.
+
+- [ ] Step 1: "exports every filtered row with BOM, commas and the documented columns" (CSV-1).
+- [ ] Step 2: "prefixes formula-like cells with an apostrophe" (CSV-2).
+- [ ] Step 3: "accented, apostrophe and comma names export intact" (review focus 2; quoting).
+- [ ] Task check: `npm test`.
