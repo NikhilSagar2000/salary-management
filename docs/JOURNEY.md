@@ -603,6 +603,7 @@ is done (hashes copied from `git log`).
 - Phase 6 QA fix 8 · red (found by QA, EMP-8): in a job change, level choices follow the role as in Add employee, and a level that no longer fits clears.
 - Phase 6 QA fix 8 · green: the job-change dialog's levels come from the role (levelChoices), and changing the role clears a level that no longer fits.
 - Phase 6 QA fix 9 · red (found by QA, S11): sending a question scrolls the chat to it (the new question and answer were hidden behind the question box).
+- Phase 6 QA fix 9 · green: the chat scrolls to the newest message when a question is sent or the chat opens, and keeps a streaming answer in view while HR is near the bottom; the end marker keeps clear of the sticky question box.
 
 ---
 

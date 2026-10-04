@@ -23,6 +23,15 @@ export function ChatView({ id, listTitle, onChanged, onDeleted }: { id: number; 
   const stop = useRef<AbortController | null>(null);
   const tempId = useRef(0);
   const streaming = chat?.messages.some((m) => m.status === 'streaming') ?? false;
+  const end = useRef<HTMLDivElement>(null);
+  const count = chat?.messages.length ?? 0;
+  const last = chat?.messages.at(-1);
+  // A new question (or opening the chat) scrolls to the newest message.
+  useEffect(() => end.current?.scrollIntoView({ block: 'end' }), [count]);
+  // A growing answer stays in view, unless HR has scrolled up to read something else.
+  useEffect(() => {
+    if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 400) end.current?.scrollIntoView({ block: 'end' });
+  }, [last?.content.length, last?.status, last?.steps?.length]);
 
   useEffect(() => {
     api<Chat>(`/api/chats/${id}`).then(setChat, (e: Error) => setError(e.message));
@@ -106,6 +115,8 @@ export function ChatView({ id, listTitle, onChanged, onDeleted }: { id: number; 
       <Stack gap="md">
         {chat.messages.map((m) => (m.role === 'user' ? <Question key={m.id} text={m.content} /> : <Answer key={m.id} message={m} />))}
       </Stack>
+      {/* Kept clear of the sticky question box below. */}
+      <div ref={end} style={{ scrollMarginBottom: 220 }} />
       <VisuallyHidden role="status">{announce}</VisuallyHidden>
 
       <Paper component="form" onSubmit={send} withBorder p="sm" pos="sticky" bottom={0} style={{ zIndex: 1 }}>

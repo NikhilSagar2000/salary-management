@@ -222,7 +222,7 @@ test('a source group the list cannot show is named without a link', async () => 
   expect(within(basedOn).queryByRole('link')).not.toBeInTheDocument();
 });
 
-test.fails('sending a question scrolls the chat to it', async () => {
+test('sending a question scrolls the chat to it', async () => {
   const scrolled = vi.spyOn(Element.prototype, 'scrollIntoView');
   start('/assistant/2', {
     'POST /api/chats/2/messages': () => ({ status: 200, events: sse(sseEvent('token', { text: 'Hi.' }), sseEvent('done', {})) }),
