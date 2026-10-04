@@ -311,6 +311,7 @@ is done (hashes copied from `git log`).
 - Task 8 · test: out-of-date cancel gets 409 (EMP-13); concurrency test gained a `prepare` step. Passed first run; a mutation ignoring the version made it fail.
 - Task 8 · red: no route edits a change (EMP-12); unknown API routes must answer JSON 404.
 - Task 8 · green: unknown `/api` routes answer JSON 404 "Not found."; there is no route that edits a change (EMP-12).
+- Task 9 · red: mark leaving (LEAVE-1).
 
 ---
 
