@@ -17,6 +17,8 @@ export const MSG = {
   salaryTooLarge: 'That salary is too large. The most allowed is 10,000,000,000.',
   roleNotInDepartment: (role: string, department: string) => `${role} isn't a role in ${department}.`,
   fixFields: 'Some fields need fixing.',
+  offline: "Can't reach the server. Check your connection and try again.",
+  serverError: 'Something went wrong on our side. Try again in a minute.',
   questionEmpty: 'Type a question.',
   questionTooLong: 'Keep the question to 2,000 characters or fewer.',
   rateLimited: 'The free AI model limit has been reached. Try again later; everything else in the app still works.',

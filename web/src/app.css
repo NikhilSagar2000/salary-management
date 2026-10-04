@@ -1,0 +1,15 @@
+/* Skip link: hidden until focused (A11Y-3). */
+.skip-link {
+  position: absolute;
+  left: 8px;
+  top: -40px;
+  z-index: 1000;
+  padding: 8px 12px;
+  background: var(--mantine-color-body);
+  color: var(--mantine-color-text);
+  border: 2px solid var(--mantine-primary-color-filled);
+  border-radius: var(--mantine-radius-sm);
+}
+.skip-link:focus {
+  top: 8px;
+}

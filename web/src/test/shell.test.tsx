@@ -4,7 +4,7 @@ import { expect, test } from 'vitest';
 import { fakeApi } from './fakeApi.ts';
 import { renderApp } from './render.tsx';
 
-test.fails('signed-out visit goes to sign-in and returns afterwards', async () => {
+test('signed-out visit goes to sign-in and returns afterwards', async () => {
   let signedIn = false;
   fakeApi({
     'GET /api/session': () => (signedIn ? { status: 200, body: { signedIn: true } } : { status: 401, body: { error: 'Please sign in.' } }),
