@@ -240,6 +240,7 @@ is done (hashes copied from `git log`).
 - Task 1 · green: Postgres DATE values are parsed as `YYYY-MM-DD` strings (review focus 1).
 - Task 1 · red: TIME-1 clock test (`clock.test.ts`).
 - Task 1 · green: `requestTimezone` validates the IANA name (UTC fallback); `todayIn(clock, tz)` gives that zone's date (TIME-1).
+- Task 1 · red: AST-18 guard test (`setup.test.ts`).
 
 ---
 
