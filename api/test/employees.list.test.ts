@@ -132,3 +132,20 @@ test('rejects invalid query values naming the value', async () => {
     expect(res.body, q).toEqual({ error: 'Some fields need fixing.', fields });
   }
 });
+
+test.fails('rows carry current job, salary with currency, hire date and status', async () => {
+  const { list, db } = await setup([
+    { code: 'E000001', firstName: 'Ana', lastName: 'Silva', country: 'BR', salary: 133000, hireDate: '2024-02-29' },
+    { code: 'E000002', firstName: 'Kenji', lastName: 'Sato', country: 'JP', salary: 6070000, hireDate: '2026-12-01' },
+  ]);
+  // Ana moved to Germany in 2025 and has a raise scheduled for 2027 (not shown yet).
+  await db.query(`INSERT INTO job_changes (employee_id, effective_date, country, salary, currency) VALUES (1, '2025-03-01', 'DE', 80000, 'EUR')`);
+  await db.query(`INSERT INTO job_changes (employee_id, effective_date, salary, currency) VALUES (1, '2027-01-01', 90000, 'EUR')`);
+  const { rows } = (await list('?sort=code')).body;
+  expect(rows).toEqual([
+    { code: 'E000001', firstName: 'Ana', lastName: 'Silva', country: 'DE', currency: 'EUR', department: 'Engineering', role: 'Software Engineer',
+      level: 3, salary: 80000, hireDate: '2024-02-29', leaveDate: null, status: 'active' },
+    { code: 'E000002', firstName: 'Kenji', lastName: 'Sato', country: 'JP', currency: 'JPY', department: 'Engineering', role: 'Software Engineer',
+      level: 3, salary: 6070000, hireDate: '2026-12-01', leaveDate: null, status: 'starting' },
+  ]);
+});

@@ -342,6 +342,7 @@ is done (hashes copied from `git log`).
 - Task 11 · green: salary sort and min/max salary filter work only with exactly one country; otherwise 400 with the plain reason on `country` (LIST-5).
 - Task 11 · red: invalid query values are named in plain messages (LIST-7).
 - Task 11 · green: page and page size errors name the value ("Page size must be 25, 50 or 100, not \"1000\".") like the filter errors (LIST-7).
+- Task 11 · red: list rows carry current job, pay with currency, hire date and status (LIST-8).
 
 ---
 
