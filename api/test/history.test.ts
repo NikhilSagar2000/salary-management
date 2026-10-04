@@ -38,3 +38,18 @@ test("a change dated before a scheduled one leaves the scheduled one's fields in
   expect(await stateOn(db, '2026-11-15')).toMatchObject({ role: 'Data Engineer', level: 4, salary: 105000 });
   expect(await stateOn(db, '2027-01-02')).toMatchObject({ role: 'Data Engineer', level: 4, salary: 110000, currency: 'BRL' });
 });
+
+test.fails('refuses a change before hire, after leaving, or changing nothing', async () => {
+  const { db, change } = await setup();
+  const before = await change({ effectiveDate: '2024-02-28', level: 4 });
+  expect(before.status).toBe(400);
+  expect(before.body.fields).toEqual({ effectiveDate: "The change can't be dated before the hire date (29 Feb 2024)." });
+  const nothing = await change({ effectiveDate: '2025-01-01', note: 'just a note' });
+  expect(nothing.status).toBe(400);
+  expect(nothing.body.fields).toEqual({ form: 'Change at least one of country, department, role, level, manager or salary.' });
+  await db.query("UPDATE employees SET leave_date = '2026-06-30'");
+  const after = await change({ effectiveDate: '2026-07-01', level: 4 });
+  expect(after.status).toBe(400);
+  expect(after.body.fields).toEqual({ effectiveDate: "The change can't be dated after the leave date (30 Jun 2026)." });
+  expect((await db.query('SELECT count(*) AS n, max(version) AS v FROM job_changes, employees')).rows[0]).toEqual({ n: 1, v: 1 });
+});
