@@ -19,6 +19,7 @@ export const MSG = {
   fixFields: 'Some fields need fixing.',
   questionEmpty: 'Type a question.',
   questionTooLong: 'Keep the question to 2,000 characters or fewer.',
+  answerInProgress: 'Wait for the current answer to finish, or stop it.',
   chatTitle: 'A chat name needs 1 to 80 characters.',
   noChat: "That chat doesn't exist. It may have been deleted.",
   importTooLarge: 'The file is larger than 5 MB. Split it into smaller files and import each one.',

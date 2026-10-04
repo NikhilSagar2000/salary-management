@@ -9,6 +9,8 @@ import { answerQuestion, type AnswerEvent } from './run.ts';
 
 export function assistantRoutes({ db, clock, model }: { db: pg.Pool; clock: Clock; model: ModelFn }) {
   const router = Router();
+  // ponytail: in-memory, fine for one server; a row lock in Postgres if the API ever runs on several
+  const answering = new Set<number>();
   const noChat = (res: import('express').Response) => res.status(404).json({ error: MSG.noChat });
 
   router.get('/api/chats', async (_req, res) => {
@@ -39,6 +41,19 @@ export function assistantRoutes({ db, clock, model }: { db: pg.Pool; clock: Cloc
     if (!parsed.success) return fieldErrors(res, parsed.error.issues);
     const { question } = parsed.data;
     if (!(await getChat(db, chatId))) return noChat(res);
+    if (answering.has(chatId)) {
+      res.status(409).json({ error: MSG.answerInProgress });
+      return;
+    }
+    answering.add(chatId);
+    try {
+      await answer(chatId, question, res);
+    } finally {
+      answering.delete(chatId);
+    }
+  });
+
+  async function answer(chatId: number, question: string, res: import('express').Response) {
     const history = await chatHistory(db, chatId);
     await saveQuestion(db, clock, chatId, question);
 
@@ -47,12 +62,12 @@ export function assistantRoutes({ db, clock, model }: { db: pg.Pool; clock: Cloc
       const { type, ...data } = e;
       res.write(`event: ${type}\ndata: ${JSON.stringify(data)}\n\n`);
     };
-    const answer = await answerQuestion({
+    const result = await answerQuestion({
       model, db, today: res.locals.today, history, question, signal: new AbortController().signal, onEvent: send,
     });
-    await saveAnswer(db, clock, chatId, { content: answer.text, sources: answer.sources, basedOnData: answer.basedOnData, status: 'complete' });
+    await saveAnswer(db, clock, chatId, { content: result.text, sources: result.sources, basedOnData: result.basedOnData, status: 'complete' });
     res.end();
-  });
+  }
 
   return router;
 }

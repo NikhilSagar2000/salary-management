@@ -102,7 +102,7 @@ function heldModel() {
   return { model, release, begun };
 }
 
-test.fails('refuses a second answer while one streams', async () => {
+test('refuses a second answer while one streams', async () => {
   const held = heldModel();
   const { app } = await testApp({ model: held.model });
   const agent = await signIn(app);
