@@ -31,3 +31,24 @@ test('no screen scrolls sideways at 375 or 1440 px', async ({ page }) => {
     }
   }
 });
+
+test('at 375 px long values on the employee page stay inside their space', async ({ page }) => {
+  test.fail(); // expected to fail until long values wrap
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.goto('/employees/E000003'); // a long work email
+  const facts = page.getByRole('list', { name: 'Employee facts' });
+  await expect(facts).toContainText('@acme.example');
+  const spilling = await facts.evaluate((list) =>
+    [...list.querySelectorAll('*')].filter((el) => el.scrollWidth > el.clientWidth + 1).map((el) => el.textContent));
+  expect(spilling).toEqual([]);
+});
+
+test('at 375 px the page buttons fit on one line', async ({ page }) => {
+  test.fail(); // expected to fail until the pagination is narrower on a phone
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.goto('/employees');
+  const controls = page.locator('.mantine-Pagination-root button');
+  await expect(controls.first()).toBeVisible();
+  const tops = await controls.evaluateAll((els) => [...new Set(els.map((el) => Math.round(el.getBoundingClientRect().top)))]);
+  expect(tops).toHaveLength(1);
+});

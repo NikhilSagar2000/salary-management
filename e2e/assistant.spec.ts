@@ -46,3 +46,18 @@ test('the browser never calls openrouter.ai', async ({ page }) => {
   await expect(page.getByRole('status')).toHaveText('Answer finished.');
   expect([...hosts]).toEqual(['localhost:4733']);
 });
+
+test("Stop doesn't send what is waiting in the question box (AST-12)", async ({ page }) => {
+  test.fail(); // expected to fail until Stop and Send are separate buttons
+  const sent: string[] = [];
+  page.on('request', (r) => r.method() === 'POST' && r.url().endsWith('/messages') && sent.push(r.url()));
+  await ask(page, 'Give me a long answer [slow]');
+  const answer = page.getByRole('article', { name: 'Answer' }).last();
+  await expect(answer).toContainText('word3');
+  await page.getByLabel('Your question').fill('a second question');
+  await page.getByRole('button', { name: 'Stop' }).click();
+  await expect(answer).toContainText('Stopped');
+  await expect(page.getByLabel('Your question')).toHaveValue('a second question');
+  await expect(page.getByText('Wait for the current answer to finish, or stop it.')).toHaveCount(0);
+  expect(sent).toHaveLength(1);
+});
