@@ -37,3 +37,15 @@ test('search matches part of name, email or code ignoring case and accents', asy
   expect(codes(await list('?q=priya%20shar'))).toEqual(['E000003']);
   expect(codes(await list('?q=%20%20'))).toHaveLength(3); // blank search = no search
 });
+
+test('names with apostrophes and hyphens are found', async () => {
+  const { list } = await setup([
+    { code: 'E000001', firstName: 'Siobhan', lastName: "O'Brien", country: 'GB' },
+    { code: 'E000002', firstName: 'Jörg', lastName: 'Müller-Lüdenscheidt', country: 'DE' },
+    { code: 'E000003', firstName: 'Ana_Maria', lastName: 'Costa', country: 'BR' },
+  ]);
+  expect(codes(await list(`?q=${encodeURIComponent("o'brien")}`))).toEqual(['E000001']);
+  expect(codes(await list('?q=muller-lud'))).toEqual(['E000002']);
+  expect(codes(await list('?q=%25'))).toEqual([]); // a typed % is literal, not "anything"
+  expect(codes(await list('?q=_'))).toEqual(['E000003']);
+});
