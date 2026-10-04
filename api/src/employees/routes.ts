@@ -1,5 +1,5 @@
 import { employeeCreateSchema, employeeDetailsSchema, jobChangeSchema, leaveSchema, MSG } from '@acme/shared';
-import { Router } from 'express';
+import { Router, type RequestHandler } from 'express';
 import type pg from 'pg';
 import { fieldErrors, sendFieldErrors, sendStaleOrMissing } from '../http.ts';
 import { createEmployee, duplicateField, nextCode } from './create.ts';
@@ -9,6 +9,17 @@ import { markLeaving, undoLeaving } from './leave.ts';
 
 export function employeeRoutes({ db }: { db: pg.Pool }) {
   const router = Router();
+
+  /** LEAVE-3: once someone has left (leave date on or before today), only "undo leaving" may change them. */
+  const refuseIfLeft: RequestHandler<{ code: string; id?: string }> = async (req, res, next) => {
+    const { rows } = await db.query('SELECT leave_date FROM employees WHERE code = $1', [req.params.code]);
+    const leave = rows[0]?.leave_date;
+    if (leave && leave <= res.locals.today) {
+      res.status(409).json({ error: MSG.hasLeft });
+      return;
+    }
+    next();
+  };
 
   router.get('/api/employees/next-code', async (_req, res) => {
     res.json({ code: await nextCode(db) });
@@ -26,7 +37,7 @@ export function employeeRoutes({ db }: { db: pg.Pool }) {
     }
   });
 
-  router.patch('/api/employees/:code', async (req, res) => {
+  router.patch('/api/employees/:code', refuseIfLeft, async (req, res) => {
     if (req.body && ('code' in req.body || 'hireDate' in req.body)) {
       res.status(400).json({ error: MSG.identityFixed });
       return;
@@ -44,7 +55,7 @@ export function employeeRoutes({ db }: { db: pg.Pool }) {
     }
   });
 
-  router.post('/api/employees/:code/changes', async (req, res) => {
+  router.post('/api/employees/:code/changes', refuseIfLeft, async (req, res) => {
     const parsed = jobChangeSchema.safeParse(req.body);
     if (!parsed.success) return fieldErrors(res, parsed.error.issues);
     const version = await addChange(db, req.params.code, parsed.data);
@@ -52,7 +63,7 @@ export function employeeRoutes({ db }: { db: pg.Pool }) {
     res.status(201).json({ code: req.params.code, version });
   });
 
-  router.post('/api/employees/:code/changes/:id/cancel', async (req, res) => {
+  router.post('/api/employees/:code/changes/:id/cancel', refuseIfLeft, async (req, res) => {
     const version = Number(req.body?.version);
     const changeId = Number(req.params.id);
     if (!Number.isInteger(version) || !Number.isInteger(changeId)) return sendFieldErrors(res, { form: MSG.noChange });
@@ -61,7 +72,7 @@ export function employeeRoutes({ db }: { db: pg.Pool }) {
     res.json({ code: req.params.code, version: next });
   });
 
-  router.post('/api/employees/:code/leave', async (req, res) => {
+  router.post('/api/employees/:code/leave', refuseIfLeft, async (req, res) => {
     const parsed = leaveSchema.safeParse(req.body);
     if (!parsed.success) return fieldErrors(res, parsed.error.issues);
     const version = await markLeaving(db, req.params.code, parsed.data);

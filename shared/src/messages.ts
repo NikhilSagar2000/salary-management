@@ -28,6 +28,7 @@ export const MSG = {
   hireNotCancellable: "The hire record can't be cancelled.",
   noChange: "That change doesn't exist for this employee.",
   leaveBeforeHire: (hire: string) => `The leave date can't be before the hire date (${hire}).`,
+  hasLeft: 'This person has left. Undo leaving first to make changes.',
   notLeaving: "This person isn't marked as leaving.",
   reasonTooLong: 'Keep the reason to 500 characters or fewer.',
   changeNothing: 'Change at least one of country, department, role, level, manager or salary.',

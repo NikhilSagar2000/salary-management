@@ -49,7 +49,7 @@ test('undo clears date and reason and both events show in history', async () => 
   expect(again.body.fields).toEqual({ form: "This person isn't marked as leaving." });
 });
 
-test.fails('refuses every write except undo after leaving', async () => {
+test('refuses every write except undo after leaving', async () => {
   const { agent, db } = await setup(); // today 2026-10-01
   await agent.post('/api/employees/E000123/changes').send({ version: 1, effectiveDate: '2027-01-01', salary: 150000 });
   // Leaving later (notice period): still editable.

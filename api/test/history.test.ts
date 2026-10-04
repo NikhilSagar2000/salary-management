@@ -47,10 +47,10 @@ test('refuses a change before hire, after leaving, or changing nothing', async (
   const nothing = await change({ effectiveDate: '2025-01-01', note: 'just a note' });
   expect(nothing.status).toBe(400);
   expect(nothing.body.fields).toEqual({ form: 'Change at least one of country, department, role, level, manager or salary.' });
-  await db.query("UPDATE employees SET leave_date = '2026-06-30'");
-  const after = await change({ effectiveDate: '2026-07-01', level: 4 });
+  await db.query("UPDATE employees SET leave_date = '2026-12-31'"); // leaving (notice period), not yet left
+  const after = await change({ effectiveDate: '2027-01-01', level: 4 });
   expect(after.status).toBe(400);
-  expect(after.body.fields).toEqual({ effectiveDate: "The change can't be dated after the leave date (30 Jun 2026)." });
+  expect(after.body.fields).toEqual({ effectiveDate: "The change can't be dated after the leave date (31 Dec 2026)." });
   expect((await db.query('SELECT count(*) AS n, max(version) AS v FROM job_changes, employees')).rows[0]).toEqual({ n: 1, v: 1 });
 });
 
