@@ -1,4 +1,4 @@
-import { employeeCreateSchema, employeeDetailsSchema } from '@acme/shared';
+import { employeeCreateSchema, employeeDetailsSchema, MSG } from '@acme/shared';
 import { Router } from 'express';
 import type pg from 'pg';
 import { fieldErrors, sendFieldErrors } from '../http.ts';
@@ -25,6 +25,10 @@ export function employeeRoutes({ db }: { db: pg.Pool }) {
   });
 
   router.patch('/api/employees/:code', async (req, res) => {
+    if (req.body && ('code' in req.body || 'hireDate' in req.body)) {
+      res.status(400).json({ error: MSG.identityFixed });
+      return;
+    }
     const parsed = employeeDetailsSchema.safeParse(req.body);
     if (!parsed.success) return fieldErrors(res, parsed.error.issues);
     try {
