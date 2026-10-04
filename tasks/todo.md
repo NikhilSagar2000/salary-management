@@ -769,3 +769,20 @@ state, Export link with the current filters, Add employee. Phone: cards instead 
 - [x] Step 5: "no matches shows the empty state and no stats" (review focus 5).
 - [x] Step 6: "export downloads the current filter" (CSV-1).
 - [x] Task check: `npm test`.
+
+### Task 22: Employee page and change forms
+
+Files: `web/src/pages/EmployeeDetail.tsx`, `web/src/pages/employee/{Timeline,DetailsForm,JobChangeForm,LeaveForm}.tsx`,
+`web/src/forms.ts` (shared-schema validation → field messages, focus the first invalid field),
+`web/src/pages/EmployeeDetail.test.tsx`, `web/src/test/fixtures.ts` (`detailResponse`).
+Forms open in modals; client validation uses the shared Zod schemas, server field errors show
+next to the same fields; 409 keeps the input and offers Reload; Save is disabled while saving.
+
+- [ ] Step 1: "code and hire date are read-only" (EMP-5).
+- [ ] Step 2: "shows peers' position, manager flag, reports and the history timeline" (EMP-14).
+- [ ] Step 3: "invalid fields show their messages and focus the first" (EMP-3, A11Y-3).
+- [ ] Step 4: "a 409 keeps the typed input and offers Reload" (EMP-13).
+- [ ] Step 5: "cancel appears only on scheduled changes" (EMP-11).
+- [ ] Step 6: "after leaving only Undo is offered" (LEAVE-3).
+- [ ] Step 7: "save button can't submit twice".
+- [ ] Task check: `npm test`.
