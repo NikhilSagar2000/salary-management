@@ -62,3 +62,15 @@ test('codes E000001–E010000, emails unique', () => {
   expect(new Set(emails).size).toBe(10_000);
   for (const email of emails) expect(email).toMatch(/^[a-z]+(\.[a-z]+)*@acme\.example$/);
 });
+
+test('no date after 2026-09-30, hires from 2012', () => {
+  const dates = [
+    ...seed.employees.flatMap((e) => [e.hireDate, e.leaveDate]),
+    ...seed.changes.map((c) => c.effectiveDate),
+    ...seed.leaveEvents.map((e) => e.leaveDate),
+  ].filter((d): d is string => d !== null);
+  expect(dates.every((d) => d <= SEED_ANCHOR)).toBe(true);
+  const hires = seed.employees.map((e) => e.hireDate).sort();
+  expect(hires[0]! >= '2012-01-01').toBe(true);
+  expect(hires[0]! < '2012-12-31').toBe(true); // the company has people from its first year
+});
