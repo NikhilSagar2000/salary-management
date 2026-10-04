@@ -1,5 +1,7 @@
+import { execFileSync } from 'node:child_process';
 import request from 'supertest';
 import { expect, test, vi } from 'vitest';
+import { verifyPassword } from '../src/auth/password.ts';
 import { PASSWORD, testApp } from './helpers.ts';
 
 test('rejects /api requests without a session', async () => {
@@ -101,4 +103,13 @@ test('malformed requests get a plain message, never internals', async () => {
   expect(res.status).toBe(400);
   expect(res.body).toEqual({ error: "The request couldn't be read. Reload the page and try again." });
   expect(res.text).not.toMatch(/at .*\.(ts|js):\d+/);
+});
+
+test.fails('hash-password script prints a hash that signs in with that password', () => {
+  const out = execFileSync(process.execPath, ['src/hash-password.ts'], { input: 'a new password\n', encoding: 'utf8' });
+  const hash = out.trim().split('\n').at(-1)!;
+  return Promise.all([verifyPassword('a new password', hash), verifyPassword('another', hash)]).then(([right, wrong]) => {
+    expect(right).toBe(true);
+    expect(wrong).toBe(false);
+  });
 });
