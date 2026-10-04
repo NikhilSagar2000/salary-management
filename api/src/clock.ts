@@ -1,10 +1,20 @@
 export type Clock = { now(): Date };
+
+export const systemClock: Clock = { now: () => new Date() };
 export const fixedClock = (iso: string): Clock => ({ now: () => new Date(iso) });
 
-export function requestTimezone(_header: string | undefined): string {
-  throw new Error('not implemented');
+/** The request's IANA timezone (X-Timezone header), or UTC when missing or unknown. */
+export function requestTimezone(header: string | undefined): string {
+  if (!header) return 'UTC';
+  try {
+    new Intl.DateTimeFormat('en', { timeZone: header });
+    return header;
+  } catch {
+    return 'UTC';
+  }
 }
 
-export function todayIn(_clock: Clock, _tz: string): string {
-  throw new Error('not implemented');
+/** Today's date as 'YYYY-MM-DD' in the given timezone. */
+export function todayIn(clock: Clock, tz: string): string {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' }).format(clock.now());
 }
