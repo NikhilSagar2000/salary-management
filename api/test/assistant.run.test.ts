@@ -45,3 +45,17 @@ test('stops tool calls after 6 rounds and asks for an answer', async () => {
   });
   expect(answer.text).toBe('Here is what I found.');
 });
+
+test('system prompt lists reference data and today\'s date and holds no secret', async () => {
+  process.env.OPENROUTER_API_KEY = 'sk-or-v1-test-secret';
+  const { requests } = await ask([[{ type: 'token', text: 'Hi.' }, { type: 'done' }]]);
+  const prompt = requests[0]!.messages[0]!;
+  expect(prompt.role).toBe('system');
+  const text = String(prompt.content);
+  expect(text).toContain('Today is 2026-10-01.');
+  for (const s of ['US United States (USD)', 'IN India (INR)', 'GB United Kingdom (GBP)', 'DE Germany (EUR)', 'BR Brazil (BRL)', 'JP Japan (JPY)']) expect(text).toContain(s);
+  for (const s of ['Customer Support: Support Specialist L1–L4, Support Manager L4–L6', 'Engineering Manager L5–L7']) expect(text).toContain(s);
+  expect(text).toContain('"The data can\'t answer this because"');
+  for (const secret of ['sk-or-v1', 'scrypt:', 'Ana Silva', 'Bo Lee', 'E000001']) expect(text).not.toContain(secret);
+  delete process.env.OPENROUTER_API_KEY;
+});
