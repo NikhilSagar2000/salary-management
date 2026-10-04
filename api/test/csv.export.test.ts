@@ -27,3 +27,11 @@ test('exports every filtered row with BOM, commas and the documented columns', a
   const india = lines((await agent.get('/api/employees.csv?country=IN')).text);
   expect(india[1]).toBe('E000099,Priya,Sharma,female,e000099@acme.example,IN,Engineering,Software Engineer,3,1550000,INR,2020-01-01,,leaving,2026-12-31,');
 });
+
+test.fails('prefixes formula-like cells with an apostrophe', async () => {
+  const { agent, db } = await setup([{ code: 'E000001', firstName: '=HYPERLINK("x")', lastName: '+Plus' }]);
+  await db.query("UPDATE employees SET leave_date = '2026-12-31', leave_reason = '@home -then'");
+  const [, row] = lines((await agent.get('/api/employees.csv')).text);
+  expect(row).toContain(`"'=HYPERLINK(""x"")",'+Plus,`);
+  expect(row!.endsWith(",'@home -then")).toBe(true);
+});

@@ -373,6 +373,7 @@ is done (hashes copied from `git log`).
 - Task 13 · chore: `npm run seed [-- --reset]` loads the seed into `DATABASE_URL` (refuses to overwrite without `--reset`). Measured seed time in section 7: ~1.4 s generate + ~1.0 s write on an Apple M3.
 - Task 14 · red: CSV export of every filtered row (CSV-1).
 - Task 14 · green: `GET /api/employees.csv` exports every row matching the list filters, in list order, as UTF-8 CSV with a BOM and the documented columns; the list's filter SQL is now shared (`listFilter`) (CSV-1).
+- Task 14 · red: formula-like cells get an apostrophe (CSV-2).
 
 ---
 
