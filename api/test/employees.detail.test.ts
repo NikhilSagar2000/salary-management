@@ -131,3 +131,14 @@ test('a leave event says whether it is still ahead and whether it was undone (LE
   await agent.post('/api/employees/E000123/leave').send({ version: 3, leaveDate: '2026-09-30' });
   expect((await leaves()).find((e: { date: string }) => e.date === '2026-09-30')).toEqual({ type: 'left', date: '2026-09-30', reason: null, scheduled: false, undone: false });
 });
+
+test.fails("someone who has left isn't compared with today's peers (EMP-14)", async () => {
+  const { agent, hire } = await setup();
+  await hire({ salary: 100000 });
+  await hire({ salary: 120000 });
+  await agent.post('/api/employees').send(newEmployee); // Ana, E000123
+  await agent.post('/api/employees/E000123/leave').send({ version: 1, leaveDate: '2026-09-30' });
+  const res = await agent.get('/api/employees/E000123');
+  expect(res.body.status).toBe('left');
+  expect(res.body.peers).toBeNull();
+});

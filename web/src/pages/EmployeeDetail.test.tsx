@@ -219,3 +219,10 @@ test('leave events read Left, Leaves or Leave cancelled', async () => {
   expect(items.map((i) => i.querySelector('.mantine-Badge-label')?.textContent)).toEqual(['Leaves', 'Leave cancelled', 'Left']);
   expect(within(items[1]!).getByText('Moving abroad')).toHaveStyle({ textDecoration: 'line-through' });
 });
+
+test.fails("someone who has left shows their last job, without a comparison to today's peers", async () => {
+  open(detailResponse({ status: 'left', leaveDate: '2025-03-22', peers: null }));
+  expect(await screen.findByRole('region', { name: 'Last job' })).toHaveTextContent('Software Engineer, L4');
+  expect(screen.queryByRole('region', { name: 'Current job' })).not.toBeInTheDocument();
+  expect(screen.getByRole('region', { name: 'Pay against peers' })).toHaveTextContent('Not compared: peers are counted as of today, after this person left.');
+});
