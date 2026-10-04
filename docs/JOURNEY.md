@@ -264,6 +264,7 @@ is done (hashes copied from `git log`).
 - Task 3 · green: 5 wrong passwords from one IP within 15 minutes lock sign-in for 15 minutes with 429 (AUTH-3); in-memory per IP (one server), trust one proxy in production.
 - Task 3 · red: sign-out test (AUTH-4).
 - Task 3 · green: `DELETE /api/session` deletes the session row and clears the cookie (AUTH-4).
+- Task 3 · test: AUTH-6 leak test over responses and console output (passes; mutation that put the hash in the 401 body made it fail, reverted). Red: malformed JSON must get a plain 400, not a stack trace.
 
 ---
 

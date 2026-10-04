@@ -1,5 +1,5 @@
 import request from 'supertest';
-import { expect, test } from 'vitest';
+import { expect, test, vi } from 'vitest';
 import { PASSWORD, testApp } from './helpers.ts';
 
 test('rejects /api requests without a session', async () => {
@@ -67,4 +67,38 @@ test('sign-out makes the old cookie stop working', async () => {
   expect(out.status).toBe(204);
   expect(out.headers['set-cookie']![0]).toMatch(/^acme_session=;/);
   expect((await request(app).get('/api/session').set('Cookie', session)).status).toBe(401);
+});
+
+test('no response or log line contains the password hash or stored session hashes', async () => {
+  const { app, db, config } = await testApp();
+  const logged: string[] = [];
+  const spies = (['log', 'info', 'warn', 'error'] as const).map((m) =>
+    vi.spyOn(console, m).mockImplementation((...args) => void logged.push(args.map(String).join(' '))),
+  );
+  const seen: string[] = [];
+  const keep = (res: request.Response) => seen.push(JSON.stringify(res.headers), res.text ?? '');
+  try {
+    const ok = await request(app).post('/api/session').send({ password: PASSWORD });
+    keep(ok);
+    const cookie = ok.headers['set-cookie']![0]!.split(';')[0]!;
+    keep(await request(app).get('/api/session').set('Cookie', cookie));
+    keep(await request(app).get('/api/nope').set('Cookie', cookie));
+    keep(await request(app).post('/api/session').set('Content-Type', 'application/json').send('{"password":'));
+    for (let i = 0; i < 6; i++) keep(await request(app).post('/api/session').send({ password: 'wrong' }));
+    keep(await request(app).delete('/api/session').set('Cookie', cookie));
+  } finally {
+    spies.forEach((s) => s.mockRestore());
+  }
+  const { rows } = await db.query('SELECT token_hash FROM sessions');
+  const secrets = [config.passwordHash, config.passwordHash.split(':')[2]!, ...rows.map((r) => r.token_hash)];
+  const everything = [...seen, ...logged].join('\n');
+  for (const secret of secrets) expect(everything).not.toContain(secret);
+});
+
+test.fails('malformed requests get a plain message, never internals', async () => {
+  const { app } = await testApp();
+  const res = await request(app).post('/api/session').set('Content-Type', 'application/json').send('{"password":');
+  expect(res.status).toBe(400);
+  expect(res.body).toEqual({ error: "The request couldn't be read. Reload the page and try again." });
+  expect(res.text).not.toMatch(/at .*\.(ts|js):\d+/);
 });
