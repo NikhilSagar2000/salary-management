@@ -93,7 +93,7 @@ JPY/INR amounts, loading, empty and error states, reload, and Back.
 | AST-7 | tests | `assistant.run.test.ts` (system prompt content, no secrets) | pass | Automated tests pass (see Steps) |
 | AST-8 | browser | Click a group link and a person link in Based on | pass | Group link opened BR + Engineering (262, as labelled); person links name and code |
 | AST-9 | browser | Ask with `[no tools]` | pass | [no tools] answer labelled "Not based on ACME data" |
-| AST-10 | not run | Needs the real model and the OpenRouter key | not run | Needs the real model; blocked on the OpenRouter key |
+| AST-10 | not run | Needs the real model and the OpenRouter key | fail → fix in progress | Real model (apodex-1.1-mini:free): says "The data can't answer this because there's no bonus information…" but after a first sentence of narration ("I need to check what data is actually available before answering.") from the lookup round, which the app joined onto the answer |
 | AST-11 | browser | Ask with `[html]` | pass | [html]: bold, a table and a list render; the img/script tags show as text; no img or script element; title unchanged |
 | AST-12 | browser | 2,001 characters; second question while one streams; Stop with `[slow]` | fail → fixed | Box stops at 2,000 characters; a second question waits while one streams; Stop saves the partial answer marked Stopped. Clicking Stop also submitted what was in the box; fixed test-first (e9733d3 → 99de1ae), rechecked in Chrome: Stop, no error, nothing sent |
 | AST-13 | tests | `assistant.run.test.ts` (last 20 messages) | pass | Automated tests pass (see Steps) |

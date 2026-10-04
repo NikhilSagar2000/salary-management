@@ -60,10 +60,11 @@ for (const model of candidates) {
     rounds = `FAIL ${why(err)}`;
   }
 
-  // 3. OpenRouter's `models` fallback: the first model doesn't exist, this one should answer.
+  // 3. The `models` list the app sends (this model first, then another candidate) is accepted and answered. OpenRouter
+  // refuses unknown ids (400), and only fails over when a listed model fails at the time, which can't be forced from here.
   try {
     let text = '';
-    const viaFallback = openRouterModel({ ...cfg, models: ['acme-smoke/no-such-model:free', model] });
+    const viaFallback = openRouterModel({ ...cfg, models: [model, ...candidates.filter((c) => c !== model).slice(0, 1)] });
     for await (const e of viaFallback({ messages: [{ role: 'user', content: 'Reply with the word ready.' }], tools: [], signal: minutes(90_000) })) {
       if (e.type === 'token') text += e.text;
     }
@@ -85,7 +86,7 @@ for (const model of candidates) {
       extra = `\n    AST-10: FAIL ${why(err)}`;
     }
   }
-  rows.push(`${model}\n    tool call while streaming: ${toolCall}\n    several rounds: ${rounds}\n    models fallback: ${fallback}${extra}`);
+  rows.push(`${model}\n    tool call while streaming: ${toolCall}\n    several rounds: ${rounds}\n    models list accepted: ${fallback}${extra}`);
   console.log(rows.at(-1));
 }
 console.log(`Free requests left today: ${await freeRequestsLeft(cfg)}`);

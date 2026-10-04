@@ -628,6 +628,7 @@ is done (hashes copied from `git log`).
 - Test fix: the keyboard add-employee test failed in 2 of 5 full runs with Role left empty (it passes alone). The arrow-key helper now reads only the focused field's own list, and the test checks each choice right after making it, so a repeat points at the exact step. Cause unconfirmed (likely Enter landing while the searchable Role list re-renders after the department change); 3 later runs green. Nikhil's "please continue" logged as P5.
 - Model smoke test fix 1 · red (found with the real free models): badly shaped tool arguments (a single value where a list is expected) go back to the model as an error; the step text read the unchecked arguments and crashed the whole answer ("f.country.map is not a function").
 - Model smoke test fix 1 · green: the step text describes only arguments that pass the tool's own checks (validArgs), with plain wording otherwise; the tool's error still goes back to the model, which can correct itself.
+- Model smoke test (D44) with Nikhil's key: npm run smoke:model added; apodex-1.1-mini (Nikhil's primary), lfm-2.5 and nemotron-3-ultra pass streamed tool calls and several lookup rounds; qwen3.8 rate-limited upstream; failover unverified (can't be forced). AST-10 partly fails: narration from the lookup round is joined onto the answer.
 
 ---
 
@@ -1044,6 +1045,19 @@ Important by their effect on HR: the export's missing timezone (TIME-1; a US-bas
 in the late afternoon gets tomorrow's state), the broader-than-labelled "Based on" links
 (AST-8), and the undo entry's date (LEAVE-2). Six fixes in all, each test-first; the other nine
 Minor items are listed as deferred in the Phase 5 report.
+
+
+**Model smoke test (D44), 2026-10-05**, run with Nikhil's key (`npm run smoke:model`, about 30 of
+the 50 free requests): all four models from `.env` stream tool calls. First run: two of them
+crashed the answer, which exposed a real bug (the step text read unchecked arguments; fixed
+test-first, a8bedfe). Second run: apodex/apodex-1.1-mini:free, liquid/lfm-2.5-2.6b:free and
+nvidia/nemotron-3-ultra-550b-a55b:free did several lookup rounds inside one streamed answer;
+qwen/qwen3.8-27b:free was rate-limited upstream both times. OpenRouter accepted the multi-model
+list the app sends. The failover itself (a listed model failing mid-request) can't be forced
+from outside: **unverified**. My first fallback check used a made-up model id, which OpenRouter
+refuses with 400; that was my test's mistake. Chosen per D44: Nikhil's primary,
+apodex/apodex-1.1-mini:free. AST-10 on it: the plain "The data can't answer this because…"
+sentence came second, after narration from the lookup round (fix in progress).
 
 ---
 
