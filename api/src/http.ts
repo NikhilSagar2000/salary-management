@@ -22,7 +22,9 @@ export async function sendStaleOrMissing(res: Response, db: pg.Pool, code: strin
 
 /** Thrown inside a write to refuse it with plain field messages (400); the transaction rolls back. */
 export class FieldProblem extends Error {
-  constructor(public fields: Record<string, string>) {
+  fields: Record<string, string>;
+  constructor(fields: Record<string, string>) {
     super(Object.values(fields).join(' '));
+    this.fields = fields;
   }
 }

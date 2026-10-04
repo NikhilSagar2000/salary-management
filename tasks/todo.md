@@ -179,7 +179,7 @@ is written just before the task starts, from the interfaces that exist at that p
   › "edits first name, last name, gender and email in place" (EMP-6) · "refuses to change code
   or hire date" (EMP-5) · `concurrency.test.ts` › "an old version gets 409 and nothing
   changes" (EMP-13, details; extended in tasks 7–9 to every write).
-- [ ] **Task 7: Job changes.** Files: `api/src/employees/{state,changes}.ts`.
+- [x] **Task 7: Job changes.** Files: `api/src/employees/{state,changes}.ts`.
   Tests: `history.test.ts` › "a change keeps the fields it doesn't touch" · "a change dated
   before a scheduled one leaves the scheduled one's fields intact" (Q35 example) · "refuses a
   change before hire, after leaving, or changing nothing" (EMP-7) · "refuses a department,
@@ -510,14 +510,14 @@ country in force on that date), then re-check every date from the change on (com
 salary currency matches country); the manager is checked on the change's date. Any problem
 rolls back and answers 400 with a plain message.
 
-- [ ] Step 1: "a change keeps the fields it doesn't touch".
-- [ ] Step 2: "a change dated before a scheduled one leaves the scheduled one's fields intact" (Q35).
-- [ ] Step 3: "refuses a change before hire, after leaving, or changing nothing" (EMP-7).
-- [ ] Step 4: "refuses a department, role and level combination not allowed on that date",
+- [x] Step 1: "a change keeps the fields it doesn't touch".
+- [x] Step 2: "a change dated before a scheduled one leaves the scheduled one's fields intact" (Q35).
+- [x] Step 3: "refuses a change before hire, after leaving, or changing nothing" (EMP-7).
+- [x] Step 4: "refuses a department, role and level combination not allowed on that date",
   including one that breaks a later scheduled change (EMP-8).
-- [ ] Step 5: "a country change needs a salary in the new currency" (EMP-9).
-- [ ] Step 6: "refuses a relocation that would leave a later salary in the old currency" (EMP-9).
-- [ ] Step 7: "manager must exist, not be the person, be employed on the date, and not form a
+- [x] Step 5: "a country change needs a salary in the new currency" (EMP-9).
+- [x] Step 6: "refuses a relocation that would leave a later salary in the old currency" (EMP-9).
+- [x] Step 7: "manager must exist, not be the person, be employed on the date, and not form a
   loop" (EMP-10).
-- [ ] Step 8: `concurrency.test.ts` job-change case (EMP-13).
-- [ ] Task check: `npm test`, `npm run typecheck`.
+- [x] Step 8: `concurrency.test.ts` job-change case (EMP-13).
+- [x] Task check: `npm test`, `npm run typecheck`.
