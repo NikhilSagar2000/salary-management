@@ -43,6 +43,8 @@ employees in six countries, plus a read-only pay assistant. Built with Nikhil.
 - **Stack:** TypeScript · Node + Express + Zod · React (Vite) + Mantine · PostgreSQL via `pg` ·
   Vitest · Playwright · Docker Compose. npm workspaces: `api/`, `web/`, `shared/`.
 - **Ports:** web 4731 · API 4732 · end-to-end 4733 · Postgres 4734.
+- **End to end:** `npm run e2e` builds the web app, recreates `acme_e2e` from the seed, and runs
+  Playwright against the API on 4733 with a local fake OpenRouter (`e2e/fake-openrouter.ts`).
 
 ## Domain rules
 

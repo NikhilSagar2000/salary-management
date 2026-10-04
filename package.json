@@ -13,12 +13,17 @@
   "scripts": {
     "db:up": "docker compose up -d --wait db",
     "test": "npm run typecheck --silent && npm test --workspaces --if-present",
-    "typecheck": "npm run typecheck --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present && tsc -p e2e",
     "migrate": "npm run migrate -w api",
     "dev:api": "npm run dev -w api",
     "hash-password": "npm run hash-password -w api --silent",
     "seed": "npm run seed -w api --",
     "measure:list": "npm run measure:list -w api --silent",
-    "dev:web": "npm run dev -w web"
+    "dev:web": "npm run dev -w web",
+    "e2e": "playwright test -c e2e"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "^1.63.0"
   }
 }
