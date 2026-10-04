@@ -253,6 +253,7 @@ is done (hashes copied from `git log`).
 - Task 2 · green: `salarySchema` turns typed text or numbers into a whole number from 1 to 10,000,000,000, with plain messages for separators, decimals, negatives, exponents and blanks.
 - Task 2 · red: calendar date test.
 - Task 2 · green: `isoDate(field)` accepts only real calendar dates written YYYY-MM-DD.
+- Task 2 · red: money and date formatting test (UI-2).
 
 ---
 
