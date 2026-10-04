@@ -4,6 +4,7 @@ import { expect, test } from 'vitest';
 import { fakeApi } from '../test/fakeApi.ts';
 import { listResponse } from '../test/fixtures.ts';
 import { renderApp } from '../test/render.tsx';
+import { setPhone } from '../test/setup.ts';
 
 const signedInWith = (list = listResponse()) =>
   fakeApi({
@@ -106,4 +107,16 @@ test('export downloads the current filter', async () => {
   expect(await screen.findByRole('link', { name: 'Export CSV' })).toHaveAttribute(
     'href', '/api/employees.csv?country=US&department=Sales&sort=hireDate&dir=desc',
   );
+});
+
+test.fails('on a phone the filters open in a drawer', async () => {
+  setPhone();
+  signedInWith();
+  renderApp('/employees?country=BR');
+  expect(await screen.findByLabelText('Search')).toBeInTheDocument();
+  expect(screen.queryByRole('combobox', { name: 'Country' })).not.toBeInTheDocument();
+  await userEvent.click(screen.getByRole('button', { name: 'Filters (1)' }));
+  const drawer = await screen.findByRole('dialog', { name: 'Filters' });
+  expect(within(drawer).getByRole('combobox', { name: 'Department' })).toBeInTheDocument();
+  expect(within(drawer).getByLabelText('Salary from')).toBeEnabled();
 });

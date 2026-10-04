@@ -503,6 +503,7 @@ is done (hashes copied from `git log`).
 - Task 22 · red: Mark as leaving sends date and reason; after leaving only Undo leaving is offered (LEAVE-1, LEAVE-3).
 - Task 22 · green: Mark as leaving (date and optional reason); a leaving person can be undone from the header; once someone has left, the page offers only Undo leaving and says why (LEAVE-1, LEAVE-3).
 - Task 22 · test: a double click on Save sends one request (the save is guarded and the button shows loading). Passed first run; removing the guard and the loading state made it fail.
+- Visual check in Chrome (seeded data, dark and light, 1568 px and 390 px): list and employee page render correctly; found the phone filters filling the first screen and the skip link peeking at the top. Red: on a phone the filters open in a drawer (LIST-10).
 
 ---
 

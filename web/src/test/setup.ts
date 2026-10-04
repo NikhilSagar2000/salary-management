@@ -5,6 +5,8 @@ import { afterEach } from 'vitest';
 // jsdom lacks these browser APIs that Mantine uses.
 const mediaQueries = new Map<string, boolean>();
 export const setPrefersDark = (dark: boolean) => mediaQueries.set('(prefers-color-scheme: dark)', dark);
+/** Pretend the screen is phone-sized (below Mantine's sm breakpoint). */
+export const setPhone = () => mediaQueries.set('(max-width: 47.99em)', true);
 window.matchMedia = (query: string) =>
   ({
     matches: mediaQueries.get(query) ?? false,
