@@ -113,7 +113,7 @@ test('manager must exist, not be the person, be employed on the date, and not fo
   expect((await person('E000400', 'Davi', '2025-01-01', { managerCode: 'E000123' })).status).toBe(201);
 });
 
-test.fails('a cancelled scheduled change stays in history and stops applying', async () => {
+test('a cancelled scheduled change stays in history and stops applying', async () => {
   const { agent, db, change } = await setup(); // today: 2026-10-01
   const raise = await change({ effectiveDate: '2027-01-01', salary: 150000 });
   const id = (await db.query("SELECT max(id) AS id FROM job_changes")).rows[0].id;

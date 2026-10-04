@@ -33,6 +33,25 @@ export async function addChange(db: pg.Pool, code: string, c: JobChange): Promis
   });
 }
 
+/** Cancels a change if `version` is current; returns the new version, or null if nothing matched. */
+export async function cancelChange(db: pg.Pool, code: string, changeId: number, version: number): Promise<number | null> {
+  return withTx(db, async (tx) => {
+    const bumped = await tx.query(
+      'UPDATE employees SET version = version + 1, updated_at = now() WHERE code = $1 AND version = $2 RETURNING id, version',
+      [code, version],
+    );
+    if (!bumped.rowCount) return null;
+    const { id, version: next } = bumped.rows[0];
+    const { rows } = await tx.query(
+      'UPDATE job_changes SET cancelled_at = now() WHERE id = $1 AND employee_id = $2 RETURNING effective_date',
+      [changeId, id],
+    );
+    if (!rows[0]) throw new FieldProblem({ form: MSG.noChange });
+    await checkTimeline(tx, id, rows[0].effective_date);
+    return next as number;
+  });
+}
+
 /** Re-checks the person's state on the change's date and every later change date; throws on the first problem. */
 async function checkTimeline(tx: pg.PoolClient, employeeId: number, from: string) {
   const { rows: dates } = await tx.query(

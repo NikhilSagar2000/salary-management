@@ -24,6 +24,7 @@ export const MSG = {
   ownManager: "Someone can't be their own manager.",
   managerNotEmployed: (name: string, date: string) => `${name} isn't employed on ${date}.`,
   managerLoop: 'That would make a reporting loop.',
+  noChange: "That change doesn't exist for this employee.",
   changeNothing: 'Change at least one of country, department, role, level, manager or salary.',
   changeBeforeHire: (hire: string) => `The change can't be dated before the hire date (${hire}).`,
   changeAfterLeave: (leave: string) => `The change can't be dated after the leave date (${leave}).`,

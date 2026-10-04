@@ -3,7 +3,7 @@ import { Router } from 'express';
 import type pg from 'pg';
 import { fieldErrors, sendFieldErrors, sendStaleOrMissing } from '../http.ts';
 import { createEmployee, duplicateField, nextCode } from './create.ts';
-import { addChange } from './changes.ts';
+import { addChange, cancelChange } from './changes.ts';
 import { updateDetails } from './details.ts';
 
 export function employeeRoutes({ db }: { db: pg.Pool }) {
@@ -49,6 +49,15 @@ export function employeeRoutes({ db }: { db: pg.Pool }) {
     const version = await addChange(db, req.params.code, parsed.data);
     if (version === null) return sendStaleOrMissing(res, db, req.params.code);
     res.status(201).json({ code: req.params.code, version });
+  });
+
+  router.post('/api/employees/:code/changes/:id/cancel', async (req, res) => {
+    const version = Number(req.body?.version);
+    const changeId = Number(req.params.id);
+    if (!Number.isInteger(version) || !Number.isInteger(changeId)) return sendFieldErrors(res, { form: MSG.noChange });
+    const next = await cancelChange(db, req.params.code, changeId, version);
+    if (next === null) return sendStaleOrMissing(res, db, req.params.code);
+    res.json({ code: req.params.code, version: next });
   });
 
   return router;
