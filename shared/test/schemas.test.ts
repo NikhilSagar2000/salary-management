@@ -63,7 +63,7 @@ test('salary accepts only whole numbers from 1 to the maximum, with a plain mess
   }
 });
 
-test.fails('dates must be real calendar dates written YYYY-MM-DD', () => {
+test('dates must be real calendar dates written YYYY-MM-DD', () => {
   expect(errorsOf({ ...valid, hireDate: '2024-02-29' })).toEqual({});
   for (const bad of ['2026-02-30', '2025-02-29', '04/10/2026', '2026-4-1', '2026-13-01', '']) {
     expect(errorsOf({ ...valid, hireDate: bad }), bad).toEqual({ hireDate: 'Enter the hire date as YYYY-MM-DD.' });

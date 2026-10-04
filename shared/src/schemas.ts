@@ -24,6 +24,15 @@ export const salarySchema = z.unknown().transform((value, ctx) => {
   return n;
 });
 
+/** A real calendar date written YYYY-MM-DD; `field` names it in the message. */
+export const isoDate = (field: string) =>
+  z.string({ error: MSG.date(field) }).refine((s) => {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
+    if (!m) return false;
+    const d = new Date(Date.UTC(+m[1]!, +m[2]! - 1, +m[3]!));
+    return d.getUTCFullYear() === +m[1]! && d.getUTCMonth() === +m[2]! - 1 && d.getUTCDate() === +m[3]!;
+  }, { error: MSG.date(field) });
+
 const text = (message: string) => z.string({ error: message }).trim().min(1, { error: message }).max(100);
 
 export const employeeCreateSchema = z.object({
@@ -32,7 +41,7 @@ export const employeeCreateSchema = z.object({
   lastName: text(MSG.lastName),
   gender: z.enum(GENDERS, { error: MSG.gender }),
   workEmail: z.email({ error: MSG.workEmail }),
-  hireDate: z.string({ error: MSG.date('hire date') }),
+  hireDate: isoDate('hire date'),
   country: z.enum(COUNTRIES, { error: MSG.country }),
   department: z.enum(DEPARTMENTS, { error: MSG.department }),
   role: z.enum(ROLE_NAMES, { error: MSG.role }),
