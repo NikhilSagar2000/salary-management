@@ -95,3 +95,27 @@ test('preview lists rows and every problem by line and column, saving nothing', 
   ]);
   expect((await db.query('SELECT count(*)::int AS n FROM employees')).rows[0].n).toBe(0);
 });
+
+test.fails('applies the add-employee rules, ISO dates, manager from the database or the same file', async () => {
+  const { preview } = await setup([{ code: 'E000500' }, { code: 'E000501', leaveDate: '2023-01-01' }]);
+  const header = `${HEADER},manager_code`;
+  const res = await preview([
+    header,
+    row(1, ',E000500'), // manager in the database
+    row(2, ',E000001'), // manager earlier in this file, hired the same day
+    row(3, ',E000999'),
+    row(4, ',E000501'), // left before this hire date
+    row(5, ',E000005'),
+    row(6, ',E000007'), // manager later in this file, not hired yet on this date
+    'E000007,Ana7,Silva,female,ana7@acme.example,BR,Engineering,Engineering Manager,5,285000,2025-01-01,',
+  ].join('\n'));
+  expect(res.body.problems).toEqual([
+    { line: 4, column: 'manager_code', message: 'No employee with code E000999.' },
+    { line: 5, column: 'manager_code', message: "Test E000501 isn't employed on 29 Feb 2024." },
+    { line: 6, column: 'manager_code', message: "Someone can't be their own manager." },
+    { line: 7, column: 'manager_code', message: "Ana7 Silva isn't employed on 29 Feb 2024." },
+  ]);
+  expect(res.body.rows.map((r: { code: string; managerCode: string | null }) => [r.code, r.managerCode])).toEqual([
+    ['E000001', 'E000500'], ['E000002', 'E000001'], ['E000007', null],
+  ]);
+});

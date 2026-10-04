@@ -386,6 +386,7 @@ is done (hashes copied from `git log`).
 - Task 15 · green: own RFC 4180 parser (D64) replaces `csv-parse`; quoted commas and line breaks, CRLF and trailing blank lines parse, and problems report the line a record starts on. While splitting the red/green commits, overlapping test runs against the shared test DB caused hangs and a misleading "2 failed"; the red commit was re-verified on its own (82 passed + 1 expected fail). Lesson 5 added.
 - Task 15 · red: preview lists valid rows and every problem by line and column, saving nothing (CSV-4). It caught a duplicate message for an out-of-range level ("Software Engineer goes from L1 to L7." after "Choose a level from L1 to L7.").
 - Task 15 · green: a level outside L1–L7 now gets one message, not two (the role/level range rule skips it), and the preview lists every remaining problem by line and column, saving nothing (CSV-4). Slow-run investigation recorded in section 9: the Mac was in 925–926 s maintenance sleeps.
+- Task 15 · red: import manager rules — in the database or the same file, employed on the hire date, not the person (CSV-5).
 
 ---
 
