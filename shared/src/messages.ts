@@ -11,6 +11,10 @@ export const MSG = {
   role: 'Choose a role.',
   level: 'Choose a level from L1 to L7.',
   salary: 'Enter the salary as a whole number, like 95000.',
+  salarySeparators: 'Write the salary without separators, like 95000.',
+  salaryWhole: 'Salary must be a whole number, like 95000.',
+  salaryPositive: 'Salary must be more than 0.',
+  salaryTooLarge: 'That salary is too large. The most allowed is 10,000,000,000.',
   roleNotInDepartment: (role: string, department: string) => `${role} isn't a role in ${department}.`,
   levelOutOfRange: (role: string, min: number, max: number) => `${role} goes from L${min} to L${max}.`,
 } as const;

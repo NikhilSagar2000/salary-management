@@ -39,7 +39,7 @@ test('role must belong to the department and the level be allowed', () => {
   });
 });
 
-test.fails('salary accepts only whole numbers from 1 to the maximum, with a plain message for separators, decimals, negatives and exponents', () => {
+test('salary accepts only whole numbers from 1 to the maximum, with a plain message for separators, decimals, negatives and exponents', () => {
   const cases: [unknown, number | string][] = [
     [95000, 95000],
     ['95000', 95000],

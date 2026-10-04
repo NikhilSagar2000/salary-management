@@ -1,6 +1,28 @@
 import { z } from 'zod';
 import { MSG } from './messages.ts';
-import { COUNTRIES, DEPARTMENTS, GENDERS, ROLE_NAMES, ROLES, type Role } from './reference.ts';
+import { COUNTRIES, DEPARTMENTS, GENDERS, MAX_SALARY, ROLE_NAMES, ROLES, type Role } from './reference.ts';
+
+/** A salary typed by a person (number or text) → whole number, or a plain message. */
+export const salarySchema = z.unknown().transform((value, ctx) => {
+  const fail = (message: string) => {
+    ctx.addIssue({ code: 'custom', message });
+    return z.NEVER;
+  };
+  let n: number;
+  if (typeof value === 'number') n = value;
+  else if (typeof value === 'string') {
+    const s = value.trim();
+    if (/^\d{1,3}([.,]\d{3})+$/.test(s)) return fail(MSG.salarySeparators);
+    if (/^-?\d+[.,]\d+$/.test(s)) return fail(MSG.salaryWhole);
+    if (!/^-?\d+$/.test(s)) return fail(MSG.salary);
+    n = Number(s);
+  } else return fail(MSG.salary);
+  if (!Number.isFinite(n)) return fail(MSG.salary);
+  if (!Number.isInteger(n)) return fail(MSG.salaryWhole);
+  if (n <= 0) return fail(MSG.salaryPositive);
+  if (n > MAX_SALARY) return fail(MSG.salaryTooLarge);
+  return n;
+});
 
 const text = (message: string) => z.string({ error: message }).trim().min(1, { error: message }).max(100);
 
@@ -15,7 +37,7 @@ export const employeeCreateSchema = z.object({
   department: z.enum(DEPARTMENTS, { error: MSG.department }),
   role: z.enum(ROLE_NAMES, { error: MSG.role }),
   level: z.number({ error: MSG.level }).int({ error: MSG.level }).min(1, { error: MSG.level }).max(7, { error: MSG.level }),
-  salary: z.number({ error: MSG.salary }),
+  salary: salarySchema,
 }).superRefine((job, ctx) => {
   for (const issue of jobProblems(job)) ctx.addIssue({ code: 'custom', ...issue });
 });
