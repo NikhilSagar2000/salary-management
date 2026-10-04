@@ -27,4 +27,8 @@ Rules learned from Nikhil's corrections and preferences. Read at session start.
    the OS locale, and free models send a single value where a list is expected. Check
    browser-only behaviour with Playwright, and give tool schemas' callers (step text) only
    checked arguments.
+9. **A smoke test sends exactly what the app sends.** The model smoke test passed with one or
+   two models, but the app sent all four configured ones and OpenRouter refuses more than three,
+   so every question failed for Nikhil (P8). Build smoke and integration checks from the app's
+   own configuration and request code, not a hand-made variant.
 
