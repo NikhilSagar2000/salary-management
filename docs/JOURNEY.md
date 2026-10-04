@@ -399,6 +399,7 @@ is done (hashes copied from `git log`).
 - Task 16 · red: `get_employee` tool returns the person with full history (AST-4).
 - Task 16 · green: `get_employee` tool returns the employee page data (current job, peers, manager, reports, full timeline) via `employeeDetail` (AST-4).
 - Task 16 · red: `query_changes` tool classifies changes (raise, pay cut, promotion, relocation, manager change, leave…) and caps at 200 (AST-4).
+- Task 16 · green: `query_changes` tool over a new `change_log` view (each applied change with the values before it, classified as hire/promotion/demotion/raise/pay cut/role/department/relocation/manager change, plus leave and undo events), with raise %, at most 200 rows, total and people count (AST-4).
 
 ---
 

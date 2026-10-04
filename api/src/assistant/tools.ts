@@ -113,9 +113,80 @@ async function getEmployee(db: pg.Pool, today: string, args: z.infer<typeof getE
   return { result: detail, sources: [{ kind: 'person', code: detail.code, name: `${detail.firstName} ${detail.lastName}` }] };
 }
 
+const CHANGE_KINDS = [
+  'hire', 'promotion', 'demotion', 'raise', 'pay_cut', 'role_change', 'department_change', 'relocation', 'manager_change',
+  'leave', 'undo_leave',
+] as const;
+
+const queryChangesSchema = z
+  .object({
+    filters: filtersSchema.default({}).describe("Which people (by their current job); default: everyone who hasn't left"),
+    kinds: z.array(z.enum(CHANGE_KINDS)).optional().describe('Only changes of these kinds'),
+    from: date.optional().describe('Changes on or after this date'),
+    to: date.optional().describe('Changes on or before this date'),
+    limit: z.number().int().min(1).default(50).describe(`At most ${MAX_ROWS} rows are returned`),
+    offset: z.number().int().min(0).default(0),
+  })
+  .strict();
+
+type Money = { amount: number; currency: string };
+const FIELDS = ['country', 'department', 'role', 'level'] as const;
+
+async function queryChanges(db: pg.Pool, today: string, args: z.infer<typeof queryChangesSchema>): Promise<ToolResult> {
+  const f = args.filters;
+  if (salaryNeedsOneCountry(f)) return { result: { error: 'Salary filters need exactly one country.' }, sources: [] };
+  const { params, fromWhere } = listFilter(toFilters(f), today);
+  const where = [`l.employee_id IN (SELECT e.id ${fromWhere()})`];
+  const param = (v: unknown) => `$${params.push(v)}`;
+  if (args.kinds) where.push(`l.kinds && ${param(args.kinds)}::text[]`);
+  if (args.from) where.push(`l.date >= ${param(args.from)}`);
+  if (args.to) where.push(`l.date <= ${param(args.to)}`);
+  const from = `FROM change_log l JOIN employees e ON e.id = l.employee_id
+    LEFT JOIN employees m ON m.id = l.manager_id LEFT JOIN employees pm ON pm.id = l.prev_manager_id
+    WHERE ${where.join(' AND ')}`;
+  const { rows: [count] } = await db.query(`SELECT count(*) AS n, count(DISTINCT l.employee_id) AS people ${from}`, params);
+  const { rows } = await db.query(
+    `SELECT l.*, e.code, e.first_name || ' ' || e.last_name AS name,
+       m.code AS manager_code, m.first_name || ' ' || m.last_name AS manager_name,
+       pm.code AS prev_manager_code, pm.first_name || ' ' || pm.last_name AS prev_manager_name
+     ${from} ORDER BY l.date DESC, l.source DESC, l.id DESC LIMIT ${Math.min(args.limit, MAX_ROWS)} OFFSET ${args.offset}`,
+    params,
+  );
+  const out = rows.map((r) => {
+    const changes: { field: string; from: unknown; to: unknown }[] = [];
+    if (r.source === 'change') {
+      for (const field of FIELDS) if (r[field] !== null && r[field] !== r[`prev_${field}`]) changes.push({ field, from: r[`prev_${field}`], to: r[field] });
+      if (r.manager_set && r.manager_id !== r.prev_manager_id) {
+        changes.push({
+          field: 'manager',
+          from: r.prev_manager_code ? { code: r.prev_manager_code, name: r.prev_manager_name } : null,
+          to: r.manager_code ? { code: r.manager_code, name: r.manager_name } : null,
+        });
+      }
+      if (r.salary !== null && (r.salary !== r.prev_salary || r.currency !== r.prev_currency)) {
+        const money = (amount: number | null, currency: string | null): Money | null => (amount === null ? null : { amount, currency: currency! });
+        changes.push({ field: 'salary', from: money(r.prev_salary, r.prev_currency), to: money(r.salary, r.currency) });
+      }
+    }
+    const pct = r.kinds.includes('raise') || r.kinds.includes('pay_cut') ? Math.round(((r.salary - r.prev_salary) / r.prev_salary) * 1000) / 10 : undefined;
+    return { code: r.code, name: r.name, date: r.date, kinds: r.kinds, note: r.note, ...(pct === undefined ? {} : { raisePct: pct }), changes };
+  });
+  const label = [describeFilters(f), args.kinds?.join(' or '), (args.from || args.to) && `${args.from ?? '…'} to ${args.to ?? '…'}`]
+    .filter(Boolean).join(' · ');
+  const people = [...new Map(out.map((r) => [r.code, r.name])).entries()].slice(0, PEOPLE_IN_SOURCES);
+  return {
+    result: { total: count.n, rows: out },
+    sources: [
+      { kind: 'group', label, query: listQueryOf(f), headcount: count.people },
+      ...people.map(([code, name]) => ({ kind: 'person' as const, code, name })),
+    ],
+  };
+}
+
 const TOOLS_BY_NAME = {
   query_employees: { schema: queryEmployeesSchema, run: queryEmployees },
   get_employee: { schema: getEmployeeSchema, run: getEmployee },
+  query_changes: { schema: queryChangesSchema, run: queryChanges },
 } as const;
 
 /** Runs one tool call from the model. Never throws for bad input: the error goes back to the model. */

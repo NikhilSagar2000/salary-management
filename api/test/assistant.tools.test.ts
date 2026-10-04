@@ -57,7 +57,7 @@ test('get_employee returns the full history', async () => {
   expect((await tool('get_employee', { code: 'E000999' })).result).toEqual({ error: 'No employee with code E000999.' });
 });
 
-test.fails('query_changes classifies kinds and caps at 200', async () => {
+test('query_changes classifies kinds and caps at 200', async () => {
   const { tool, db } = await setup([
     { code: 'E000001', firstName: 'Ana', lastName: 'Silva', country: 'BR', salary: 100000, hireDate: '2020-01-01' },
     { code: 'E000002', firstName: 'Bo', lastName: 'Lee', country: 'US', salary: 120000, hireDate: '2020-01-01' },
