@@ -505,6 +505,7 @@ is done (hashes copied from `git log`).
 - Task 22 · test: a double click on Save sends one request (the save is guarded and the button shows loading). Passed first run; removing the guard and the loading state made it fail.
 - Visual check in Chrome (seeded data, dark and light, 1568 px and 390 px): list and employee page render correctly; found the phone filters filling the first screen and the skip link peeking at the top. Red: on a phone the filters open in a drawer (LIST-10).
 - Green: on a phone, Search stays on screen beside a Filters (n) button and the other filters open in a bottom drawer; desktop layout unchanged (LIST-10). The skip link is now fully hidden until focused. Rechecked in Chrome at 390 px and 1280 px.
+- Task 23 · red: Add employee page: pre-fills the suggested code, editable (EMP-1); role choices follow the department, level choices follow the role (EMP-2); each field's message shows next to it and the first invalid field gets focus (EMP-3, A11Y-3).
 
 ---
 
