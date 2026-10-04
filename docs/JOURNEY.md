@@ -1,0 +1,336 @@
+# ACME Salary Management: journey
+
+The master record, from the first prompt to the deployed app. Append only: a changed
+decision gets a new entry. Commit hashes are copied from `git log`. Anything unverified is
+labelled **unverified**.
+
+Contents: 1 Brief · 2 Prompt log · 3 Timeline · 4 Decision log · 5 Architecture, data model
+and API · 6 Trade-offs · 7 Performance · 8 Testing strategy · 9 AI usage · 10 Deliberately
+left out · 11 Deployment · 12 Retrospective
+
+---
+
+## 1. Brief
+
+Replace ACME's Excel salary sheets. ACME's HR manager (one user, on phone and desktop, knows
+the organisation but not SQL) manages pay for 10,000 employees across six countries (US, IN,
+GB, DE, BR, JP), and asks a pay assistant questions about how the organisation pays people.
+
+Features: find employees (server-side search, filter, sort, paging, state in the URL); add
+and change employees (validated forms, effective-dated job and salary history, immutable code
+and hire date, stale saves refused); record leavers (mark and undo, nothing deleted); ask about
+pay (read-only tool-using assistant on a free OpenRouter model, sources shown, says plainly
+when the data can't answer); Excel round trip (CSV export of the filtered list, all-or-nothing
+CSV import with preview and per-row errors); deterministic seed of exactly 10,000 people.
+
+Rules: currencies never mixed or converted; median with min, max and headcount; money as
+integers; WCAG AA. Full text: `requirements.md` (P1).
+
+---
+
+## 2. Prompt log
+
+Nikhil's messages verbatim and numbered, each followed by "My reply". Questions asked through
+the question dialog are logged with their answers under the message they belong to.
+
+> **Logging note:** P2 and P3 arrived while the session was in plan mode, which only allows
+> writing the plan file. They were recorded in the plan file as they happened and transcribed
+> here at set-up, so they were acted on (questions asked) before being logged in this file.
+
+### P1: `requirements.md`
+
+The requirements file as provided (committed alongside this journal, unchanged).
+
+**My reply:** read it in full; it drove every question below.
+
+### P2
+
+> I have the rquiremernts in the requirements.md file. I want you to go ahead and check it out. and lets plan the website first. Feel free to ask any questions. DOnt assume anything. in doubt? always ask me
+
+**My reply:** read `requirements.md`; checked tooling (Node 24.13.1, npm 11.8.0, no pnpm,
+Docker 28.1.1, Docker Compose v2.35.1, git 2.50.1, `~/.ssh/id_personal` present, global git
+email is a work address); listed free tool-capable OpenRouter models; classified the work as
+architectural (new project); wrote back my understanding; asked the questions below. No
+subagents used during planning.
+
+**Round 1** (question dialog; answers verbatim)
+
+| # | Question | Options offered | Answer |
+|---|---|---|---|
+| Q1 | What should this planning pass produce before we stop again? | Phases 1–4, then stop (Recommended) · Phases 1–4 + screen wireframes · Chat plan only for now | "Phases 1–4, then stop (Recommended)" |
+| Q2 | The app will be deployed on Render (public URL) and calls OpenRouter with your key. Should it require a login? | Single password (Recommended) · No login · Username + password in DB | "Single password (Recommended)" |
+| Q3 | Do you already have an OpenRouter account and API key? | Yes, I'll put it in .env · No, I'll create one myself · No, you sign up (I approve) | "Yes, I'll put it in .env" |
+| Q4 | What should CSV import do? | Create new employees only (Recommended) · Create + update by employee code · Update only | "Create new employees, if it has some overlapping codes or other unique fields reject the csv. csv rle is either all gets uploaded or nothing. do mention the things why csv failed." |
+
+**Round 2** (Nikhil answered two, then stopped the dialog to clarify)
+
+| # | Question | Options offered | Answer |
+|---|---|---|---|
+| Q5 | Which fields must be unique per employee (so CSV import rejects duplicates against the database and within the file)? | Code + work email (Recommended) · Code + email + full name · Employee code only | "Code + work email (Recommended)" |
+| Q6 | Besides code, name, country, job, salary, hire date and leaver status, which extra fields should an employee have? (multi-select) | Department + level · Gender · Work email · Manager | "Department + level, Gender, Work email, Manager" |
+| Q7 | How should the pay assistant conversation work? | Multi-turn, not saved (Recommended) · One question, one answer · Multi-turn, saved history | Not answered in the dialog; answered by P3 |
+| Q8 | Which genders should the data model support? | Female / Male / Non-binary · Female / Male · Don't store gender | Not answered; re-asked as Q10 |
+| Q8a | What would you like to clarify? (The assistant question · The gender question · One of my answered ones · How I'm asking questions) | | Declined the dialog; Nikhil wanted to type freely. I asked in plain text instead. |
+
+### P3
+
+> if we dont save history will on refresh it will go away ? I think we should maintain multiple chat windows and maintain history I feel like. just like we have chatgpt we can keep multiple chats right. so in similar way we should implemnent it and maintaining history as well.
+
+**My reply:** confirmed that unsaved chats disappear on refresh. Decided with Nikhil:
+ChatGPT-style multiple chats, stored in Postgres, each answer stored with the sources it was
+based on so reopened chats show what they said and why. Continued the questions:
+
+**Round 3**
+
+| # | Question | Options offered | Answer |
+|---|---|---|---|
+| Q9 | What can HR do with saved chats? | Auto-title, rename, delete (Recommended) · Auto-title, rename, archive · Auto-title only | "Auto-title, rename, delete (Recommended)" |
+| Q10 | Which gender values should the data model support? | Female / Male / Non-binary · Female / Male | "Female / Male / Non-binary" |
+| Q11 | How should Manager work? | Part of job history (Recommended) · Plain current field | "Part of job history (Recommended)" |
+| Q12 | What kind of company is ACME, so I can pick realistic departments, roles and levels? | Tech/software company · Manufacturing · Retail / consumer | "Tech/software company" |
+
+**Round 4**
+
+| # | Question | Options offered | Answer |
+|---|---|---|---|
+| Q13 | What salary figure does the app store and compare? | Annual base salary (Recommended) · Monthly base salary · Annual base + bonus target | "Annual base salary (Recommended)" |
+| Q14 | How should the 10,000 employees be split across countries? | US 3000 / IN 3000 / GB 1200 / DE 1200 / BR 800 / JP 800 · Even split | "US 3000 / IN 3000 / GB 1200 / DE 1200 / BR 800 / JP 800" |
+| Q15 | How should Japanese names be written? | Romaji, given then family (Recommended) · Romaji, family then given · Kanji | "Romaji, given then family (Recommended)" |
+| Q16 | Which effective dates can a job/salary/manager change have? | Past or future (Recommended) · Today or past only · Past or future, rows editable | "Past or future (Recommended)" |
+
+**Round 5**
+
+| # | Question | Options offered | Answer |
+|---|---|---|---|
+| Q17 | Salaries can't be compared across currencies. How should salary sort and the salary-range filter behave on the employee list? | Only with one country chosen (Recommended) · Group by currency, then sort · No salary sort/filter in the list | "Only with one country chosen (Recommended)" |
+| Q18 | Where should pay statistics (median, min, max, headcount) appear outside the assistant? (multi-select) | Summary on the filtered list · Pay overview page · Employee page vs peers | "Employee page vs peers, Pay overview page, Summary on the filtered list" |
+| Q19 | What is recorded when someone leaves, and how does it affect the rest of the app? | Leave date + optional reason (Recommended) · Leave date only | "Leave date + optional reason (Recommended)" |
+| Q20 | Local git identity for this repo (your global email is your work one)? | Personal email + Claude trailer (Recommended) · Personal email, no trailer | "Personal email + Claude trailer (Recommended)" |
+
+Before round 6 I posted a draft assistant design in chat (fixed tools `find_employees`,
+`get_employee`, `pay_stats`, `find_outliers`; taxonomy in the system prompt; server-built
+"Based on" panel; plain `fetch` to OpenRouter; 429 handling; about 2–4 model requests per
+question).
+
+**Round 6**
+
+| # | Question | Options offered | Answer |
+|---|---|---|---|
+| Q21 | Which kinds of questions must the pay assistant handle? (multi-select) | Pay stats by group · Find and compare people · Outliers vs peers · Changes over time | "anything, we should provide the assistant with the data, AI model will figure out on its own how to do calculation based on that data" |
+| Q22 | How should an answer appear while the assistant works? | Progress steps, then answer (Recommended) · Stream words as they arrive | "Stream words as they arrive" |
+| Q23 | Can an employee's country change (relocation)? Salary currency would change with it. | No, country is fixed (Recommended) · Yes, as a dated job change | "Yes, as a dated job change" |
+| Q24 | Look and feel for the UI? | Calm, data-dense, light + dark (Recommended) · Light theme only · I'll share references | "Calm, data-dense, light + dark (Recommended)" |
+
+Before round 7 I flagged two problems with sending raw data for the model to compute on:
+all 10,000 rows as CSV would be roughly 250–300k tokens (**unverified** rough estimate,
+not measured), past most free models' context and expensive on the free quota; and models
+miscompute medians over thousands of numbers.
+
+**Round 7**
+
+| # | Question | Options offered | Answer |
+|---|---|---|---|
+| Q25 | How should the assistant get data so it can answer 'anything'? | Flexible data tools + exact maths tool (Recommended) · Raw rows only, model does maths · Fixed question-type tools | "Flexible data tools + exact maths tool (Recommended)" |
+| Q26 | Free OpenRouter model providers may log prompts or use them for training. What may the assistant send them? | Everything; data is fictional (Recommended) · No names or emails | "Everything; data is fictional (Recommended)" |
+| Q27 | When someone relocates (country changes), what must the same change include? | New salary in new currency (Recommended) · Salary optional | "New salary in new currency (Recommended)" |
+
+**Round 8**
+
+| # | Question | Options offered | Answer |
+|---|---|---|---|
+| Q28 | Employee codes: who assigns them, and what format? | App suggests next, HR can edit (Recommended) · Always auto-generated · HR always types it | "App suggests next, HR can edit (Recommended)" |
+| Q29 | Should the seed contain a realistic gender pay gap, so pay-gap questions have something to find? | Small gap, varies by country · No gap | "Small gap, varies by country" |
+| Q30 | How much past history should seeded employees have? | Realistic history (Recommended) · Hire record only | "Realistic history (Recommended)" |
+| Q31 | How many seeded people should be paid far from their peers? | About 30 (Recommended) · About 10 · About 100 | "About 30 (Recommended)" |
+
+**Round 9**
+
+| # | Question | Options offered | Answer |
+|---|---|---|---|
+| Q32 | Can hire dates and leave dates be in the future (accepted offer, notice period)? | Yes, both (Recommended) · No, today or earlier only · Future hire only | "Yes, both (Recommended)" |
+| Q33 | Deployment shape on Render (deploy itself still needs your approval later)? | One service: API serves the web build (Recommended) · Static site + API service | "One service: API serves the web build (Recommended)" |
+
+Then I wrote the plan (phases 1–4, design, defaults) and asked for approval.
+
+### P4: plan approval
+
+Approved through the plan-approval dialog; no typed text. No "pause after SPEC" was
+requested, so the next stop is after the plan in `tasks/todo.md`.
+
+**My reply:** started phase 1 (set-up). While writing `CLAUDE.md` I found that the
+requirements' "a `test(...)` commit (red)" and "commit only when the tests pass" contradict
+each other literally, and asked:
+
+| # | Question | Options offered | Answer |
+|---|---|---|---|
+| Q34 | The requirements say each behaviour gets a red test(...) commit, and also 'commit only when the tests pass'. How should red commits work? | Expected-to-fail marker (Recommended) · Red commit may fail, only on the new test | "Expected-to-fail marker (Recommended)" |
+
+Set-up done in the commit "chore: project set-up and brainstorm record" (hash recorded in the
+next timeline entry).
+
+---
+
+## 3. Timeline
+
+| Date | What happened | Commits |
+|---|---|---|
+| 2026-10-04 | P1 + P2: read requirements, checked tooling and OpenRouter models, brainstorm rounds 1–2 | none |
+| 2026-10-04 | P3: persisted multi-chat assistant; brainstorm rounds 3–9; plan written | none |
+| 2026-10-04 | P4: plan approved; Q34 red-commit rule; git repo on `master`, `CLAUDE.md`, this journal, `tasks/` | set-up commit (hash in next entry) |
+
+---
+
+## 4. Decision log
+
+Who: **N** = Nikhil decided (often picking my recommended option), **C** = Claude's default,
+accepted when Nikhil approved the plan (P4).
+
+| # | Decision | Context | Options | Choice | Why | Who |
+|---|---|---|---|---|---|---|
+| D1 | Planning path | New project, no code | Spike · bounded · architectural | Architectural: questions, written requirements and spec, then plan | No existing flow to change; heavier path when in doubt | C |
+| D2 | Scope of the planning pass | "Plan the website first" | Phases 1–4 · + wireframes · chat only | Phases 1–4, then stop | Matches the requirements' stop after the plan | N (Q1) |
+| D3 | Authentication | Public Render URL; proxies the OpenRouter key | Single password · none · users table | Single password: scrypt hash in env, signed session cookie, login page | Keeps strangers off salary data and the free model quota; one user needs no users table | N (Q2) |
+| D4 | OpenRouter key | Sign-up needs approval | Nikhil's existing key · he creates one · Claude signs up | Nikhil puts his key in git-ignored `.env`; model picked by smoke test | No sign-up needed; key never in the repo | N (Q3) |
+| D5 | CSV import semantics | Excel round trip | Create only · create + update · update only | Create only. Any duplicate code or email (in the database or within the file) rejects the whole file. All or nothing, and every reason is listed | Nikhil's words, Q4 | N (Q4) |
+| D6 | Unique fields | Defines import rejections | Code + email · + full name · code only | Code and work email unique; full names unique only in the seed | Real organisations can have two people with the same name | N (Q5) |
+| D7 | Employee fields | Beyond the required fields | Department + level · gender · email · manager | All four | Peers = same country, role, level; gender for names and pay-gap questions | N (Q6) |
+| D8 | Assistant conversations | Q7 unanswered; P3 | Unsaved multi-turn · single Q&A · saved multi-turn | ChatGPT-style multiple chats, saved in Postgres with each answer's sources | Nikhil wants chats to survive refresh and to keep several | N (P3) |
+| D9 | Chat management | Saved chats | Rename + delete · archive · none | Auto-title from first question, rename, delete | Chats aren't employee data, so deleting is allowed | N (Q9) |
+| D10 | Gender values | Names must fit gender | F/M/NB · F/M · none | Female, male, non-binary; non-binary people get gender-neutral names | Nikhil's choice | N (Q10) |
+| D11 | Manager | Reporting line | In job history · plain field | Effective-dated in job history; must be active, not self, no loops; a leaver's reports keep the link, flagged | Manager changes are job changes | N (Q11) |
+| D12 | Company type | Taxonomy for the seed | Tech · manufacturing · retail | Tech: Engineering, Product, Design, Sales, Marketing, Customer Support, Finance, HR, Operations; levels L1–L7 | Nikhil's choice | N (Q12) |
+| D13 | Salary figure | What is stored | Annual base · monthly · base + bonus | Annual base salary, integer, local currency | Standard for pay-band comparison | N (Q13) |
+| D14 | Country split | 10,000 people | Weighted · even | US 3000, IN 3000, GB 1200, DE 1200, BR 800, JP 800 | Typical tech company footprint | N (Q14) |
+| D15 | Japanese names | Seed realism vs search | Romaji given-family · romaji family-given · kanji | Romaji, given then family | Same alphabet and order everywhere, so search and sort behave the same | N (Q15) |
+| D16 | Effective dates | History rules | Past/future · past only · editable rows | Past or future, not before hire date; current = latest dated today or earlier; future = scheduled; rows never edited, mistakes fixed with a new row | Scheduled raises are normal; immutable history is an audit trail | N (Q16) |
+| D17 | Salary sort and filter in the list | Currencies can't mix | Single country only · group by currency · none | Enabled only when exactly one country is filtered; otherwise disabled with a note | Never compares amounts across currencies | N (Q17) |
+| D18 | Where stats appear | Median/min/max/headcount | List summary · overview page · employee vs peers | All three, plus the assistant | Nikhil's choice | N (Q18) |
+| D19 | Leavers | Mark and undo | Date + optional reason · date only | Leave date and optional reason; hidden by default; out of stats unless asked; read-only except undo; leave and undo both in history | Nothing deleted; reversible | N (Q19) |
+| D20 | Git identity | Global email is a work address | With or without Claude trailer | Repo-local Nikhil Sagar / personal email; commits end with a Co-Authored-By Claude trailer | Personal project | N (Q20) |
+| D21 | Assistant scope | Which questions | Listed types | "Anything"; the model works it out from the data | Nikhil's words, Q21 (refined by D25) | N (Q21) |
+| D22 | Answer display | Streaming vs steps | Steps then answer · stream | Stream words as they arrive (SSE) | Nikhil's choice | N (Q22) |
+| D23 | Relocation | Country change | Fixed · dated change | Country is part of job history; each salary row has its own currency | Nikhil's choice | N (Q23) |
+| D24 | Visual direction | UI | Calm dense light+dark · light only · references | Calm, data-dense, follows device light/dark with a toggle; cards on phone | Built for scanning tables | N (Q24) |
+| D25 | How the assistant gets data | "Anything" vs size and arithmetic limits | Flexible tools + exact maths · raw rows · fixed tools | Flexible read-only tools (`query_employees`, `get_employee`, `query_changes`) plus a server-computed `aggregate` tool; raw rows capped at about 200 per call with totals | Exact medians; fits free-model context and quota; still lets the model combine tools freely | N (Q25), after my warning |
+| D26 | Data sent to the model | Free providers may log prompts | Everything · no names/emails | Everything, because the data is fictional. README must say to switch to a paid no-logging model before real data | Natural answers; risk is nil for fake data | N (Q26) |
+| D27 | Relocation pay | Currency switch | Salary required · optional | Country change refused unless it sets a salary in the new currency; no raise % across a currency switch | No salary ever shown in the wrong currency | N (Q27) |
+| D28 | Employee code | Format and source | Suggest next · auto only · HR types | `E000001` format; add form pre-fills the next free code, HR may change it; CSV rows carry their own | Country prefix would go stale on relocation; CSV needs codes | N (Q28) |
+| D29 | Gender pay gap in seed | Demo realism | Small, varies by country · none | Small gap within role/level, varying by country | Makes pay-gap questions meaningful | N (Q29) |
+| D30 | Seed history depth | History questions | Realistic · hire only | Hires 2012–2026; raises, promotions, manager changes, some relocations and leavers | "Changes over time" questions need data | N (Q30) |
+| D31 | Seed outliers | "A few" | ~10 · ~30 · ~100 | About 30, above 1.8× or below 0.55× peer median, listed by the seed for tests | Enough to find, few enough to check | N (Q31) |
+| D32 | Future hire and leave dates | Offers, notice periods | Both · neither · hire only | Both allowed; status is starting / active / leaving / left as of today; counted only between hire and leave date | Real HR workflow | N (Q32) |
+| D33 | Deployment shape | Render | One service · static + API | One Render web service serving API and built web, plus Neon | Same origin: no CORS, simple cookies | N (Q33) |
+| D34 | Red commits vs "commit only when tests pass" | Literal contradiction | Expected-to-fail marker · red commit fails | Red commit adds the test as `test.fails` / `test.fail()`; green commit removes the marker | Every commit has a passing suite and history still shows red then green | N (Q34) |
+| D35 | Repo layout | Stack fixed | npm workspaces · single package | npm workspaces `api/`, `web/`, `shared/` (Zod schemas shared by API and forms) | npm is installed (no pnpm); one source for validation | C |
+| D36 | Search and paging | 10,000 rows | `pg_trgm` + offset · full-text · keyset | `pg_trgm` index on name, email, code; offset paging, 25 per page (25/50/100) | Substring search on names; offset is fine at 10k (to be measured) | C |
+| D37 | Median rounding | Integer money | Floor · round | `percentile_cont(0.5)` rounded half away from zero | Whole-number display of an exact median | C |
+| D38 | Auth details | D3 | – | scrypt via `node:crypto`, httpOnly signed cookie, 7-day session, login attempts rate-limited, `hash-password` script | Standard library only | C |
+| D39 | Language and formats | UI | – | English UI; money with currency code and thousands separators; dates like `4 Oct 2026` | Unambiguous across six countries | C |
+| D40 | Test tooling | Stack fixed | – | Vitest + supertest on a Postgres test DB (Docker, 4734); Vitest + Testing Library for form logic; Playwright on 4733, desktop and phone, with `@axe-core/playwright` for WCAG AA; GitHub Actions workflow written locally, runs only after an approved push | Real database, real browser, automated accessibility checks | C |
+| D41 | Dev setup | Ports fixed | – | Docker Compose runs Postgres; Vite on 4731 proxies `/api` to the API on 4732 | Fast reloads without containers for app code | C |
+| D42 | Time and seed determinism | "As of today" + identical seed | – | One injectable clock, fixed in tests; seed dates on or before 2026-09-30 and no future-dated rows; starting/leaving/scheduled cases created by tests | Counts and medians don't drift as the calendar moves | C |
+| D43 | Model in end-to-end tests | Tests never call the real model | – | Server started with `OPENROUTER_BASE_URL` pointing at a local fake OpenRouter server with scripted replies; Vitest injects a scripted function | Holds the rule across unit and e2e | C |
+| D44 | Model choice | 16 free tool-capable models | – | Smoke test once the key exists: streamed tool-call deltas, several tool rounds while streaming, `models` fallback. If none pass, use progress steps then full answer (Nikhil's second choice) and tell him | Free models differ in tool + streaming support | C |
+| D45 | Answer sources | "Shows what it's based on" | Model cites · server derives | Built server-side from the tool calls made; no tool call means "not based on ACME data" | The model can't invent sources | C |
+| D46 | Migrations | Postgres via `pg` | Library · plain SQL | Plain SQL files plus a tiny runner with a `schema_migrations` table | No extra dependency | C |
+
+---
+
+## 5. Architecture, data model and API
+
+**Status: planned, not built.** Detailed acceptance criteria live in `docs/SPEC.md`.
+
+```mermaid
+flowchart LR
+  HR["HR manager<br/>phone or desktop"] -->|HTTPS| WEB["React + Mantine<br/>(built web, same origin)"]
+  WEB -->|/api JSON, SSE| API["Express + Zod API"]
+  API -->|pg, parameterised SQL| DB[(PostgreSQL)]
+  API -->|fetch, tool calling, streaming| OR["OpenRouter<br/>free model"]
+  OR -.->|tool calls| API
+```
+
+Data model (Postgres):
+- `employees`: code (unique, immutable, `E000001`), first_name, last_name, gender
+  (female / male / non_binary), work_email (unique, case-insensitive), hire_date (immutable),
+  leave_date, leave_reason, version (optimistic lock), timestamps.
+- `job_history`: one full snapshot per row: effective_date, country, currency (derived from
+  country), department, role, level, manager_id, salary (integer), note. Never updated or
+  deleted.
+- `leave_events`: left / undone, date, reason.
+- `chats`, `chat_messages` (role, content, sources, tool calls, error kind).
+- `schema_migrations`.
+
+API (planned): session login/logout; employees list (filters, sort, paging, per-currency
+stats), next code, detail, create, edit personal fields, add job change, leave, undo leave
+(writes carry `version`; stale returns 409); CSV export; import preview and commit; pay
+overview; meta (taxonomy); chats list/create/rename/delete; post a message (SSE stream).
+
+Assistant tools (planned): `query_employees`, `get_employee`, `query_changes`, `aggregate`.
+
+---
+
+## 6. Trade-offs
+
+- **Flexible tools + exact maths vs raw data to the model (D25):** the model can still
+  combine tools to answer open questions, but numbers like medians come from Postgres. Cost:
+  more tool code than "send everything".
+- **Stateless import (D5):** the browser re-sends the file for commit instead of the server
+  storing a preview. Cost: the file is parsed twice. Gain: no temporary storage to clean up.
+- **One Render service (D33):** simpler auth and no CORS. Cost: web and API scale together.
+- **Streaming (D22):** answers appear sooner. Cost: tool calls inside a stream are more
+  complex, and some free models may not support it (D44 fallback).
+
+---
+
+## 7. Performance considerations
+
+Nothing measured yet. Every number here will come from a measurement, with how it was taken.
+
+---
+
+## 8. Testing strategy
+
+**Status: planned.** Test-first for every behaviour (red commit with an expected-to-fail
+marker, then green; D34). API: Vitest + supertest against a real Postgres test database.
+Web: Vitest + Testing Library for form logic. End to end: Playwright on port 4733 against the
+built app, desktop and phone viewports, with axe accessibility checks. The model is always
+fake in tests (D43). Every acceptance criterion in `docs/SPEC.md` maps to a named test in
+`tasks/todo.md`.
+
+---
+
+## 9. AI usage
+
+Claude (Opus 5.5 in Claude Code) does the building; Nikhil decides and approves.
+
+Where the AI was wrong or could have been, and how it was caught:
+- My first assistant design (fixed tools for four question types) was narrower than what
+  Nikhil wanted ("anything"). Caught by asking Q21; resolved by D25.
+- The token estimate for sending all rows (250–300k) is a rough guess, **unverified**.
+- OpenRouter's free-tier limits (recalled as about 20 per minute and 50 per day) could not be
+  read from the docs page, so they are **unverified** until checked with the real key.
+- The requirements' commit rules contradicted each other; I nearly wrote my own
+  interpretation into `CLAUDE.md` without asking. Caught before committing; asked Q34.
+
+Subagent prompts: none used so far.
+
+---
+
+## 10. Deliberately left out
+
+Planned (reasons to be finalised in `docs/REQUIREMENTS.md`): multiple users and roles,
+currency conversion, bonus and equity, payroll and tax, CSV update/upsert, deleting
+employees, editing history rows, UI translations.
+
+---
+
+## 11. Deployment
+
+Not started. Planned: one Render web service + Neon Postgres (D33), only after Nikhil's
+approval, including any account sign-ups.
+
+---
+
+## 12. Retrospective
+
+Written at the end.
