@@ -19,3 +19,10 @@ export async function sendStaleOrMissing(res: Response, db: pg.Pool, code: strin
   if (rowCount) res.status(409).json({ error: MSG.stale });
   else res.status(404).json({ error: MSG.noEmployee(code) });
 }
+
+/** Thrown inside a write to refuse it with plain field messages (400); the transaction rolls back. */
+export class FieldProblem extends Error {
+  constructor(public fields: Record<string, string>) {
+    super(Object.values(fields).join(' '));
+  }
+}

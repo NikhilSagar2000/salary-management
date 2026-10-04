@@ -39,7 +39,7 @@ test("a change dated before a scheduled one leaves the scheduled one's fields in
   expect(await stateOn(db, '2027-01-02')).toMatchObject({ role: 'Data Engineer', level: 4, salary: 110000, currency: 'BRL' });
 });
 
-test.fails('refuses a change before hire, after leaving, or changing nothing', async () => {
+test('refuses a change before hire, after leaving, or changing nothing', async () => {
   const { db, change } = await setup();
   const before = await change({ effectiveDate: '2024-02-28', level: 4 });
   expect(before.status).toBe(400);

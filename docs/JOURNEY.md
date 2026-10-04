@@ -291,6 +291,7 @@ is done (hashes copied from `git log`).
 - Task 7 · green: `employee_state(as_of)` SQL function (latest non-cancelled value per field, not after the leave date) and `POST /api/employees/:code/changes` storing only the changed fields, salary currency from the country in force.
 - Task 7 · test: Q35 example (raise scheduled 1 Jan 2027, promotion added for 1 Nov 2026 → on 2 Jan 2027 the new role and the 110,000 raise both apply). Passed first run by design; a full-snapshot mutation of `employee_state` made it fail.
 - Task 7 · red: change date bounds and empty change (EMP-7).
+- Task 7 · green: a change dated before hire or after the leave date, or changing nothing, is refused with a plain message and rolled back (EMP-7); `FieldProblem` errors become 400s centrally.
 
 ---
 
