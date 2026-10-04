@@ -1,9 +1,9 @@
-import { CURRENCY, DEPARTMENTS, jobChangeSchema, LEVELS, type Country } from '@acme/shared';
+import { CURRENCY, DEPARTMENTS, jobChangeSchema, type Country } from '@acme/shared';
 import { Alert, Button, Group, NumberInput, Select, SimpleGrid, Stack, Text, Textarea, TextInput } from '@mantine/core';
 import { useState, type FormEvent } from 'react';
 import { api } from '../../api.ts';
 import { issuesToFields, useFormErrors } from '../../forms.ts';
-import { COUNTRY_OPTIONS, roleChoices } from './choices.ts';
+import { COUNTRY_OPTIONS, levelChoices, roleChoices } from './choices.ts';
 import { FormAlert } from './DetailsForm.tsx';
 import type { Detail } from './types.ts';
 
@@ -51,8 +51,12 @@ export function JobChangeForm({ detail, onSaved, onReload }: { detail: Detail; o
               form.clearField('department');
               setV((s) => ({ ...s, department: d ?? s.department, role: '' }));
             }} />
-          <Select label="Role" data={roleChoices(v.department)} value={v.role || null} onChange={set('role')} error={form.fields.role} allowDeselect={false} />
-          <Select label="Level" data={LEVELS.map((l) => ({ value: String(l), label: `L${l}` }))} value={v.level}
+          <Select label="Role" data={roleChoices(v.department)} value={v.role || null} error={form.fields.role} allowDeselect={false}
+            onChange={(r) => {
+              form.clearField('role');
+              setV((s) => ({ ...s, role: r ?? '', level: levelChoices(r ?? '').some((l) => l.value === s.level) ? s.level : '' }));
+            }} />
+          <Select label="Level" data={levelChoices(v.role)} value={v.level || null}
             onChange={set('level')} error={form.fields.level} allowDeselect={false} />
           <NumberInput label="Salary" description={`Annual base, in ${CURRENCY[v.country as Country]}`} thousandSeparator="," allowDecimal={false}
             min={1} value={v.salary} onChange={set('salary')} error={form.fields.salary} />

@@ -227,7 +227,7 @@ test("someone who has left shows their last job, without a comparison to today's
   expect(screen.getByRole('region', { name: 'Pay against peers' })).toHaveTextContent('Not compared: peers are counted as of today, after this person left.');
 });
 
-test.fails('in a job change, level choices follow the role (EMP-8)', async () => {
+test('in a job change, level choices follow the role (EMP-8)', async () => {
   open();
   await userEvent.click(await screen.findByRole('button', { name: 'Change job or pay' }));
   const dialog = await screen.findByRole('dialog', { name: 'Change job or pay' });

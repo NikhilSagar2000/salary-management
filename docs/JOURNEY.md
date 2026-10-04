@@ -601,6 +601,7 @@ is done (hashes copied from `git log`).
 - Phase 6 QA fix 7 · red (found by QA, EMP-3): a field loses its message as soon as HR changes it; the rest stay until fixed (messages used to linger until the next submit).
 - Phase 6 QA fix 7 · green: changing a field drops its message (all five forms); a submit still moves focus to the first invalid field, a clear never moves focus.
 - Phase 6 QA fix 8 · red (found by QA, EMP-8): in a job change, level choices follow the role as in Add employee, and a level that no longer fits clears.
+- Phase 6 QA fix 8 · green: the job-change dialog's levels come from the role (levelChoices), and changing the role clears a level that no longer fits.
 
 ---
 
