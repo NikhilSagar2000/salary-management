@@ -296,7 +296,7 @@ is written just before the task starts, from the interfaces that exist at that p
 - [x] **Task 25: Import page.** Tests: `Import.test.tsx` › "preview shows rows and problems by
   row and column" (CSV-4) · "Import is enabled only with no problems and shows the result"
   (CSV-7).
-- [ ] **Task 26: Assistant page.** Tests: `Assistant.test.tsx` › "chat list, rename, and
+- [x] **Task 26: Assistant page.** Tests: `Assistant.test.tsx` › "chat list, rename, and
   delete after confirming" (AST-1) · "model HTML shows as text, never runs" (AST-11) · "Stop
   ends the stream and shows Stopped" (AST-12) · "free requests left are shown when known"
   (AST-16) · "announces once when the answer finishes" (A11Y-4) · "sources link to people and
