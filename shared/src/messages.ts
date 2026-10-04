@@ -6,6 +6,7 @@ export const MSG = {
   gender: 'Choose a gender.',
   workEmail: 'Enter a work email, like name@acme.example.',
   date: (field: string) => `Enter the ${field} as YYYY-MM-DD.`,
+  dateMissing: (field: string) => `Enter the ${field}.`,
   country: 'Choose a country.',
   department: 'Choose a department.',
   role: 'Choose a role.',

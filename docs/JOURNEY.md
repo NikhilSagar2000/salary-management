@@ -577,6 +577,7 @@ is done (hashes copied from `git log`).
 - Minor fix 6 · red: when someone is saved while an import runs, the import lists the clash as a problem instead of failing with a server error (CSV-7).
 - Minor fix 6 · green: the import's transaction locks the employees table against other writes (SHARE ROW EXCLUSIVE) before re-checking, so a save made meanwhile either finishes first and is listed as a clash, or waits until the import commits.
 - Minor fix 7 · red: a missing date asks for the date ("Enter the hire date."); only a badly written one names the format. Date fields in the app always send YYYY-MM-DD, so people only ever saw the format message for an empty field.
+- Minor fix 7 · green: an empty or missing date gives "Enter the <field>."; a date written another way (only possible in a CSV file) gives "Enter the <field> as YYYY-MM-DD."
 
 ---
 

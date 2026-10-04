@@ -89,7 +89,7 @@ test("shows each field's message next to it", async () => {
     [screen.getByLabelText('Last name'), MSG.lastName],
     [combobox('Gender'), MSG.gender],
     [screen.getByLabelText('Work email'), MSG.workEmail],
-    [screen.getByLabelText('Hire date'), MSG.date('hire date')],
+    [screen.getByLabelText('Hire date'), MSG.dateMissing('hire date')],
     [combobox('Country'), MSG.country],
     [combobox('Department'), MSG.department],
     [combobox('Role'), MSG.role],

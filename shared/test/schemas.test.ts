@@ -17,7 +17,7 @@ test('employee schema requires each field with a plain message', () => {
     lastName: 'Enter a last name.',
     gender: 'Choose a gender.',
     workEmail: 'Enter a work email, like name@acme.example.',
-    hireDate: 'Enter the hire date as YYYY-MM-DD.',
+    hireDate: 'Enter the hire date.',
     country: 'Choose a country.',
     department: 'Choose a department.',
     role: 'Choose a role.',
@@ -65,12 +65,12 @@ test('salary accepts only whole numbers from 1 to the maximum, with a plain mess
 
 test('dates must be real calendar dates written YYYY-MM-DD', () => {
   expect(errorsOf({ ...valid, hireDate: '2024-02-29' })).toEqual({});
-  for (const bad of ['2026-02-30', '2025-02-29', '04/10/2026', '2026-4-1', '2026-13-01', '']) {
+  for (const bad of ['2026-02-30', '2025-02-29', '04/10/2026', '2026-4-1', '2026-13-01']) {
     expect(errorsOf({ ...valid, hireDate: bad }), bad).toEqual({ hireDate: 'Enter the hire date as YYYY-MM-DD.' });
   }
 });
 
-test.fails('a missing date asks for the date; only a badly written one names the format', () => {
+test('a missing date asks for the date; only a badly written one names the format', () => {
   for (const missing of ['', undefined]) {
     expect(errorsOf({ ...valid, hireDate: missing }), String(missing)).toEqual({ hireDate: 'Enter the hire date.' });
   }

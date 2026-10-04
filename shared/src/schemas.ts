@@ -26,7 +26,7 @@ export const salarySchema = z.unknown().transform((value, ctx) => {
 
 /** A real calendar date written YYYY-MM-DD; `field` names it in the message. */
 export const isoDate = (field: string) =>
-  z.string({ error: MSG.date(field) }).refine((s) => {
+  z.string({ error: MSG.dateMissing(field) }).min(1, { error: MSG.dateMissing(field), abort: true }).refine((s) => {
     const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
     if (!m) return false;
     const d = new Date(Date.UTC(+m[1]!, +m[2]! - 1, +m[3]!));
