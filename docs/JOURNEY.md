@@ -364,6 +364,7 @@ is done (hashes copied from `git log`).
 - Task 13 · test: no seeded date is after 2026-09-30 and hires start in 2012 (SEED-5). Passed first run; letting 2026 hires run to 31 Dec made it fail.
 - Task 13 · test: `band()` matches hand-worked research values, and every country/role/level group of 20+ people has a median within ±15% of its band (SEED-6). Passed first run; mutations (no level multiplier in `band()`; generator pricing everyone at L3) each failed it.
 - Task 13 · test: within the same country, role and level, women's pay sits below men's by roughly the country's gap from D61 (within 3 points) (SEED-7). Passed first run; removing the gap made it fail.
+- Task 13 · red: about 30 listed outliers, nobody else beyond the limits (SEED-8).
 
 ---
 

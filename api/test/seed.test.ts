@@ -121,3 +121,35 @@ test("women's median below men's by the country's gap", async () => {
     expect(Math.abs(ratio - (1 - gaps[country]!)), `${country}: ratio ${ratio.toFixed(3)}`).toBeLessThan(0.03);
   }
 });
+
+test.fails('about 30 listed outliers and nobody else beyond the limits', async () => {
+  const { rows } = await db.query(
+    `WITH s AS (
+       SELECT e.code, s.country, s.role, s.level, s.salary
+       FROM employee_state($1) s JOIN employees e ON e.id = s.employee_id
+       WHERE e.hire_date <= $1 AND (e.leave_date IS NULL OR e.leave_date > $1)
+     ), peers AS (
+       SELECT country, role, level, percentile_cont(0.5) WITHIN GROUP (ORDER BY salary) AS median, count(*)::int AS n
+       FROM s GROUP BY 1, 2, 3
+     )
+     SELECT s.code, s.salary / p.median AS ratio, p.n FROM s JOIN peers p USING (country, role, level)`,
+    [SEED_ANCHOR],
+  );
+  const outliers = new Set(seed.outliers);
+  expect(outliers.size).toBeGreaterThanOrEqual(25);
+  expect(outliers.size).toBeLessThanOrEqual(35);
+  let high = 0;
+  for (const r of rows) {
+    if (outliers.has(r.code)) {
+      expect(r.n, r.code).toBeGreaterThanOrEqual(20);
+      expect(r.ratio > 1.8 || r.ratio < 0.55, `${r.code} ratio ${r.ratio}`).toBe(true);
+      if (r.ratio > 1.8) high++;
+    } else {
+      expect(r.ratio, r.code).toBeGreaterThanOrEqual(0.55);
+      expect(r.ratio, r.code).toBeLessThanOrEqual(1.8);
+    }
+  }
+  expect(rows.filter((r) => outliers.has(r.code))).toHaveLength(outliers.size); // every outlier is employed at the anchor
+  expect(high).toBeGreaterThan(5);
+  expect(outliers.size - high).toBeGreaterThan(5);
+});
