@@ -215,7 +215,7 @@ is written just before the task starts, from the interfaces that exist at that p
   currencies" (STATS-1) · "counts active and leaving, not starting; left only when asked"
   (STATS-2, LEAVE-6) · "overview gives department × level cells for one country" (STATS-3) ·
   "a relocated person counts only in their current country" (STATS-4).
-- [ ] **Task 13: Seed.** Files: `api/src/seed/*`, data from `docs/research/pay-bands.md`.
+- [x] **Task 13: Seed.** Files: `api/src/seed/*`, data from `docs/research/pay-bands.md`.
   Seed runs into the test database once per file. Tests: `seed.test.ts` › one test per
   criterion: "exactly 10,000 with the country split" (SEED-1) · "two runs give the same
   checksum" (SEED-2) · "every full name differs and fits country and gender" (SEED-3) · "codes
@@ -624,16 +624,16 @@ first, history back-computed. Managers: same country and department, strictly hi
 employed on every date they manage (reassigned when they leave or a report catches up).
 Tests run `generateSeed()` once per file and write it to the test database.
 
-- [ ] Step 1: "exactly 10,000 with the country split" (SEED-1).
-- [ ] Step 2: "two runs give the same checksum" (SEED-2).
-- [ ] Step 3: "every full name differs and fits country and gender" (SEED-3).
-- [ ] Step 4: "codes E000001–E010000, emails unique" (SEED-4).
-- [ ] Step 5: "no date after 2026-09-30, hires from 2012" (SEED-5).
-- [ ] Step 6: "group medians within ±15% of the researched bands" (SEED-6).
-- [ ] Step 7: "women's median below men's by the country's gap" (SEED-7).
-- [ ] Step 8: "about 30 listed outliers and nobody else beyond the limits" (SEED-8).
-- [ ] Step 9: "every person starts with a hire change; raises, promotions, relocations with
+- [x] Step 1: "exactly 10,000 with the country split" (SEED-1).
+- [x] Step 2: "two runs give the same checksum" (SEED-2).
+- [x] Step 3: "every full name differs and fits country and gender" (SEED-3).
+- [x] Step 4: "codes E000001–E010000, emails unique" (SEED-4).
+- [x] Step 5: "no date after 2026-09-30, hires from 2012" (SEED-5).
+- [x] Step 6: "group medians within ±15% of the researched bands" (SEED-6).
+- [x] Step 7: "women's median below men's by the country's gap" (SEED-7).
+- [x] Step 8: "about 30 listed outliers and nobody else beyond the limits" (SEED-8).
+- [x] Step 9: "every person starts with a hire change; raises, promotions, relocations with
   new-currency salaries and leavers exist" (SEED-9).
-- [ ] Step 10: "managers employed, more senior, no loops" (SEED-10).
-- [ ] `npm run seed` loads the dev database; seed time measured for JOURNEY section 7.
-- [ ] Task check: `npm test`.
+- [x] Step 10: "managers employed, more senior, no loops" (SEED-10).
+- [x] `npm run seed` loads the dev database; seed time measured for JOURNEY section 7.
+- [x] Task check: `npm test`.

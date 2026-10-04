@@ -8,7 +8,8 @@
     "migrate": "node --env-file-if-exists=../.env src/migrate.ts",
     "test": "vitest run",
     "typecheck": "tsc -p .",
-    "hash-password": "node src/hash-password.ts"
+    "hash-password": "node src/hash-password.ts",
+    "seed": "node --env-file-if-exists=../.env src/seed/cli.ts"
   },
   "dependencies": {
     "@acme/shared": "*",

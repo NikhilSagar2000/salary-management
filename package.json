@@ -15,6 +15,7 @@
     "typecheck": "npm run typecheck --workspaces --if-present",
     "migrate": "npm run migrate -w api",
     "dev:api": "npm run dev -w api",
-    "hash-password": "npm run hash-password -w api --silent"
+    "hash-password": "npm run hash-password -w api --silent",
+    "seed": "npm run seed -w api --"
   }
 }

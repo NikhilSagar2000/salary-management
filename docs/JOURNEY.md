@@ -370,6 +370,7 @@ is done (hashes copied from `git log`).
 - Task 13 · green: seeded careers — hire change, a raise every 1 April after nine months, promotions every 2–4 years, ~1% moves to another country (with pay in the new currency), ~12% leavers with "left" events; today's pay comes from the band and earlier pay is worked back from it (SEED-9). Measured: 58,829 changes (41,540 raises, 7,185 promotions, 104 moves), 1,093 leavers, 30 outliers.
 - Task 13 · red: managers are employed, in the same country and department, more senior, with no loops (SEED-10).
 - Task 13 · green: managers — each person reports to the most junior colleague who outranks them in the same country and department; re-chosen on hire, promotions and moves and when the manager leaves or moves, so managers are always employed, more senior and loop-free (SEED-10).
+- Task 13 · chore: `npm run seed [-- --reset]` loads the seed into `DATABASE_URL` (refuses to overwrite without `--reset`). Measured seed time in section 7: ~1.4 s generate + ~1.0 s write on an Apple M3.
 
 ---
 
@@ -499,6 +500,11 @@ computation will be measured (section 7).
 ## 7. Performance considerations
 
 Nothing measured yet. Every number here will come from a measurement, with how it was taken.
+
+| When | What | Result | How measured |
+|---|---|---|---|
+| 2026-10-04 | Seed: generate 10,000 people (63,154 job changes, 1,093 leavers, 30 outliers) | 1.40–1.49 s | `npm run seed -- --reset`, 3 runs, Apple M3, Postgres 17 in Docker; `performance.now()` around `generateSeed()` |
+| 2026-10-04 | Seed: write to Postgres in batches of 5,000 | 0.97–1.02 s | same runs, around `writeSeed()` |
 
 ---
 
