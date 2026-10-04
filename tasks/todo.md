@@ -197,7 +197,7 @@ is written just before the task starts, from the interfaces that exist at that p
   in history" (LEAVE-2) · "refuses every write except undo after leaving" (LEAVE-3) ·
   "DELETE on an employee URL answers 404" (LEAVE-4) · "scheduled changes after the leave date
   stop applying and return on undo" (LEAVE-5) · `concurrency.test.ts` › leave and undo cases (EMP-13).
-- [ ] **Task 10: Employee detail.** Tests: `employees.detail.test.ts` › "returns current job,
+- [x] **Task 10: Employee detail.** Tests: `employees.detail.test.ts` › "returns current job,
   peers' stats and position, manager with has-left flag, direct reports and the full
   timeline (changes, scheduled, cancelled, leave, undo)" (EMP-14).
 - [ ] **Task 11: Employee list.** Files: `api/src/employees/list.ts`. Tests:
@@ -568,8 +568,8 @@ Peers = same country, role and level, active or leaving today, including the per
 Timeline entries in date order: changes (`changes: [{ field, from, to }]`, `scheduled`,
 `cancelled`, `wontApply`) and leave events.
 
-- [ ] Step 1: "returns status, current job and pay against peers" (+ unknown code → 404).
-- [ ] Step 2: "shows the manager with a has-left flag and the direct reports".
-- [ ] Step 3: "timeline lists each change with from → to, and marks scheduled, cancelled,
+- [x] Step 1: "returns status, current job and pay against peers" (+ unknown code → 404).
+- [x] Step 2: "shows the manager with a has-left flag and the direct reports".
+- [x] Step 3: "timeline lists each change with from → to, and marks scheduled, cancelled,
   won't-apply and leave events".
-- [ ] Task check: `npm test`.
+- [x] Task check: `npm test`.

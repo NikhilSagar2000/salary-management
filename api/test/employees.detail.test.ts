@@ -52,7 +52,7 @@ test('shows the manager with a has-left flag and the direct reports', async () =
   expect((await agent.get('/api/employees/E000123')).body.current.manager).toEqual({ code: bruno, name: 'Bruno Lima', hasLeft: true });
 });
 
-test.fails("timeline lists each change with from → to, and marks scheduled, cancelled, won't-apply and leave events", async () => {
+test("timeline lists each change with from → to, and marks scheduled, cancelled, won't-apply and leave events", async () => {
   const { agent, db } = await setup();
   await agent.post('/api/employees').send(newEmployee);
   const post = (body: object) => agent.post('/api/employees/E000123/changes').send(body);

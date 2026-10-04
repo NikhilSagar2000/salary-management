@@ -326,6 +326,7 @@ is done (hashes copied from `git log`).
 - Task 10 · red: manager with has-left flag and direct reports (EMP-14).
 - Task 10 · green: detail shows the current manager (with "has left" flag) and current direct reports who haven't left (EMP-14).
 - Task 10 · red: timeline with from → to and scheduled/cancelled/won't-apply/leave markers (EMP-14).
+- Task 10 · green: the detail timeline lists changes in date order with from → to values (salary with its currency, manager with code and name), marking the hire, scheduled, cancelled and won't-apply changes, plus leave and undo events (EMP-14).
 
 ---
 
