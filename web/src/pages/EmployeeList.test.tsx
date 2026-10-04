@@ -127,3 +127,9 @@ test("the export link carries the browser's timezone", async () => {
   const href = (await screen.findByRole('link', { name: 'Export CSV' })).getAttribute('href')!;
   expect(new URL(href, 'http://localhost').searchParams.get('tz')).toBe(Intl.DateTimeFormat().resolvedOptions().timeZone);
 });
+
+test.fails('the search box takes at most 100 characters, as the search does', async () => {
+  signedInWith();
+  renderApp('/employees');
+  expect(await screen.findByLabelText('Search')).toHaveAttribute('maxlength', '100');
+});
