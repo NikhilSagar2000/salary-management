@@ -275,6 +275,7 @@ is done (hashes copied from `git log`).
 - Task 5 · red: next-code test (EMP-1).
 - Task 5 · green: `GET /api/employees/next-code` (highest + 1); `POST /api/employees` validates with the shared schema and saves the person.
 - Task 5 · red: malformed/used code test (EMP-1).
+- Task 5 · green: a code already in use gets "E000123 is already used." on the code field.
 
 ---
 

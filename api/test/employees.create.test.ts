@@ -14,7 +14,7 @@ test('suggests the next free code', async () => {
   expect((await agent.get('/api/employees/next-code')).body).toEqual({ code: 'E000124' });
 });
 
-test.fails('rejects a malformed or used code', async () => {
+test('rejects a malformed or used code', async () => {
   const { app } = await testApp();
   const agent = await signIn(app);
   const bad = await agent.post('/api/employees').send({ ...newEmployee, code: 'E12' });
