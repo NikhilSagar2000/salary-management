@@ -17,6 +17,26 @@ only; manual QA can't do better, named test listed) · *not run* (with the reaso
 
 Data changed during the run (so later rows aren't surprised) is listed at the end.
 
+## Summary (2026-10-05)
+
+99 cases (13 screens, 86 rules): **87 pass, 12 failed and were fixed test-first, 0 left
+open.** AST-10 ran against the real model once Nikhil added the key. Fixes made during QA:
+bad list addresses showed a vague message (LIST-5, LIST-7), country sorted by code (LIST-4),
+refusals without a field lost their message (UI-4), a starting person's hire offered Cancel,
+leave history read as if an undone leave would happen (LEAVE-2), leavers were compared with
+today's peers (EMP-14), a long email overlapped at 390 px, page buttons wrapped on a phone,
+form messages stayed after a fix, job-change levels ignored the role, the chat didn't scroll
+to new messages, Stop also sent the waiting question (AST-12), and narration before a lookup
+came before "The data can't answer this because…" (AST-10). The real-model smoke test also
+found that badly shaped tool arguments crashed the answer (AST-5), and an end-to-end run
+caught a crash introduced by one of the fixes (both fixed).
+
+Rulings, not fixed: rows from the previous search stay without a sign while the next search
+loads (about 0.1 s); cancelling a scheduled change takes one click with no confirmation (the
+change can be entered again); a cancelled change's "from" value is worked out against today's
+history, so it can change later; Chrome's own password pop-up can swallow the first Enter on
+sign-in.
+
 ## Screens
 
 Each screen in light and dark, at 1440 and 390 px: layout, wording, long names and large
@@ -131,4 +151,17 @@ JPY/INR amounts, loading, empty and error states, reload, and Back.
 
 ## Data changed during the run
 
-(Filled in while running.)
+All in `acme_e2e`, which the end-to-end server recreates from the seed on every start (the
+server was restarted four times during QA, so later rows started from fresh data where noted).
+
+- E090950 "Tama Zone" added by `e2e/qa-api.ts` (TIME-1), hired today in Kiritimati.
+- E000029 renamed Rohan Gupta-Rao (email changed), two scheduled changes cancelled, a move to
+  Germany scheduled for 1 Dec 2026, a leave on 15 Nov 2026 marked and undone.
+- E000195 and E000003 used for refused writes only (nothing saved).
+- E090960 Inês D'Ávila-Ferreira added (starting 1 Jan 2027); E091001 and E091002 imported;
+  E091001 renamed "=SUM(1) +Kierkegaard" for the export check.
+- Chats 1 and 2 created; chat 2 deleted.
+- After the restart for re-checks: E000010 marked leaving on 31 Dec 2026, then undone; a
+  chat with three questions.
+- AUTH-3 locked 127.0.0.1 out of sign-in until the next restart.
+- The dev database (`acme`) was read by the model smoke test only (read-only tools).

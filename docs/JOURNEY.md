@@ -288,6 +288,9 @@ free daily quota.
 | 2026-10-05 | Six review fixes, test-first (EMP-11, CSV-5 loops, migrate on start, export timezone, source links, LEAVE-2) | 2b392b7..4ae6cc6 |
 | 2026-10-05 | Phase 5 complete: report to Nikhil | a3c2cea |
 | 2026-10-05 | Q41–Q42 logged; nine minor fixes test-first (D68) | a21e2f9..7cd6a9b |
+| 2026-10-05 | Phase 6: QA cases, API/SQL checks, browser runs, 12 QA fixes test-first | 883261a..b34ded9 |
+| 2026-10-05 | P5–P6; model smoke test with Nikhil's key; AST-10 fixed and passing | b34ded9..e4f462d |
+| 2026-10-05 | Phase 6 complete: report to Nikhil | this commit (hash in next entry) |
 
 ### Build log
 
@@ -634,6 +637,7 @@ is done (hashes copied from `git log`).
 - Phase 6 QA fix 14 · red (found with the real model): the system prompt asks for money as currency code and amount ("EUR 71,000"), as the app shows it; models wrote "€71,000".
 - Phase 6 QA fix 14 · green: one system-prompt rule for money: currency code and amount with separators, no symbols.
 - AST-10 rechecked with the real model after the fix: the answer starts "The data can't answer this because…". npm run smoke:model gained --only-data-cant-answer. 5 free requests left today.
+- Phase 6 complete: 99 QA cases, 87 pass, 12 failed and fixed test-first, none open; the model smoke test and AST-10 ran with the real key; lessons 7–8 added.
 
 ---
 

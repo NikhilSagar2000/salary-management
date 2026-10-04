@@ -28,11 +28,11 @@ reasons: `docs/JOURNEY.md` section 4.
 - [x] Phase 4: this plan
 - [x] **Stop: Nikhil approved this plan (native execution, step detail just before each task)**
 - [x] Phase 5: build (tasks 1–29 below; final review and its fixes; see "Phase 5 review" at the end)
-- [ ] Phase 6: manual QA (test cases for every screen and rule, run, record, fix test-first)
-  - [ ] Write `docs/QA.md`: 13 screen cases and one row per criterion (86), each with how it's run
-  - [ ] Run on the end-to-end server (fresh seed, fake model with QA switches), screen by screen
-  - [ ] Record pass/fail per row; fix failures test-first and note the commit
-  - [ ] AUTH-3 last (it locks the IP out); AST-10 waits for the OpenRouter key
+- [x] Phase 6: manual QA (test cases for every screen and rule, run, record, fix test-first)
+  - [x] Write `docs/QA.md`: 13 screen cases and one row per criterion (86), each with how it's run
+  - [x] Run on the end-to-end server (fresh seed, fake model with QA switches), screen by screen
+  - [x] Record pass/fail per row; fix failures test-first and note the commit
+  - [x] AUTH-3 last (it locks the IP out); AST-10 waits for the OpenRouter key
 - [ ] Phase 7: deploy after approval, README with set-up, tests and demo-recording script
 
 ## Global constraints
@@ -939,4 +939,11 @@ Final: fixed migrate-on-start and silent empty password hash — 'the server app
 Final: fixed export without the timezone (re-graded Important) — "a plain download link can give the browser's timezone as ?tz= (TIME-1)" + web "the export link carries the browser's timezone" RED→GREEN, suite 5+120+37
 Final: fixed broader-than-labelled source links (re-graded Important) — 'a group links to the list only when the list can show exactly those people (AST-8)' + web 'a source group the list cannot show is named without a link' RED→GREEN, suite 5+121+38
 ```
+
+## Phase 6 review
+
+99 QA cases in `docs/QA.md` (13 screens, 86 rules): 87 pass, 12 failed and were fixed
+test-first, none left open; summary and rulings at the top of that file. The model smoke test
+ran with Nikhil's key (D44: apodex/apodex-1.1-mini:free kept as primary; failover unverified).
+Suites after phase 6: 188 unit and API tests (shared 6, API 135, web 47) and 25 Playwright tests.
 

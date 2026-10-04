@@ -18,3 +18,13 @@ Rules learned from Nikhil's corrections and preferences. Read at session start.
 6. **A constant "hang" length is a clue.** Test stalls of ~926 s every time matched the Mac's
    925–926 s maintenance-sleep cycles in `pmset -g log`, not the code. Check the host before
    chasing database theories, and run long commands under `caffeinate -i`.
+7. **Keep long runs short and single.** Nikhil rejected a command that ran the full end-to-end
+   suite three times in a row (about 5 minutes) to chase a flaky test, then said "please
+   continue". Run one suite at a time, add evidence to the failing step instead of repeating
+   runs, and say how long a command will take when it is long.
+8. **The real browser and the real model catch what jsdom and the fake can't.** Chromium's
+   `scrollIntoView` returns a promise (React then crashed on clean-up), native date fields follow
+   the OS locale, and free models send a single value where a list is expected. Check
+   browser-only behaviour with Playwright, and give tool schemas' callers (step text) only
+   checked arguments.
+
