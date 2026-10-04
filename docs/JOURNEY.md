@@ -381,6 +381,7 @@ is done (hashes copied from `git log`).
 - Task 15 · red: export's currency/status/leave columns allowed only when matching or empty (CSV-3).
 - Task 15 · green: a currency column must match the country, and the export's status/leave columns must be empty (CSV-3).
 - Task 15 · red: files over 5 MB or 10,000 rows are refused plainly (CSV-3).
+- Task 15 · green: files over 5 MB get 413 with a plain message; more than 10,000 rows is a whole-file problem (CSV-3).
 
 ---
 

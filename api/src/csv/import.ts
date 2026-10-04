@@ -2,6 +2,9 @@ import { CURRENCY, employeeCreateSchema, MSG, type Country } from '@acme/shared'
 import { parse } from 'csv-parse/sync';
 import type pg from 'pg';
 
+const MAX_ROWS = 10_000;
+
+/** `line` 0 with an empty `column` means a problem with the whole file. */
 export type Problem = { line: number; column: string; message: string };
 export type ImportRow = {
   line: number; code: string; firstName: string; lastName: string; gender: string; workEmail: string; country: string;
@@ -43,6 +46,7 @@ const unguard = (s: string) => (/^'[=+\-@\t\r]/.test(s) ? s.slice(1) : s);
 export async function checkImport(_db: pg.Pool | pg.PoolClient, text: string): Promise<{ rows: ImportRow[]; problems: Problem[] }> {
   const { records, problems } = readCsv(text);
   const rows: ImportRow[] = [];
+  if (records.length > MAX_ROWS) return { rows, problems: [{ line: 0, column: '', message: MSG.importTooManyRows(records.length) }] };
   for (const { line, values } of records) {
     const v = (c: string) => unguard(values[c] ?? '');
     const input = {

@@ -1,3 +1,4 @@
+import { MSG } from '@acme/shared';
 import express from 'express';
 import type pg from 'pg';
 import { authRoutes, requireSession } from './auth/routes.ts';
@@ -47,7 +48,11 @@ export function createApp(deps: { db: pg.Pool; clock: Clock; config: Config }) {
 /** Errors answer in plain words; details go to the server log only, never to the browser. */
 const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
   if (err instanceof FieldProblem) return sendFieldErrors(res, err.fields);
-  if (err?.type === 'entity.parse.failed' || err?.type === 'entity.too.large') {
+  if (err?.type === 'entity.too.large') {
+    res.status(413).json({ error: MSG.importTooLarge });
+    return;
+  }
+  if (err?.type === 'entity.parse.failed') {
     res.status(400).json({ error: "The request couldn't be read. Reload the page and try again." });
     return;
   }

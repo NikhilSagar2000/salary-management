@@ -47,7 +47,7 @@ test("allows the export's status and leave columns only when empty", async () =>
   ]);
 });
 
-test.fails('refuses files over 5 MB or 10,000 rows', async () => {
+test('refuses files over 5 MB or 10,000 rows', async () => {
   const { preview } = await setup();
   const big = await preview(`${HEADER}\n${'x'.repeat(5 * 1024 * 1024 + 1)}`);
   expect(big.status).toBe(413);
