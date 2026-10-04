@@ -10,7 +10,7 @@ const signedInWith = (list = listResponse()) =>
     'GET /api/employees': () => ({ status: 200, body: list }),
   });
 
-test.fails('salary controls are disabled with the note unless one country is chosen', async () => {
+test('salary controls are disabled with the note unless one country is chosen', async () => {
   signedInWith();
   const mixed = renderApp('/employees');
   const min = await screen.findByLabelText('Salary from');
