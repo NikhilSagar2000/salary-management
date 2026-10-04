@@ -12,7 +12,7 @@ test('rejects /api requests without a session', async () => {
   expect((await request(app).get('/api/health')).status).toBe(200);
 });
 
-test.fails('signs in with the right password and sets a 7-day httpOnly cookie', async () => {
+test('signs in with the right password and sets a 7-day httpOnly cookie', async () => {
   const { app, clock } = await testApp();
   const res = await request(app).post('/api/session').send({ password: PASSWORD });
   expect(res.status).toBe(204);
@@ -29,7 +29,7 @@ test.fails('signs in with the right password and sets a 7-day httpOnly cookie', 
   expect((await request(app).get('/api/session').set('Cookie', session)).status).toBe(401);
 });
 
-test.fails('the session cookie is Secure in production', async () => {
+test('the session cookie is Secure in production', async () => {
   const { app } = await testApp({ production: true });
   const res = await request(app).post('/api/session').send({ password: PASSWORD });
   expect(res.headers['set-cookie']![0]).toContain('Secure');
