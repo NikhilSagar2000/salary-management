@@ -149,3 +149,14 @@ test('rows carry current job, salary with currency, hire date and status', async
       level: 3, salary: 6070000, hireDate: '2026-12-01', leaveDate: null, status: 'starting' },
   ]);
 });
+
+test('no matches gives an empty page, not an error', async () => {
+  const { list } = await setup([{ code: 'E000001', country: 'US' }]);
+  for (const q of ['?q=nobody', '?country=JP', '?page=9']) {
+    const res = await list(q);
+    expect(res.status, q).toBe(200);
+    expect(res.body.rows, q).toEqual([]);
+  }
+  expect((await list('?country=JP')).body.total).toBe(0);
+  expect((await list('?page=9')).body.total).toBe(1);
+});

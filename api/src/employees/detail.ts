@@ -1,7 +1,6 @@
+import type { Status } from '@acme/shared';
 import type pg from 'pg';
 import { peerStats } from '../stats/peers.ts';
-
-export type Status = 'starting' | 'active' | 'leaving' | 'left';
 
 export function statusOn(today: string, hireDate: string, leaveDate: string | null): Status {
   if (hireDate > today) return 'starting';

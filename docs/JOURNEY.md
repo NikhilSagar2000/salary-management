@@ -344,6 +344,7 @@ is done (hashes copied from `git log`).
 - Task 11 · green: page and page size errors name the value ("Page size must be 25, 50 or 100, not \"1000\".") like the filter errors (LIST-7).
 - Task 11 · red: list rows carry current job, pay with currency, hire date and status (LIST-8).
 - Task 11 · green: list rows carry name, current country/currency, department, role, level, salary, hire and leave dates and status (LIST-8).
+- Task 11 · test: filters that match nobody (or a page past the end) give an empty page with the total, not an error (review focus 5); mutation-checked. `Status` type now comes from `@acme/shared`.
 
 ---
 

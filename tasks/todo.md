@@ -200,7 +200,7 @@ is written just before the task starts, from the interfaces that exist at that p
 - [x] **Task 10: Employee detail.** Tests: `employees.detail.test.ts` › "returns current job,
   peers' stats and position, manager with has-left flag, direct reports and the full
   timeline (changes, scheduled, cancelled, leave, undo)" (EMP-14).
-- [ ] **Task 11: Employee list.** Files: `api/src/employees/list.ts`. Tests:
+- [x] **Task 11: Employee list.** Files: `api/src/employees/list.ts`. Tests:
   `employees.list.test.ts` › "returns a page of 25 with the total; 50 and 100 allowed" (LIST-1)
   · "search matches part of name, email or code ignoring case and accents" (LIST-2) · "names
   with apostrophes and hyphens are found" (review focus 2) · "filters combine with AND across
@@ -584,14 +584,14 @@ starting), `shared/src/schemas.ts` (`listQuerySchema`, shared with the web URL s
 &gender=&status=starting,active,leaving&salaryMin=&salaryMax=&sort=name&dir=asc&page=1&pageSize=25`
 → `{ rows, total, page, pageSize }`. Name sort = last name, then first name; ties by code.
 
-- [ ] Step 1: "returns a page of 25 with the total; 50 and 100 allowed" (LIST-1).
-- [ ] Step 2: "search matches part of name, email or code ignoring case and accents" (LIST-2).
-- [ ] Step 3: "names with apostrophes and hyphens are found" (review focus 2; `%`/`_` typed literally).
-- [ ] Step 4: "filters combine with AND across fields and OR within one" (LIST-3).
-- [ ] Step 5: "default status filter hides people who have left" (LIST-3, LEAVE-6).
-- [ ] Step 6: "sorts by each column both ways, ties broken by code" (LIST-4).
-- [ ] Step 7: "salary sort and range need exactly one country" (LIST-5).
-- [ ] Step 8: "rejects invalid query values naming the value" (LIST-7).
-- [ ] Step 9: "rows carry current job, salary with currency, hire date and status" (LIST-8).
-- [ ] Step 10: "no matches gives an empty page, not an error" (review focus 5).
-- [ ] Task check: `npm test`.
+- [x] Step 1: "returns a page of 25 with the total; 50 and 100 allowed" (LIST-1).
+- [x] Step 2: "search matches part of name, email or code ignoring case and accents" (LIST-2).
+- [x] Step 3: "names with apostrophes and hyphens are found" (review focus 2; `%`/`_` typed literally).
+- [x] Step 4: "filters combine with AND across fields and OR within one" (LIST-3).
+- [x] Step 5: "default status filter hides people who have left" (LIST-3, LEAVE-6).
+- [x] Step 6: "sorts by each column both ways, ties broken by code" (LIST-4).
+- [x] Step 7: "salary sort and range need exactly one country" (LIST-5).
+- [x] Step 8: "rejects invalid query values naming the value" (LIST-7).
+- [x] Step 9: "rows carry current job, salary with currency, hire date and status" (LIST-8).
+- [x] Step 10: "no matches gives an empty page, not an error" (review focus 5).
+- [x] Task check: `npm test`.
