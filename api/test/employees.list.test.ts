@@ -65,7 +65,7 @@ test('filters combine with AND across fields and OR within one', async () => {
   expect(await sorted('?gender=non_binary&country=GB,US')).toEqual(['E000004']);
 });
 
-test.fails('default status filter hides people who have left', async () => {
+test('default status filter hides people who have left', async () => {
   const { list } = await setup([
     { code: 'E000001' }, // active
     { code: 'E000002', hireDate: '2026-12-01' }, // starting

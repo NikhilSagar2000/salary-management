@@ -42,3 +42,6 @@ export type Role = keyof typeof ROLES;
 export const ROLE_NAMES = Object.keys(ROLES) as Role[];
 
 export const MAX_SALARY = 10_000_000_000;
+
+export const STATUSES = ['starting', 'active', 'leaving', 'left'] as const;
+export type Status = (typeof STATUSES)[number];

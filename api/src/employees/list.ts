@@ -1,6 +1,10 @@
 import type { ListQuery } from '@acme/shared';
 import type pg from 'pg';
 
+/** SQL: a person's status on date $1 (matches statusOn in detail.ts). */
+export const STATUS_SQL = `CASE WHEN e.hire_date > $1 THEN 'starting' WHEN e.leave_date <= $1 THEN 'left'
+  WHEN e.leave_date IS NOT NULL THEN 'leaving' ELSE 'active' END`;
+
 /** One page of the employee list plus the total match count. Filtering, sorting and paging happen in Postgres. */
 export async function listEmployees(db: pg.Pool, q: ListQuery, today: string) {
   const params: unknown[] = [today];
@@ -18,6 +22,7 @@ export async function listEmployees(db: pg.Pool, q: ListQuery, today: string) {
   anyOf('s.role', q.role);
   anyOf('s.level', q.level);
   anyOf('e.gender', q.gender);
+  anyOf(`(${STATUS_SQL})`, q.status);
   const from = `FROM employees e JOIN current_state($1) s ON s.employee_id = e.id ${where.length ? `WHERE ${where.join(' AND ')}` : ''}`;
   const total = (await db.query(`SELECT count(*) AS n ${from}`, params)).rows[0].n as number;
   const { rows } = await db.query(

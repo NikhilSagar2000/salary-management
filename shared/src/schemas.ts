@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { MSG } from './messages.ts';
-import { COUNTRIES, DEPARTMENTS, GENDERS, LEVELS, MAX_SALARY, ROLE_NAMES, ROLES, type Role } from './reference.ts';
+import { COUNTRIES, DEPARTMENTS, GENDERS, LEVELS, MAX_SALARY, ROLE_NAMES, ROLES, STATUSES, type Role, type Status } from './reference.ts';
 
 /** A salary typed by a person (number or text) → whole number, or a plain message. */
 export const salarySchema = z.unknown().transform((value, ctx) => {
@@ -126,6 +126,9 @@ function csvOf<T extends string | number>(allowed: readonly T[], label: string) 
     });
 }
 
+/** The list shows everyone except people who have left, unless asked (LEAVE-6). */
+export const DEFAULT_STATUSES: Status[] = ['starting', 'active', 'leaving'];
+
 /** Employee list query (URL state): filters, sort and paging. */
 export const listQuerySchema = z.object({
   q: z.string().trim().max(100).optional().transform((s) => s || undefined),
@@ -134,6 +137,7 @@ export const listQuerySchema = z.object({
   role: csvOf(ROLE_NAMES, 'role'),
   level: csvOf(LEVELS, 'level'),
   gender: csvOf(GENDERS, 'gender'),
+  status: csvOf(STATUSES, 'status').transform((s) => s ?? DEFAULT_STATUSES),
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().pipe(z.union([z.literal(25), z.literal(50), z.literal(100)])).default(25),
 });

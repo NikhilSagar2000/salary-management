@@ -335,6 +335,7 @@ is done (hashes copied from `git log`).
 - Task 11 · red: filters AND across fields, OR within one (LIST-3).
 - Task 11 · green: country, department, role, level and gender filters as comma lists in the URL; AND across filters, OR within one; unknown values are named (LIST-3).
 - Task 11 · red: status filter, leavers hidden by default (LIST-3, LEAVE-6).
+- Task 11 · green: status filter (starting/active/leaving/left as of today); default hides people who have left (LIST-3, LEAVE-6).
 
 ---
 
