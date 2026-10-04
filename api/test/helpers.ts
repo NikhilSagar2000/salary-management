@@ -47,3 +47,9 @@ export async function signIn(app: Parameters<typeof request.agent>[0]) {
   if (res.status !== 204) throw new Error(`sign-in failed: ${res.status} ${JSON.stringify(res.body)}`);
   return agent;
 }
+
+/** A valid new employee (POST /api/employees body). */
+export const newEmployee = {
+  code: 'E000123', firstName: 'Ana', lastName: 'Silva', gender: 'female', workEmail: 'ana.silva@acme.example',
+  hireDate: '2024-02-29', country: 'BR', department: 'Engineering', role: 'Software Engineer', level: 3, salary: 133000,
+};

@@ -281,6 +281,7 @@ is done (hashes copied from `git log`).
 - Task 5 · red: duplicate email test (EMP-2).
 - Task 5 · green: a work email already used (any case) gets "That work email is already used."
 - Task 5 · refactor: `withTx` in `db.ts` used by create and migrations; "already used" and "Some fields need fixing." messages moved to `shared/src/messages.ts`.
+- Task 6 · red: edit personal details test (EMP-6); the `newEmployee` fixture moved to `helpers.ts` (importing a test file would re-run its tests).
 
 ---
 

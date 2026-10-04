@@ -480,3 +480,19 @@ every field (`manager_set` true; manager rules arrive with Task 7).
   with country, department, role, level, salary, currency set and `manager_set` true.
 - [x] Step 5: "rejects an email already used, ignoring case" → "That work email is already used."
 - [x] Task check: `npm test`, `npm run typecheck`.
+
+### Task 6: Edit personal details with version check
+
+Files: `shared/src/schemas.ts` (`employeeDetailsSchema`), `api/src/employees/details.ts`,
+routes, `api/test/employees.edit.test.ts`, `api/test/concurrency.test.ts`.
+`PATCH /api/employees/:code` with `{ version, firstName?, lastName?, gender?, workEmail? }`;
+the update runs `WHERE code = $1 AND version = $2` and bumps `version`.
+
+- [ ] Step 1: "edits first name, last name, gender and email in place": 200 `{ code, version: 2 }`,
+  values saved, no history row added; an email used by someone else → "That work email is already used."
+- [ ] Step 2: "refuses to change code or hire date": body with `code` or `hireDate` → 400
+  "The employee code and hire date can't be changed.", nothing saved.
+- [ ] Step 3: `concurrency.test.ts` › "an old version gets 409 and nothing changes" (details):
+  second save with version 1 → 409 with the EMP-13 message; unknown code → 404
+  "No employee with code E000999."
+- [ ] Task check: `npm test`, `npm run typecheck`.

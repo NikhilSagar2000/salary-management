@@ -1,10 +1,5 @@
 import { expect, test } from 'vitest';
-import { signIn, testApp } from './helpers.ts';
-
-export const newEmployee = {
-  code: 'E000123', firstName: 'Ana', lastName: 'Silva', gender: 'female', workEmail: 'ana.silva@acme.example',
-  hireDate: '2024-02-29', country: 'BR', department: 'Engineering', role: 'Software Engineer', level: 3, salary: 133000,
-};
+import { newEmployee, signIn, testApp } from './helpers.ts';
 
 test('suggests the next free code', async () => {
   const { app } = await testApp();
