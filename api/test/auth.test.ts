@@ -45,7 +45,7 @@ test('rejects a wrong password with a plain message', async () => {
   }
 });
 
-test.fails('locks sign-in for 15 minutes after 5 wrong tries from one IP', async () => {
+test('locks sign-in for 15 minutes after 5 wrong tries from one IP', async () => {
   const { app, clock } = await testApp();
   for (let i = 0; i < 5; i++) {
     expect((await request(app).post('/api/session').send({ password: 'wrong' })).status).toBe(401);
