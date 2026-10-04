@@ -31,14 +31,19 @@ export function mutableClock(iso: string) {
 }
 
 /** A fresh app on a migrated, emptied test database. */
-export async function testApp(opts: { now?: string; production?: boolean } = {}) {
+export async function testApp(opts: { now?: string; production?: boolean; model?: ModelFn; openRouter?: { baseUrl: string; apiKey: string } } = {}) {
   const db = testPool();
   await migrate(db);
   const { rows } = await db.query("SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename <> 'schema_migrations'");
   if (rows.length) await db.query(`TRUNCATE ${rows.map((r) => `"${r.tablename}"`).join(', ')} RESTART IDENTITY CASCADE`);
   const clock = mutableClock(opts.now ?? '2026-10-01T12:00:00Z');
-  const config = { passwordHash: await passwordHash, production: opts.production ?? false };
-  return { app: createApp({ db, clock, config }), db, clock, config };
+  const config = {
+    passwordHash: await passwordHash,
+    production: opts.production ?? false,
+    openRouter: opts.openRouter ?? { baseUrl: 'http://127.0.0.1:9/api/v1', apiKey: 'test-only-key' },
+  };
+  const model = opts.model ?? scriptedModel([]).model;
+  return { app: createApp({ db, clock, config, model }), db, clock, config };
 }
 
 /** A supertest agent that is signed in (keeps the session cookie). */

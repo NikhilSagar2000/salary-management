@@ -427,6 +427,7 @@ is done (hashes copied from `git log`).
 - Task 17 · green: network errors, non-2xx answers and 60 s without data (measured from the last data, so long answers keep streaming) throw `ModelError("unavailable")`; a stop from the caller stays an AbortError (AST-15).
 - Task 17 · red: free model requests left today, read from OpenRouter's key info (AST-16).
 - Task 17 · green: `freeRequestsLeft` reads `free_model_daily_requests.remaining` from OpenRouter's GET /key, or null when unknown (AST-16).
+- Task 18 · red: chats can be created, listed newest first, renamed (1–80 characters) and deleted (AST-1); the app now takes the model and OpenRouter settings as dependencies.
 
 ---
 

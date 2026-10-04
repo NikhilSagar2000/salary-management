@@ -4,15 +4,16 @@ import type pg from 'pg';
 import { authRoutes, requireSession } from './auth/routes.ts';
 import { deleteSession, SESSION_COOKIE, sessionToken } from './auth/sessions.ts';
 import type { ErrorRequestHandler } from 'express';
+import type { ModelFn } from './assistant/model.ts';
 import { requestTimezone, todayIn, type Clock } from './clock.ts';
 import { employeeRoutes } from './employees/routes.ts';
 import { FieldProblem, sendFieldErrors } from './http.ts';
 import { importRoutes } from './csv/routes.ts';
 import { statsRoutes } from './stats/routes.ts';
 
-export type Config = { passwordHash: string; production: boolean };
+export type Config = { passwordHash: string; production: boolean; openRouter: { baseUrl: string; apiKey: string } };
 
-export function createApp(deps: { db: pg.Pool; clock: Clock; config: Config }) {
+export function createApp(deps: { db: pg.Pool; clock: Clock; config: Config; model: ModelFn }) {
   const app = express();
   // Render puts one proxy in front; trust it so req.ip is the browser's address.
   if (deps.config.production) app.set('trust proxy', 1);

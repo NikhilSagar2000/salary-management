@@ -715,3 +715,24 @@ network error, 5xx or 60 s without a reply → `ModelError('unavailable')`.
 - [x] Step 9: model › "network error, 5xx and a 60 s timeout become unavailable" (AST-15).
 - [x] Step 10: model › "reads free requests left from OpenRouter's key info" (AST-16).
 - [x] Task check: `npm test`.
+
+### Task 18: Chats API and streaming route
+
+Files: `api/db/migrations/007_chats.sql`, `api/src/assistant/{chats,routes}.ts`, `api/src/app.ts`
+(deps gain `model`; config gains `openRouter: { baseUrl, apiKey }`), `api/src/main.ts`,
+`api/test/chats.test.ts`, `api/test/helpers.ts` (`testApp({ model })`, SSE reader).
+Routes: `GET/POST /api/chats`, `GET/PATCH/DELETE /api/chats/:id`,
+`POST /api/chats/:id/messages` (SSE: `step`, `token`, `sources`, `done`, `error`),
+`GET /api/assistant/status` (`{ freeRequestsLeft }`). The question is saved first; the answer
+is saved when it ends as `complete`, `stopped` (connection closed; partial text kept) or
+`error` (`rate_limited` / `unavailable`, with the plain message). One answer per chat at a time.
+
+- [ ] Step 1: "creates, lists newest first, renames (1–80 characters) and deletes chats" (AST-1).
+- [ ] Step 2: "titles a new chat with its first question cut to 60 characters" (AST-1).
+- [ ] Step 3: "a reopened chat returns messages with their saved sources" (AST-2, AST-3 over HTTP).
+- [ ] Step 4: "rejects questions over 2,000 characters" (AST-12).
+- [ ] Step 5: "refuses a second answer while one streams" (AST-12).
+- [ ] Step 6: "stopping saves the partial answer as Stopped" (AST-12).
+- [ ] Step 7: "rate limit keeps the question and saves the free-limit message" (AST-14, AST-15).
+- [ ] Step 8: "the key is never sent to the browser" (AST-17) and `/api/assistant/status` (AST-16).
+- [ ] Task check: `npm test`.
