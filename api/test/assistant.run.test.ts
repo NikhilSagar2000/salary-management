@@ -59,3 +59,23 @@ test('system prompt lists reference data and today\'s date and holds no secret',
   for (const secret of ['sk-or-v1', 'scrypt:', 'Ana Silva', 'Bo Lee', 'E000001']) expect(text).not.toContain(secret);
   delete process.env.OPENROUTER_API_KEY;
 });
+
+test.fails('sources come from the tool calls: groups with filters and headcount, people capped at 20 with a list link', async () => {
+  const { db } = await testApp();
+  await insertPeople(db, Array.from({ length: 25 }, (_, i) => ({ code: `E${String(i + 1).padStart(6, '0')}`, firstName: `P${i + 1}`, lastName: 'Kim', country: 'JP' })));
+  const { model } = scriptedModel([
+    [{ type: 'tool_call', id: 'a', name: 'query_employees', args: { filters: { country: ['JP'] }, limit: 20 } },
+      { type: 'tool_call', id: 'b', name: 'query_employees', args: { filters: { country: ['JP'] }, offset: 20 } }, { type: 'done' }],
+    [{ type: 'tool_call', id: 'c', name: 'aggregate', args: { metric: 'headcount', groupBy: ['country'] } }, { type: 'done' }],
+    [{ type: 'token', text: '25 people work in Japan.' }, { type: 'done' }],
+  ]);
+  const answer = await answerQuestion({
+    model, db, today: TODAY, history: [], question: 'Who works in Japan?', signal: new AbortController().signal, onEvent: () => {},
+  });
+  expect(answer.sources.groups).toEqual([
+    { kind: 'group', label: 'Japan', query: 'country=JP', headcount: 25 },
+  ]);
+  expect(answer.sources.people).toHaveLength(20);
+  expect(answer.sources.people[0]).toEqual({ kind: 'person', code: 'E000001', name: 'P1 Kim' });
+  expect(answer.sources.morePeople).toBe(5);
+});

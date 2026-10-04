@@ -414,6 +414,7 @@ is done (hashes copied from `git log`).
 - Task 17 · red: after 6 tool rounds the model gets no tools and a nudge to answer (AST-6).
 - Task 17 · green: after 6 tool rounds the model is called once more with no tools and told to answer from what it found (AST-6).
 - Task 17 · test: the system prompt carries countries with currencies, every role with its level range, today's date and the "can't answer" rule, and no key, password hash or employee data (AST-7). Passed first run; a mutation to the date line made it fail.
+- Task 17 · red: sources merge groups and cap people at 20 with a count of the rest (AST-8).
 
 ---
 
