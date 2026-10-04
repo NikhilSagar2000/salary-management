@@ -1,11 +1,14 @@
 import { CURRENCY } from '@acme/shared';
 import type pg from 'pg';
-import { beforeAll, expect, test } from 'vitest';
+import { beforeAll, expect, test, vi } from 'vitest';
 import { generateSeed, SEED_ANCHOR, type Seed } from '../src/seed/generate.ts';
 import { band } from '../src/seed/bands.ts';
 import { NAMES } from '../src/seed/names.ts';
 import { writeSeed } from '../src/seed/write.ts';
 import { testApp } from './helpers.ts';
+
+// Generating and writing 10,000 people takes a few seconds; one test does it twice.
+vi.setConfig({ testTimeout: 60_000 });
 
 let seed: Seed;
 let db: pg.Pool;

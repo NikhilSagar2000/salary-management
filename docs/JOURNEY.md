@@ -463,6 +463,7 @@ is done (hashes copied from `git log`).
 - Task 18 · green: `GET /api/assistant/status` returns `{ freeRequestsLeft }`, asked server-side with the server's key; no response carries the key (AST-16, AST-17).
 - Task 19: `npm run measure:list` times 200 list requests over HTTP on the seeded database and fails above 300 ms at p95; measured p95 99–104 ms (LIST-11, section 7).
 - Phase 5 checkpoint: backend complete (Tasks 1–19). Timeline rows added per task; D65 (UI look and exclusions), D66 (serving the web app), D67 (unknown fields ignored).
+- Fix: seed tests get a 60 s timeout. The checksum test reseeds 10,000 people (3 s idle, 7 s on a throttled laptop); on timeout the abandoned reseed left the tables half-written and four later seed tests failed.
 
 ---
 
