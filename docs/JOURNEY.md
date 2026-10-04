@@ -237,6 +237,7 @@ is done (hashes copied from `git log`).
 - Task 1 · red: migration runner test (`infra.test.ts` › "migrations apply once and are recorded").
 - Task 1 · green: `migrate(db, dir)` applies each new `.sql` file once, in order, in its own transaction, and records it in `schema_migrations`; `npm run migrate` runs it on `DATABASE_URL`.
 - Task 1 · red: date round-trip test; watched `pg` return `2026-03-01T08:00:00.000Z` for a DATE under `TZ=America/Los_Angeles`.
+- Task 1 · green: Postgres DATE values are parsed as `YYYY-MM-DD` strings (review focus 1).
 
 ---
 

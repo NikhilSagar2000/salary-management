@@ -33,7 +33,7 @@ test('migrations apply once and are recorded', async () => {
   }
 });
 
-test.fails('dates round-trip unchanged under any server timezone', async () => {
+test('dates round-trip unchanged under any server timezone', async () => {
   const original = process.env.TZ;
   const db = createPool(testDbUrl());
   try {
