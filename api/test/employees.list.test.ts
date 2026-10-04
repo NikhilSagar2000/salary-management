@@ -114,3 +114,21 @@ test('salary sort and range need exactly one country', async () => {
   expect(codes(await list('?country=US&sort=salary&dir=desc'))).toEqual(['E000002', 'E000003', 'E000001']);
   expect(codes(await list('?country=US&salaryMin=100000&salaryMax=150000&sort=salary'))).toEqual(['E000003', 'E000002']);
 });
+
+test.fails('rejects invalid query values naming the value', async () => {
+  const { list } = await setup();
+  const cases: [string, Record<string, string>][] = [
+    ['?pageSize=1000', { pageSize: 'Page size must be 25, 50 or 100, not "1000".' }],
+    ['?page=0', { page: 'Page must be a whole number from 1, not "0".' }],
+    ['?page=abc', { page: 'Page must be a whole number from 1, not "abc".' }],
+    ['?country=US,XX', { country: 'There\'s no country called "XX".' }],
+    ['?level=9', { level: 'There\'s no level called "9".' }],
+    ['?sort=age', { sort: 'There\'s no sort called "age".' }],
+    ['?country=US&salaryMin=lots', { salaryMin: 'Enter the salary as a whole number, like 95000.' }],
+  ];
+  for (const [q, fields] of cases) {
+    const res = await list(q);
+    expect(res.status, q).toBe(400);
+    expect(res.body, q).toEqual({ error: 'Some fields need fixing.', fields });
+  }
+});

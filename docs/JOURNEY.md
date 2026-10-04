@@ -340,6 +340,7 @@ is done (hashes copied from `git log`).
 - Task 11 · green: sort by name (last, first), code, country, department, role, level or hire date, either direction, ties by code (LIST-4).
 - Task 11 · red: salary sort/range only with exactly one country (LIST-5).
 - Task 11 · green: salary sort and min/max salary filter work only with exactly one country; otherwise 400 with the plain reason on `country` (LIST-5).
+- Task 11 · red: invalid query values are named in plain messages (LIST-7).
 
 ---
 
