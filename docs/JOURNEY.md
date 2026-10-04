@@ -708,6 +708,7 @@ is done (hashes copied from `git log`).
 - Lesson 9 added: a smoke test sends exactly what the app sends (P8).
 - P9–P11 logged (D72–D74). Red: the chat shows no free-request count and never asks for it.
 - D72 · green: the free-request line under the question box and `/api/assistant/status` are gone (the fake OpenRouter's /key reply and the QA script's route checks with them); the quota reader stays for `npm run smoke:model`. SPEC AST-16 marked removed; QA row and plan map updated. 189 unit and API tests pass.
+- Red: lookup steps show while the answer is worked out, then go away (D73).
 
 ---
 

@@ -152,6 +152,26 @@ test('Stop ends the stream and shows Stopped', async () => {
   hold.open();
 });
 
+test.fails('lookup steps show while the answer is worked out, then go away (D73)', async () => {
+  const hold = gate();
+  start('/assistant/2', {
+    'POST /api/chats/2/messages': () => ({
+      status: 200,
+      events: sse(
+        sseEvent('step', { text: 'Looking up pay in Brazil…' }), sseEvent('token', { text: 'The median is BRL 133,000.' }), hold.wait,
+        sseEvent('sources', { sources: noSources, basedOnData: true }), sseEvent('done', {}),
+      ),
+    }),
+  });
+  await ask('What is the median pay in Brazil?');
+  const answer = await screen.findByRole('article', { name: 'Answer' });
+  await waitFor(() => expect(answer).toHaveTextContent('Looking up pay in Brazil…'));
+  hold.open();
+  await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('Answer finished.'));
+  expect(answer).toHaveTextContent('The median is BRL 133,000.');
+  expect(answer).not.toHaveTextContent('Looking up pay in Brazil…');
+});
+
 test('the chat shows no free-request count (removed, D72)', async () => {
   const calls = start('/assistant/2', { 'GET /api/assistant/status': () => ({ status: 200, body: { freeRequestsLeft: 37 } }) });
   await screen.findByRole('heading', { name: 'Median pay in Brazil' });
