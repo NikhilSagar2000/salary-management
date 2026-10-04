@@ -193,6 +193,8 @@ async function checkManagers(db: pg.Pool | pg.PoolClient, rows: ImportRow[]): Pr
  */
 export async function runImport(db: pg.Pool, text: string): Promise<{ imported: number } | { problems: Problem[] }> {
   return withTx(db, async (tx) => {
+    // Hold off other employee writes until this commits, so the re-check below can't miss someone saved meanwhile.
+    await tx.query('LOCK TABLE employees IN SHARE ROW EXCLUSIVE MODE');
     const { rows, problems } = await checkImport(tx, text);
     if (problems.length) return { problems };
     const { rows: inserted } = await tx.query(

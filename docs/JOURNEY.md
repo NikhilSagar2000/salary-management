@@ -575,6 +575,7 @@ is done (hashes copied from `git log`).
 - Minor fix 5 · red: the search box takes at most 100 characters, the search's own limit (longer text gave a vague "Some fields need fixing.").
 - Minor fix 5 · green: the search box stops at 100 characters.
 - Minor fix 6 · red: when someone is saved while an import runs, the import lists the clash as a problem instead of failing with a server error (CSV-7).
+- Minor fix 6 · green: the import's transaction locks the employees table against other writes (SHARE ROW EXCLUSIVE) before re-checking, so a save made meanwhile either finishes first and is listed as a clash, or waits until the import commits.
 
 ---
 
