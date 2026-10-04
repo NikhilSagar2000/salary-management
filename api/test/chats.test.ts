@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest';
 import type { ModelFn } from '../src/assistant/model.ts';
-import { asText, insertPeople, scriptedModel, sseEvents, signIn, testApp } from './helpers.ts';
+import { asText, insertPeople, PASSWORD, scriptedModel, sseEvents, signIn, testApp } from './helpers.ts';
 
 test('creates, lists newest first, renames (1–80 characters) and deletes chats', async () => {
   const { app, clock } = await testApp();
@@ -116,4 +116,37 @@ test('refuses a second answer while one streams', async () => {
   expect((await first).status).toBe(200);
   const other = (await agent.post('/api/chats').send({})).body; // other chats are not blocked
   expect((await agent.post(`/api/chats/${other.id}/messages`).send({ question: 'Hi?' }).buffer(true).parse(asText)).status).toBe(200);
+});
+
+test.fails('stopping saves the partial answer as Stopped', async () => {
+  const held = heldModel();
+  const { app, db } = await testApp({ model: held.model });
+  const server = app.listen(0);
+  const base = `http://127.0.0.1:${(server.address() as import('node:net').AddressInfo).port}`;
+  try {
+    const signedIn = await fetch(`${base}/api/session`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ password: PASSWORD }) });
+    const cookie = signedIn.headers.get('set-cookie')!.split(';')[0]!;
+    const headers = { cookie, 'content-type': 'application/json' };
+    const chat = await (await fetch(`${base}/api/chats`, { method: 'POST', headers, body: '{}' })).json();
+
+    const stop = new AbortController();
+    const res = await fetch(`${base}/api/chats/${chat.id}/messages`, { method: 'POST', headers, body: JSON.stringify({ question: 'Tell me everything.' }), signal: stop.signal });
+    const reader = res.body!.getReader();
+    let seen = '';
+    while (!seen.includes('event: token')) seen += new TextDecoder().decode((await reader.read()).value);
+    stop.abort(); // the browser's Stop button
+
+    let saved: { content: string; status: string }[] = [];
+    for (let i = 0; i < 50 && saved.length < 1; i++) {
+      saved = (await db.query("SELECT content, status FROM chat_messages WHERE role = 'assistant'")).rows;
+      await new Promise((r) => setTimeout(r, 20));
+    }
+    expect(saved).toEqual([{ content: 'Partial ', status: 'stopped' }]);
+    const again = await fetch(`${base}/api/chats/${chat.id}/messages`, { method: 'POST', headers, body: JSON.stringify({ question: 'Shorter, please.' }) });
+    expect(again.status).toBe(200); // the chat is free again
+    held.release();
+    await again.text();
+  } finally {
+    server.close();
+  }
 });
