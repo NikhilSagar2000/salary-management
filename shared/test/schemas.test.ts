@@ -69,3 +69,10 @@ test('dates must be real calendar dates written YYYY-MM-DD', () => {
     expect(errorsOf({ ...valid, hireDate: bad }), bad).toEqual({ hireDate: 'Enter the hire date as YYYY-MM-DD.' });
   }
 });
+
+test.fails('a missing date asks for the date; only a badly written one names the format', () => {
+  for (const missing of ['', undefined]) {
+    expect(errorsOf({ ...valid, hireDate: missing }), String(missing)).toEqual({ hireDate: 'Enter the hire date.' });
+  }
+  expect(errorsOf({ ...valid, hireDate: '29/02/2024' })).toEqual({ hireDate: 'Enter the hire date as YYYY-MM-DD.' });
+});
