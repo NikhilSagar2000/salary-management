@@ -9,7 +9,7 @@ async function setup(people: Parameters<typeof insertPeople>[1]) {
 
 const lines = (text: string) => text.replace(/^﻿/, '').trimEnd().split('\r\n');
 
-test.fails('exports every filtered row with BOM, commas and the documented columns', async () => {
+test('exports every filtered row with BOM, commas and the documented columns', async () => {
   const { agent } = await setup([
     ...Array.from({ length: 30 }, (_, i) => ({ code: code(i + 1), country: 'US', lastName: `Person${String(i + 1).padStart(2, '0')}` })),
     { code: 'E000099', country: 'IN', firstName: 'Priya', lastName: 'Sharma', salary: 1550000, leaveDate: '2026-12-31' },

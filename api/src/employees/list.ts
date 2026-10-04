@@ -6,7 +6,6 @@ import { CURRENCY_ORDER, PAY_STATS } from '../stats/peers.ts';
 export const STATUS_SQL = `CASE WHEN e.hire_date > $1 THEN 'starting' WHEN e.leave_date <= $1 THEN 'left'
   WHEN e.leave_date IS NOT NULL THEN 'leaving' ELSE 'active' END`;
 
-/** One page of the employee list plus the total match count. Filtering, sorting and paging happen in Postgres. */
 const ORDER: Record<ListQuery['sort'], string[]> = {
   salary: ['s.salary'], // only reachable with one country filtered (one currency)
   name: ['e.last_name', 'e.first_name'],
@@ -18,7 +17,8 @@ const ORDER: Record<ListQuery['sort'], string[]> = {
   hireDate: ['e.hire_date'],
 };
 
-export async function listEmployees(db: pg.Pool, q: ListQuery, today: string) {
+/** The list's filters as SQL: `fromWhere()` (FROM … WHERE …, aliases e and s), its `params` ($1 = today) and `orderBy`. */
+export function listFilter(q: ListQuery, today: string) {
   const params: unknown[] = [today];
   const where: string[] = [];
   const param = (value: unknown) => `$${params.push(value)}`;
@@ -37,19 +37,28 @@ export async function listEmployees(db: pg.Pool, q: ListQuery, today: string) {
   anyOf(`(${STATUS_SQL})`, q.status);
   if (q.salaryMin !== undefined) where.push(`s.salary >= ${param(q.salaryMin)}`);
   if (q.salaryMax !== undefined) where.push(`s.salary <= ${param(q.salaryMax)}`);
-  const fromWhere = (extra: string[] = []) => {
+  const fromWhere = (extra: string[] = [], join = '') => {
     const all = [...where, ...extra];
-    return `FROM employees e JOIN current_state($1) s ON s.employee_id = e.id ${all.length ? `WHERE ${all.join(' AND ')}` : ''}`;
+    return `FROM employees e JOIN current_state($1) s ON s.employee_id = e.id ${join} ${all.length ? `WHERE ${all.join(' AND ')}` : ''}`;
   };
+  return { params, fromWhere, orderBy: orderBy(q) };
+}
+
+/** One page of the employee list, the total match count and pay stats per currency. All done in Postgres. */
+export async function listEmployees(db: pg.Pool, q: ListQuery, today: string) {
+  const { params, fromWhere, orderBy } = listFilter(q, today);
   const from = fromWhere();
   const total = (await db.query(`SELECT count(*) AS n ${from}`, params)).rows[0].n as number;
   const { rows } = await db.query(
     `SELECT e.code, e.first_name AS "firstName", e.last_name AS "lastName", s.country, s.currency, s.department, s.role,
        s.level, s.salary, e.hire_date AS "hireDate", e.leave_date AS "leaveDate", ${STATUS_SQL} AS status
-     ${from} ORDER BY ${orderBy(q)} LIMIT ${q.pageSize} OFFSET ${(q.page - 1) * q.pageSize}`,
+     ${from} ORDER BY ${orderBy} LIMIT ${q.pageSize} OFFSET ${(q.page - 1) * q.pageSize}`,
     params,
   );
-  const { rows: stats } = await db.query(`SELECT s.currency, ${PAY_STATS} ${fromWhere([`(${STATUS_SQL}) <> 'starting'`])} GROUP BY s.currency ORDER BY ${CURRENCY_ORDER}`, params);
+  const { rows: stats } = await db.query(
+    `SELECT s.currency, ${PAY_STATS} ${fromWhere([`(${STATUS_SQL}) <> 'starting'`])} GROUP BY s.currency ORDER BY ${CURRENCY_ORDER}`,
+    params,
+  );
   return { rows, total, page: q.page, pageSize: q.pageSize, stats };
 }
 

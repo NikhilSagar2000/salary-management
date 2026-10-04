@@ -7,6 +7,7 @@ import { addChange, cancelChange } from './changes.ts';
 import { employeeDetail } from './detail.ts';
 import { updateDetails } from './details.ts';
 import { markLeaving, undoLeaving } from './leave.ts';
+import { exportCsv } from '../csv/export.ts';
 import { listEmployees } from './list.ts';
 
 export function employeeRoutes({ db }: { db: pg.Pool }) {
@@ -27,6 +28,15 @@ export function employeeRoutes({ db }: { db: pg.Pool }) {
     const parsed = listQuerySchema.safeParse(req.query);
     if (!parsed.success) return fieldErrors(res, parsed.error.issues);
     res.json(await listEmployees(db, parsed.data, res.locals.today));
+  });
+
+  router.get('/api/employees.csv', async (req, res) => {
+    const parsed = listQuerySchema.safeParse({ ...req.query, page: undefined, pageSize: undefined });
+    if (!parsed.success) return fieldErrors(res, parsed.error.issues);
+    res
+      .type('text/csv; charset=utf-8')
+      .attachment(`employees-${res.locals.today}.csv`)
+      .send(await exportCsv(db, parsed.data, res.locals.today));
   });
 
   router.get('/api/employees/next-code', async (_req, res) => {
