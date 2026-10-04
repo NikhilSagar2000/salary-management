@@ -144,7 +144,7 @@ test('refuses to cancel a change dated today or earlier', async () => {
   expect((await cancel(tomorrow, 3, 'Europe/London')).status).toBe(200);
 });
 
-test.fails("the hire change can't be cancelled", async () => {
+test("the hire change can't be cancelled", async () => {
   const { app, db } = await testApp();
   const agent = await signIn(app);
   await agent.post('/api/employees').send({ ...newEmployee, hireDate: '2026-12-01' }); // starting soon

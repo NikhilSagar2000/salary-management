@@ -308,6 +308,7 @@ is done (hashes copied from `git log`).
 - Task 8 · red: only scheduled changes can be cancelled, "today" from `X-Timezone` (EMP-11, TIME-1).
 - Task 8 · green: every request gets "today" in its `X-Timezone` (UTC fallback); only changes dated after that day can be cancelled (EMP-11, TIME-1).
 - Task 8 · red: the hire change can't be cancelled.
+- Task 8 · test: out-of-date cancel gets 409 (EMP-13); concurrency test gained a `prepare` step. Passed first run; a mutation ignoring the version made it fail.
 
 ---
 

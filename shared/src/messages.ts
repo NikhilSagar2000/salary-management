@@ -25,6 +25,7 @@ export const MSG = {
   managerNotEmployed: (name: string, date: string) => `${name} isn't employed on ${date}.`,
   managerLoop: 'That would make a reporting loop.',
   onlyScheduled: 'Only scheduled changes can be cancelled. Fix a past change by adding a new one.',
+  hireNotCancellable: "The hire record can't be cancelled.",
   noChange: "That change doesn't exist for this employee.",
   changeNothing: 'Change at least one of country, department, role, level, manager or salary.',
   changeBeforeHire: (hire: string) => `The change can't be dated before the hire date (${hire}).`,

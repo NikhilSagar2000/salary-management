@@ -42,8 +42,13 @@ export async function cancelChange(db: pg.Pool, code: string, changeId: number, 
     );
     if (!bumped.rowCount) return null;
     const { id, version: next } = bumped.rows[0];
-    const { rows } = await tx.query('SELECT effective_date FROM job_changes WHERE id = $1 AND employee_id = $2', [changeId, id]);
+    const { rows } = await tx.query(
+      `SELECT effective_date, id = (SELECT min(id) FROM job_changes WHERE employee_id = $2) AS is_hire
+       FROM job_changes WHERE id = $1 AND employee_id = $2`,
+      [changeId, id],
+    );
     if (!rows[0]) throw new FieldProblem({ form: MSG.noChange });
+    if (rows[0].is_hire) throw new FieldProblem({ form: MSG.hireNotCancellable });
     if (rows[0].effective_date <= today) throw new FieldProblem({ form: MSG.onlyScheduled });
     await tx.query('UPDATE job_changes SET cancelled_at = now() WHERE id = $1', [changeId]);
     await checkTimeline(tx, id, rows[0].effective_date);
