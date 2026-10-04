@@ -35,3 +35,17 @@ test('prefixes formula-like cells with an apostrophe', async () => {
   expect(row).toContain(`"'=HYPERLINK(""x"")",'+Plus,`);
   expect(row!.endsWith(",'@home -then")).toBe(true);
 });
+
+test('accented, apostrophe and comma names export intact', async () => {
+  const { agent } = await setup([
+    { code: 'E000001', firstName: 'Siobhan', lastName: "O'Brien", country: 'GB' },
+    { code: 'E000002', firstName: 'Jörg', lastName: 'Müller-Lüdenscheidt', country: 'DE' },
+    { code: 'E000003', firstName: 'John', lastName: 'Smith, Jr.', country: 'US' },
+    { code: 'E000004', firstName: 'João', lastName: 'Gonçalves', country: 'BR' },
+  ]);
+  const rows = lines((await agent.get('/api/employees.csv?sort=code')).text);
+  expect(rows[1]!.startsWith("E000001,Siobhan,O'Brien,")).toBe(true);
+  expect(rows[2]!.startsWith('E000002,Jörg,Müller-Lüdenscheidt,')).toBe(true);
+  expect(rows[3]!.startsWith('E000003,John,"Smith, Jr.",')).toBe(true);
+  expect(rows[4]!.startsWith('E000004,João,Gonçalves,')).toBe(true);
+});

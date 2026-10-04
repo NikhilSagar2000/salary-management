@@ -225,7 +225,7 @@ is written just before the task starts, from the interfaces that exist at that p
   limits" (SEED-8) · "every person starts with a hire change; raises, promotions, relocations
   with new-currency salaries and leavers exist" (SEED-9) · "managers employed, more senior,
   no loops" (SEED-10). Seed time is measured and logged in JOURNEY section 7.
-- [ ] **Task 14: CSV export.** Files: `api/src/csv/export.ts`. Tests: `csv.export.test.ts` ›
+- [x] **Task 14: CSV export.** Files: `api/src/csv/export.ts`. Tests: `csv.export.test.ts` ›
   "exports every filtered row with BOM, commas and the documented columns" (CSV-1) ·
   "prefixes formula-like cells with an apostrophe" (CSV-2) · "accented and apostrophe names
   export intact" (review focus 2).
@@ -647,7 +647,7 @@ row (no paging) in list order, `text/csv; charset=utf-8`, BOM, comma-separated, 
 country, department, role, level (number), salary, currency, hire_date, manager_code, status,
 leave_date, leave_reason.
 
-- [ ] Step 1: "exports every filtered row with BOM, commas and the documented columns" (CSV-1).
-- [ ] Step 2: "prefixes formula-like cells with an apostrophe" (CSV-2).
-- [ ] Step 3: "accented, apostrophe and comma names export intact" (review focus 2; quoting).
-- [ ] Task check: `npm test`.
+- [x] Step 1: "exports every filtered row with BOM, commas and the documented columns" (CSV-1).
+- [x] Step 2: "prefixes formula-like cells with an apostrophe" (CSV-2).
+- [x] Step 3: "accented, apostrophe and comma names export intact" (review focus 2; quoting).
+- [x] Task check: `npm test`.
