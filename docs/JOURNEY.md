@@ -390,6 +390,7 @@ is done (hashes copied from `git log`).
 - Task 15 · green: import checks each manager_code — the database or an earlier-hired row in the same file, employed on the row's hire date, not the person; problems sorted by line (CSV-5). One full run timed out two seed tests during a 208 s host sleep; the re-run passed (85/85).
 - Task 15 · red: duplicate codes and emails, in the database or within the file, flag every row involved (CSV-6).
 - Task 15 · green: a code or work email already in the database, or repeated in the file, is a problem on every row involved, naming the lines (CSV-6).
+- Task 15 · red: import saves all rows in one transaction or none, re-checking at commit (CSV-7).
 
 ---
 

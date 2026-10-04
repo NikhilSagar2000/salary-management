@@ -140,3 +140,39 @@ test('a duplicate code or email in the database or file flags every row involved
   ]);
   expect(res.body.rows).toEqual([]);
 });
+
+test.fails('import saves all rows in one transaction or none, re-checking at commit', async () => {
+  const { commit, preview, db } = await setup([{ code: 'E000500' }]);
+  const count = async () => (await db.query('SELECT count(*)::int AS n FROM employees')).rows[0].n;
+  const header = `${HEADER},manager_code`;
+  const good = [header, row(1, ',E000500'), row(2, ',E000001'), row(3, ',')].join('\n');
+
+  const done = await commit(good);
+  expect(done.status).toBe(201);
+  expect(done.body).toEqual({ imported: 3 });
+  expect(await count()).toBe(4);
+  const { rows } = await db.query(
+    `SELECT e.code, m.code AS manager, c.salary, c.currency, c.effective_date FROM employees e
+     JOIN job_changes c ON c.employee_id = e.id LEFT JOIN employees m ON m.id = c.manager_id WHERE e.code LIKE 'E00000%' ORDER BY e.code`,
+  );
+  expect(rows).toEqual([
+    { code: 'E000001', manager: 'E000500', salary: 133000, currency: 'BRL', effective_date: '2024-02-29' },
+    { code: 'E000002', manager: 'E000001', salary: 133000, currency: 'BRL', effective_date: '2024-02-29' },
+    { code: 'E000003', manager: null, salary: 133000, currency: 'BRL', effective_date: '2024-02-29' },
+  ]);
+
+  const mixed = await commit([HEADER, row(4), row(5).replace(',133000,', ',abc,')].join('\n'));
+  expect(mixed.status).toBe(400);
+  expect(mixed.body.error).toBe('Nothing was imported. Fix these problems and try again.');
+  expect(mixed.body.problems).toEqual([{ line: 3, column: 'salary', message: 'Enter the salary as a whole number, like 95000.' }]);
+  expect(await count()).toBe(4);
+
+  // Previewed fine, but the code was taken before "Import" was pressed.
+  const later = [HEADER, row(6), row(7)].join('\n');
+  expect((await preview(later)).body.problems).toEqual([]);
+  await db.query("INSERT INTO employees (code, first_name, last_name, gender, work_email, hire_date) VALUES ('E000007', 'X', 'Y', 'male', 'x@acme.example', '2020-01-01')");
+  const raced = await commit(later);
+  expect(raced.status).toBe(400);
+  expect(raced.body.problems).toEqual([{ line: 3, column: 'code', message: 'E000007 is already used.' }]);
+  expect(await count()).toBe(5);
+});
