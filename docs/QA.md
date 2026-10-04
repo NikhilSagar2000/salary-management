@@ -26,15 +26,15 @@ JPY/INR amounts, loading, empty and error states, reload, and Back.
 |---|---|---|---|---|
 | S1 | Sign-in | pass | Dark (device) at 1440: layout fine; wrong password → "That password isn't right."; Enter submits (once Chrome's own password pop-up is closed, it eats the first Enter); next kept |
 | S2 | Employee list, desktop | pass | Dark and light at desktop: filters, stats lines, sortable headers, paging, empty state with Clear filters, loading skeleton. Found: rows from the previous search stay without any sign while the next loads (about 0.1 s; ruling: leave) |
-| S3 | Employee list, phone | fail → fix queued | Cards, Filters button and drawer, no sideways scroll. Found: the pagination's next arrow wraps to its own line at 390 |
-| S4 | Employee page | fail → fix queued | Desktop and 390: facts, job, peers, reports, history. Found: (1) a leaver's long email overlaps Gender at 390; (2) a leaver shows "Current job" and a peer comparison against today's peers; (3) a past leave reads "Leaves"; (4) an undone leave still reads "Leaves"; (5) a starting person's hire shows Scheduled with a Cancel that the server refuses, and the refusal shows only "Some fields need fixing." |
+| S3 | Employee list, phone | fail → fixed | Cards, Filters button and drawer, no sideways scroll. Page buttons wrapped at 390; now fewer siblings on a phone (e9733d3 → 99de1ae, e2e phone.spec) |
+| S4 | Employee page | fail → fixed | (1) long email now wraps (99de1ae); (2) a leaver shows "Last job" and "Not compared…" (b54cc9e → d805b00); (3)+(4) leave events read Left / Leaves / Leave cancelled (c19f56a → 7921b21); (5) a starting person's hire reads Starts with no Cancel (9354529 → e0a3001) and field-less refusals carry their own message (9a4f273 → 88598e3). Rechecked at 390 (E000003) and in Chrome (E000010) |
 | S5 | Edit details dialog | pass | Pre-filled, case-blind email clash message, save, Escape closes |
-| S6 | Change job or pay dialog | pass | Starts from the current job; messages under the right fields; scheduled change and cancel work. Found: level list ignores the role (Add employee filters it) |
-| S7 | Mark as leaving / Undo | Future and past leave dates, header and actions while leaving and after leaving, undo | | |
-| S8 | Add employee | pass | Layout, choices follow each other, messages, success lands on the new page. Found: corrected fields keep their red message until the next submit |
+| S6 | Change job or pay dialog | fail → fixed | Starts from the current job; messages under the right fields; scheduled change and cancel work. The level list ignored the role; now follows it (26084d7 → f343729) |
+| S7 | Mark as leaving / Undo | pass | Leave before hire refused; leaving 15 Nov 2026 with a reason; header shows Leaving and Undo; a scheduled change after it shows Won't apply; undo restores it; someone who has left shows only Undo and the explanation |
+| S8 | Add employee | fail → fixed | Layout, choices follow each other, messages, success lands on the new page. Corrected fields kept their red message; now a field drops it when changed (f681686 → c0ed542) |
 | S9 | Pay overview | pass | 1440 light: US and JP (widest amounts) fit; 390 dark: one block per department for IN; cell link works |
 | S10 | Import | pass | Instructions, previews, import and result at 1440; 390 dark screenshot fine (the native file button is plain but readable) |
-| S11 | Assistant | fail → fix queued | All flows work. Found: the chat doesn't scroll to a new question or answer (hidden behind the question box); clicking Stop also submits what is in the box |
+| S11 | Assistant | fail → fixed | All flows work. Chat not scrolling to new messages fixed (d3b458f → 0e8c57b; a crash this caused when leaving a chat, found by e2e, fixed in 990d791); Stop also submitting fixed (99de1ae). Rechecked in Chrome: the streaming answer stays above the question box |
 | S12 | Shell | pass | Menu with the active page highlighted, theme toggle, sign out; header fits at 390 with the menu button |
 | S13 | Errors | pass | Server stopped: Pay overview, Assistant and Employees each show "Can't reach the server. Check your connection and try again." |
 
@@ -52,10 +52,10 @@ JPY/INR amounts, loading, empty and error states, reload, and Back.
 | LIST-1 | API | Default, 50 and 100 page sizes; total count | pass | API: 25/50/100 rows, same total 8,907; pageSize=30 → 400 |
 | LIST-2 | browser | Search "muller", "jose", part of an email, part of a code | pass | Browser: "muller" → 8 incl. Heike Müller; API: "jose" → 41 incl. José Almeida; code and email parts match; each search ~0.1 s |
 | LIST-3 | browser | Two countries + one department; default status; add Left | pass | US+IN with Engineering → 2,090, only those; adding Left → 2,339 with leavers counted in stats; Left only → 249 |
-| LIST-4 | browser | Each sortable column, both directions | fail → fixed | Every key and direction sorted with ties by code, but Country sorted by code (United Kingdom between Germany and India). Fixed test-first: 9a934d6 → 5915bdb |
-| LIST-5 | browser, API | Salary controls with 0/1/2 countries; API salary sort without one country | fail → fixed | API answered the generic "Some fields need fixing."; now the salary message itself (e03c66e → f94f725). UI: salary boxes disabled with the note (seen at 1440) |
+| LIST-4 | browser | Each sortable column, both directions | fail → fixed | Every key and direction sorted with ties by code, but Country sorted by code (United Kingdom between Germany and India). Fixed test-first: 9a934d6 → 5915bdb; rechecked: Brazil, Germany, India, …, United Kingdom, United States |
+| LIST-5 | browser, API | Salary controls with 0/1/2 countries; API salary sort without one country | fail → fixed | API answered the generic message; now the salary message itself (e03c66e → f94f725). UI: salary boxes disabled with the note unless one country is chosen |
 | LIST-6 | browser | Filter, search, sort, page 2; reload; copy link to a new tab; back/forward | pass | Browser: page 2 + Brazil + hire-date sort survive reload; Back returns to the previous view; e2e list.spec.ts covers copied link |
-| LIST-7 | browser, API | `pageSize=1000`, `country=XX` | fail → fixed | The page showed "Some fields need fixing." for pageSize=1000; now the message naming the value (e03c66e → f94f725); browser re-check below |
+| LIST-7 | browser, API | `pageSize=1000`, `country=XX` | fail → fixed | The page showed "Some fields need fixing." for pageSize=1000; now 'Page size must be 25, 50 or 100, not "1000".' (e03c66e → f94f725); rechecked in Chrome |
 | LIST-8 | browser | Read a row | pass | Row: code, name, country, department, role, level, salary with currency, hire date, status badge |
 | LIST-9 | browser, SQL | Stats line for a filter; compare a median with SQL | pass | One line per currency above the list; with Left added, leavers counted; Inês (starting) listed, not counted (20 listed, 19 in stats) |
 | LIST-10 | browser | 390 px | pass | 390: cards, Filters drawer, no sideways scroll (screenshots + e2e phone.spec) |
@@ -70,12 +70,12 @@ JPY/INR amounts, loading, empty and error states, reload, and Back.
 | EMP-8 | browser | Role not in department; level outside the role | pass | L6 for Sales Development Representative → "Sales Development Representative goes from L1 to L3." |
 | EMP-9 | browser | Move country without salary; with salary; move with a later salary scheduled | pass | Move without salary → "Moving to another country needs a salary in the new currency."; with a later USD raise → "A salary change on 1 Jan 2027 is in USD; cancel it before moving this person to Germany."; after cancelling it, saved as USD 51,100 → EUR 48,000 |
 | EMP-10 | browser | Manager: self, unknown code, starting person, a report of this person | pass | Browser: self → "Someone can't be their own manager.", E999999 → "No employee with code E999999."; API: starting manager, left manager → "… isn't employed on 15 Nov 2026.", loop → "That would make a reporting loop." |
-| EMP-11 | browser | Schedule a change, cancel it; try to cancel a past change | pass | Scheduled change cancelled → "Cancelled on 5 Oct 2026", struck through; no Cancel on past changes. Found: the hire of a starting person also offers Cancel (see S4) |
+| EMP-11 | browser | Schedule a change, cancel it; try to cancel a past change | pass | Scheduled change cancelled → "Cancelled on 5 Oct 2026", struck through; no Cancel on past changes; a starting person's hire now offers no Cancel (e0a3001) |
 | EMP-12 | SQL, API | `UPDATE`/`DELETE` on job_changes and leave_events; look for edit routes | pass | API: no route (404); SQL: UPDATE/DELETE on job_changes and leave_events refused ("History can't be edited/deleted.") |
 | EMP-13 | browser | Two tabs on one person; save in one, then in the other | pass | Saved from another session, then from the page: the 409 message, typed name kept, Reload, save succeeded |
-| EMP-14 | browser | Person with manager who left, reports, scheduled and cancelled changes | fail → fix queued | Current job, peers line, manager, reports, history all shown. Found: for someone who has left, "Current job" and "6% above the median of 23 peers" compare a 2015 salary with today's peers |
+| EMP-14 | browser | Person with manager who left, reports, scheduled and cancelled changes | fail → fixed | Current job, peers line, manager, reports, history. A leaver now shows "Last job" and no comparison with today's peers (b54cc9e → d805b00); rechecked at 390 |
 | LEAVE-1 | browser | Leave date before hire date; reason over 500 characters; valid | pass | Before hire → "The leave date can't be before the hire date (6 Jun 2012)."; incomplete date → "Enter the leave date."; 15 Nov 2026 with a reason saved (Leaving). Reason over 500 characters: the box stops at 500 (API limit covered by leave.test.ts) |
-| LEAVE-2 | browser | Undo leaving | fail → fix queued | Undo clears the leave; history shows both events with their dates (undo on 5 Oct 2026). Found: the undone leave on 15 Nov 2026 still reads "Leaves", as if it will happen |
+| LEAVE-2 | browser | Undo leaving | fail → fixed | Undo clears the leave; both events in history with their dates. The undone leave now reads "Leave cancelled" with its reason struck through (c19f56a → 7921b21); rechecked in Chrome |
 | LEAVE-3 | browser, API | Person who has left: page actions; API writes | pass | API: writes to someone who has left → 409 with the message; page shows only Undo leaving and the explanation |
 | LEAVE-4 | API | `DELETE /api/employees/<code>` | pass | API: DELETE → 404; person still there |
 | LEAVE-5 | browser | Leaving with a later scheduled change; undo | pass | Move on 1 Dec 2026 showed "Won't apply (after leave date)" while leaving 15 Nov; applied again after undo |
@@ -95,7 +95,7 @@ JPY/INR amounts, loading, empty and error states, reload, and Back.
 | AST-9 | browser | Ask with `[no tools]` | pass | [no tools] answer labelled "Not based on ACME data" |
 | AST-10 | not run | Needs the real model and the OpenRouter key | not run | Needs the real model; blocked on the OpenRouter key |
 | AST-11 | browser | Ask with `[html]` | pass | [html]: bold, a table and a list render; the img/script tags show as text; no img or script element; title unchanged |
-| AST-12 | browser | 2,001 characters; second question while one streams; Stop with `[slow]` | fail → fix queued | Box stops at 2,000 characters; a second question waits while one streams; Stop saved the partial answer marked Stopped. But clicking Stop also submitted what was in the box (a 409 for the waiting question) |
+| AST-12 | browser | 2,001 characters; second question while one streams; Stop with `[slow]` | fail → fixed | Box stops at 2,000 characters; a second question waits while one streams; Stop saves the partial answer marked Stopped. Clicking Stop also submitted what was in the box; fixed test-first (e9733d3 → 99de1ae), rechecked in Chrome: Stop, no error, nothing sent |
 | AST-13 | tests | `assistant.run.test.ts` (last 20 messages) | pass | Automated tests pass (see Steps) |
 | AST-14 | browser | Ask with `[429]`; then other pages | pass | [429] → the free-limit message; question saved; other pages fine |
 | AST-15 | browser | Ask with `[500]`; then other pages | pass | [500] → "The assistant isn't available right now. Try again in a minute." (announced once in the status line) |
@@ -126,8 +126,8 @@ JPY/INR amounts, loading, empty and error states, reload, and Back.
 | A11Y-4 | browser | Ask; watch the hidden status line | pass | The only status/live region read "Answer finished." after the answer; nothing announced word by word |
 | UI-1 | browser | Device dark/light; toggle; reload | pass | First load followed the device (dark); the toggle chose light and it stayed light after a full reload |
 | UI-2 | browser | Money and dates on every screen | pass | "USD 117,700", "JPY 4,003,000", "EUR 48,000"; dates "6 Jun 2012", "Cancelled on 5 Oct 2026" on every screen seen |
-| UI-3 | browser | Every screen at 375 and 1440 px | pass | Screenshots at 390: list, employee page, add, pay overview (IN), import, assistant all scrollWidth = 390; 1440 likewise; e2e phone.spec checks seven screens. Found: on a leaver's page at 390 the long email runs into Gender (see S4) |
-| UI-4 | browser | Failed requests on each screen | pass | Bad list address shows the message naming the value (after fix f94f725); server down → "Can't reach the server. Check your connection and try again." on each screen. Found: a refused cancel of a hire showed only "Some fields need fixing." (see S4) |
+| UI-3 | browser | Every screen at 375 and 1440 px | pass | Screenshots at 390 and 1440: every screen scrollWidth = viewport; e2e phone.spec checks seven screens, long values and page buttons. The leaver's email overlap at 390 is fixed (99de1ae) |
+| UI-4 | browser | Failed requests on each screen | pass | Bad list address shows the message naming the value (f94f725); server down → "Can't reach the server…" on each screen; field-less refusals carry their message (88598e3) |
 
 ## Data changed during the run
 

@@ -230,6 +230,14 @@ chase a flaky keyboard test; Nikhil rejected that tool call, then wrote:
 **My reply:** resumed phase 6 where it stopped, running the end-to-end suite once at a time
 instead of three runs in one go.
 
+### P6 (2026-10-05, during phase 6)
+
+> added values in .env so you can test other things as well now
+
+**My reply:** checked which `.env` keys are set (names only, no values printed), then ran the
+planned model smoke test (D44) on the free models and the real-model QA row (AST-10), within the
+free daily quota.
+
 ---
 
 ## 3. Timeline
@@ -618,6 +626,7 @@ is done (hashes copied from `git log`).
 - Phase 6 QA fixes 10–12 · red (found by QA): Stop doesn't send what is waiting in the question box (AST-12); at 375 px long values on the employee page stay inside their space (UI-3); at 375 px the page buttons fit on one line.
 - Phase 6 QA fixes 10–12 · green: Stop and Send are separate keyed buttons, so clicking Stop no longer submits the waiting question; long fact values (emails) wrap inside their column; the list shows fewer page buttons on a phone so they stay on one line.
 - Test fix: the keyboard add-employee test failed in 2 of 5 full runs with Role left empty (it passes alone). The arrow-key helper now reads only the focused field's own list, and the test checks each choice right after making it, so a repeat points at the exact step. Cause unconfirmed (likely Enter landing while the searchable Role list re-renders after the department change); 3 later runs green. Nikhil's "please continue" logged as P5.
+- Model smoke test fix 1 · red (found with the real free models): badly shaped tool arguments (a single value where a list is expected) go back to the model as an error; the step text read the unchecked arguments and crashed the whole answer ("f.country.map is not a function").
 
 ---
 

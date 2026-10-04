@@ -10,7 +10,8 @@
     "typecheck": "tsc -p .",
     "hash-password": "node src/hash-password.ts",
     "seed": "node --env-file-if-exists=../.env src/seed/cli.ts",
-    "measure:list": "node --env-file-if-exists=../.env src/measure-list.ts"
+    "measure:list": "node --env-file-if-exists=../.env src/measure-list.ts",
+    "smoke:model": "node --env-file-if-exists=../.env src/smoke-model.ts"
   },
   "dependencies": {
     "@acme/shared": "*",

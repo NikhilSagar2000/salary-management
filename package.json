@@ -20,7 +20,8 @@
     "seed": "npm run seed -w api --",
     "measure:list": "npm run measure:list -w api --silent",
     "dev:web": "npm run dev -w web",
-    "e2e": "playwright test -c e2e"
+    "e2e": "playwright test -c e2e",
+    "smoke:model": "npm run smoke:model -w api --silent --"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
