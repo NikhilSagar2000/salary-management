@@ -398,6 +398,7 @@ is done (hashes copied from `git log`).
 - Task 16 · green: `query_employees` tool — the list's filters plus hire/leave date ranges, codes and manager; at most 200 rows with the total; sources name the group in words with a list link, and the first 20 people (AST-4). `listFilter` now takes those extra filters.
 - Task 16 · red: `get_employee` tool returns the person with full history (AST-4).
 - Task 16 · green: `get_employee` tool returns the employee page data (current job, peers, manager, reports, full timeline) via `employeeDetail` (AST-4).
+- Task 16 · red: `query_changes` tool classifies changes (raise, pay cut, promotion, relocation, manager change, leave…) and caps at 200 (AST-4).
 
 ---
 
