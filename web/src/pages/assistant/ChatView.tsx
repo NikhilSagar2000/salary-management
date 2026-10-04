@@ -8,8 +8,11 @@ import { Answer, Question, type Message, type Sources } from './Answer.tsx';
 
 type Chat = { id: number; title: string; updatedAt: string; messages: Message[] };
 
-/** One chat: its questions and answers, the composer, rename and delete (AST-1, AST-3, AST-12, AST-16). */
-export function ChatView({ id, onChanged, onDeleted }: { id: number; onChanged: () => void; onDeleted: () => void }) {
+/**
+ * One chat: its questions and answers, the composer, rename and delete (AST-1, AST-3, AST-12, AST-16). `listTitle` is the
+ * title in the chat list, which follows the server when the first question names the chat.
+ */
+export function ChatView({ id, listTitle, onChanged, onDeleted }: { id: number; listTitle?: string; onChanged: () => void; onDeleted: () => void }) {
   const [chat, setChat] = useState<Chat | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [question, setQuestion] = useState('');
@@ -82,11 +85,12 @@ export function ChatView({ id, onChanged, onDeleted }: { id: number; onChanged: 
 
   if (error) return <Alert color="red" role="alert">{error}</Alert>;
   if (!chat) return <Skeleton h={240} aria-label="Loading chat" />;
+  const title = listTitle ?? chat.title;
   return (
     <Stack gap="md">
       <Anchor component={Link} to="/assistant" size="sm" hiddenFrom="md">All chats</Anchor>
       <Group justify="space-between" wrap="nowrap" align="flex-start">
-        <Title order={2} size="h3" style={{ overflowWrap: 'anywhere' }}>{chat.title}</Title>
+        <Title order={2} size="h3" style={{ overflowWrap: 'anywhere' }}>{title}</Title>
         <Group gap="xs" wrap="nowrap">
           <Button size="xs" variant="default" onClick={() => setDialog('rename')}>Rename</Button>
           <Button size="xs" variant="default" color="red" onClick={() => setDialog('delete')}>Delete</Button>
@@ -125,14 +129,14 @@ export function ChatView({ id, onChanged, onDeleted }: { id: number; onChanged: 
       </Paper>
 
       <Modal opened={dialog === 'rename'} onClose={() => setDialog(null)} title="Rename chat">
-        <RenameForm id={id} title={chat.title} onCancel={() => setDialog(null)} onSaved={(title) => {
+        <RenameForm id={id} title={title} onCancel={() => setDialog(null)} onSaved={(title) => {
           setChat((c) => c && { ...c, title });
           setDialog(null);
           onChanged();
         }} />
       </Modal>
       <Modal opened={dialog === 'delete'} onClose={() => setDialog(null)} title="Delete this chat?">
-        <DeleteConfirm id={id} title={chat.title} onCancel={() => setDialog(null)} onDeleted={onDeleted} />
+        <DeleteConfirm id={id} title={title} onCancel={() => setDialog(null)} onDeleted={onDeleted} />
       </Modal>
     </Stack>
   );

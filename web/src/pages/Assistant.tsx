@@ -56,7 +56,7 @@ export function Assistant() {
         </Grid.Col>
         <Grid.Col span={{ base: 12, md: 9 }} visibleFrom={id ? undefined : 'md'}>
           {id ? (
-            <ChatView key={id} id={Number(id)} onChanged={() => void loadChats()} onDeleted={() => {
+            <ChatView key={id} id={Number(id)} listTitle={chats?.find((c) => String(c.id) === id)?.title} onChanged={() => void loadChats()} onDeleted={() => {
               void loadChats();
               navigate('/assistant');
             }} />

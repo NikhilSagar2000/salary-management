@@ -188,7 +188,7 @@ test('announces once when the answer finishes', async () => {
   expect(screen.getByRole('article', { name: 'Answer' })).toHaveTextContent('The median is BRL 129,000.');
 });
 
-test.fails('the first question names the chat', async () => {
+test('the first question names the chat', async () => {
   let list = [{ id: 3, title: 'New chat', updatedAt: '2026-10-04T09:00:00Z' }, ...CHATS];
   start('/assistant/3', {
     'GET /api/chats': () => ({ status: 200, body: list }),
