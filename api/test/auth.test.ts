@@ -2,7 +2,7 @@ import request from 'supertest';
 import { expect, test } from 'vitest';
 import { testApp } from './helpers.ts';
 
-test.fails('rejects /api requests without a session', async () => {
+test('rejects /api requests without a session', async () => {
   const { app } = await testApp();
   for (const path of ['/api/session', '/api/employees']) {
     const res = await request(app).get(path);
