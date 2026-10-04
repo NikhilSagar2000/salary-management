@@ -21,6 +21,7 @@ const named = args.filter((a) => !a.startsWith('--'));
 const candidates = named.length
   ? named
   : [process.env.OPENROUTER_MODEL, ...(process.env.OPENROUTER_FALLBACK_MODELS ?? '').split(',')].map((m) => m?.trim()).filter((m): m is string => !!m);
+const configured = [process.env.OPENROUTER_MODEL, ...(process.env.OPENROUTER_FALLBACK_MODELS ?? '').split(',')].map((m) => m?.trim()).filter((m): m is string => !!m);
 const db = createPool(process.env.DATABASE_URL ?? DEV_DATABASE_URL);
 const today = todayIn(systemClock, 'UTC');
 const minutes = (ms: number) => AbortSignal.timeout(ms);
@@ -62,11 +63,11 @@ for (const model of candidates) {
     rounds = `FAIL ${why(err)}`;
   }
 
-  // 3. The `models` list the app sends (this model first, then another candidate) is accepted and answered. OpenRouter
-  // refuses unknown ids (400), and only fails over when a listed model fails at the time, which can't be forced from here.
+  // 3. The model list exactly as the app sends it (OPENROUTER_MODEL, then the fallbacks; the client keeps three, the most
+  // OpenRouter takes) is accepted and answered. Failing over to a fallback can't be forced from here.
   if (!onlyAst10) try {
     let text = '';
-    const viaFallback = openRouterModel({ ...cfg, models: [model, ...candidates.filter((c) => c !== model).slice(0, 1)] });
+    const viaFallback = openRouterModel({ ...cfg, models: configured });
     for await (const e of viaFallback({ messages: [{ role: 'user', content: 'Reply with the word ready.' }], tools: [], signal: minutes(90_000) })) {
       if (e.type === 'token') text += e.text;
     }
@@ -88,7 +89,7 @@ for (const model of candidates) {
       extra = `\n    AST-10: FAIL ${why(err)}`;
     }
   }
-  rows.push(`${model}\n    tool call while streaming: ${toolCall}\n    several rounds: ${rounds}\n    models list accepted: ${fallback}${extra}`);
+  rows.push(`${model}\n    tool call while streaming: ${toolCall}\n    several rounds: ${rounds}\n    app's model list accepted: ${fallback}${extra}`);
   console.log(rows.at(-1));
 }
 console.log(`Free requests left today: ${await freeRequestsLeft(cfg)}`);

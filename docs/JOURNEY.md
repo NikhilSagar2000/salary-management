@@ -674,6 +674,7 @@ is done (hashes copied from `git log`).
 - P8 investigated: the dev database showed each question failing in the same second; the app's exact request to OpenRouter (4 models) answered 400 "'models' array must have 3 items or fewer." (the smoke test only ever sent 1 or 2). Red: send at most three models; keep OpenRouter's message for the server log.
 - Red: an unavailable model is written to the server log with its reason (the browser keeps the plain message); P8's cause was invisible because only unexpected errors were logged.
 - P8 fixed · green: the model client sends at most three models (OpenRouter's limit); OpenRouter's error text rides in the ModelError and every unavailable answer is written to the server log with it (the browser still sees the plain message). Smoke test check 3 now uses the app's own configured list; render.yaml keeps two fallbacks; .env.example says so. Nikhil's .env lists three fallbacks, so the client uses the first two of them.
+- Follow-up to 0545fb0: the smoke-test, render.yaml and .env.example edits that commit's line describes failed to apply in that step (a text mismatch in my edit script); applied here.
 
 ---
 
