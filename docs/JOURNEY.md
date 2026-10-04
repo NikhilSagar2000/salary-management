@@ -631,6 +631,7 @@ is done (hashes copied from `git log`).
 - Model smoke test (D44) with Nikhil's key: npm run smoke:model added; apodex-1.1-mini (Nikhil's primary), lfm-2.5 and nemotron-3-ultra pass streamed tool calls and several lookup rounds; qwen3.8 rate-limited upstream; failover unverified (can't be forced). AST-10 partly fails: narration from the lookup round is joined onto the answer.
 - Phase 6 QA fix 13 · red (found with the real model, AST-10): words a model writes before a lookup become a step and are taken back from the answer, so the saved answer is only the final reply.
 - Phase 6 QA fix 13 · green: each round's words are kept separately; if the round ends in a lookup, the server sends reset and the words as a step, and the saved answer is the final round's words (a stopped answer keeps only words after the last reset).
+- Phase 6 QA fix 14 · red (found with the real model): the system prompt asks for money as currency code and amount ("EUR 71,000"), as the app shows it; models wrote "€71,000".
 
 ---
 
