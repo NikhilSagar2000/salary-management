@@ -66,3 +66,14 @@ test('refuses a department, role and level combination not allowed on that date'
   expect(breaksLater.body.fields).toEqual({ level: 'On 1 Jan 2027: Sales Development Representative goes from L1 to L3.' });
   expect((await db.query('SELECT count(*) AS n FROM job_changes')).rows[0].n).toBe(3);
 });
+
+test.fails('a country change needs a salary in the new currency', async () => {
+  const { db, change } = await setup();
+  const noSalary = await change({ effectiveDate: '2025-03-01', country: 'DE' });
+  expect(noSalary.status).toBe(400);
+  expect(noSalary.body.fields).toEqual({ salary: 'Moving to another country needs a salary in the new currency.' });
+  expect((await change({ effectiveDate: '2025-03-01', country: 'DE', salary: 80000 })).status).toBe(201);
+  expect(await stateOn(db, '2025-03-01')).toMatchObject({ country: 'DE', salary: 80000, currency: 'EUR' });
+  expect((await change({ effectiveDate: '2026-01-01', salary: 84000 })).status).toBe(201);
+  expect(await stateOn(db, '2026-01-01')).toMatchObject({ country: 'DE', salary: 84000, currency: 'EUR' });
+});
