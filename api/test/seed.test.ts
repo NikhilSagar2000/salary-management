@@ -1,3 +1,4 @@
+import { CURRENCY } from '@acme/shared';
 import type pg from 'pg';
 import { beforeAll, expect, test } from 'vitest';
 import { generateSeed, SEED_ANCHOR, type Seed } from '../src/seed/generate.ts';
@@ -152,4 +153,35 @@ test('about 30 listed outliers and nobody else beyond the limits', async () => {
   expect(rows.filter((r) => outliers.has(r.code))).toHaveLength(outliers.size); // every outlier is employed at the anchor
   expect(high).toBeGreaterThan(5);
   expect(outliers.size - high).toBeGreaterThan(5);
+});
+
+test.fails('every person starts with a hire change; raises, promotions, relocations with new-currency salaries and leavers exist', () => {
+  const byCode = new Map<string, typeof seed.changes>();
+  for (const c of seed.changes) byCode.set(c.code, [...(byCode.get(c.code) ?? []), c]);
+  let raises = 0, promotions = 0, relocations = 0;
+  for (const e of seed.employees) {
+    const changes = byCode.get(e.code)!;
+    const [hire, ...rest] = changes;
+    expect(hire!.effectiveDate, e.code).toBe(e.hireDate);
+    expect([hire!.country, hire!.department, hire!.role, hire!.level, hire!.salary, hire!.currency].every((v) => v !== null), e.code).toBe(true);
+    expect(changes.every((c, i) => i === 0 || c.effectiveDate >= changes[i - 1]!.effectiveDate), e.code).toBe(true);
+    if (e.leaveDate) expect(changes.every((c) => c.effectiveDate <= e.leaveDate!), e.code).toBe(true);
+    for (const c of rest) {
+      if (c.country) {
+        relocations++;
+        expect(c.salary, e.code).not.toBeNull();
+        expect(c.currency, e.code).toBe(CURRENCY[c.country]);
+      } else if (c.level) promotions++;
+      else if (c.salary) raises++;
+    }
+  }
+  expect(raises).toBeGreaterThan(10_000);
+  expect(promotions).toBeGreaterThan(1_000);
+  expect(relocations).toBeGreaterThanOrEqual(50);
+  expect(relocations).toBeLessThanOrEqual(200);
+  const leavers = seed.employees.filter((e) => e.leaveDate);
+  expect(leavers.length).toBeGreaterThan(800);
+  expect(leavers.length).toBeLessThan(1600);
+  const left = new Map(seed.leaveEvents.filter((ev) => ev.kind === 'left').map((ev) => [ev.code, ev.leaveDate]));
+  for (const e of leavers) expect(left.get(e.code), e.code).toBe(e.leaveDate);
 });

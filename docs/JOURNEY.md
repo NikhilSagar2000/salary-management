@@ -366,6 +366,7 @@ is done (hashes copied from `git log`).
 - Task 13 · test: within the same country, role and level, women's pay sits below men's by roughly the country's gap from D61 (within 3 points) (SEED-7). Passed first run; removing the gap made it fail.
 - Task 13 · red: about 30 listed outliers, nobody else beyond the limits (SEED-8).
 - Task 13 · green: the seed keeps everyone within 0.6–1.7× their peer median, then pays 30 people from peer groups of 20+ far from it (half above 2×, half below 0.5×) and lists their codes (SEED-8).
+- Task 13 · red: realistic history — hire change first, raises, promotions, relocations with new-currency salaries, leavers with leave events (SEED-9).
 
 ---
 
