@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { runTool } from '../src/assistant/tools.ts';
+import { runTool, TOOLS } from '../src/assistant/tools.ts';
 import { readOnlyTx } from '../src/db.ts';
 import { code, insertPeople, testApp } from './helpers.ts';
 
@@ -158,4 +158,25 @@ test('tool queries run in a read-only transaction', async () => {
   await runTool(spy, TODAY, 'query_employees', {});
   expect(seen[0]).toBe('client: BEGIN READ ONLY');
   expect(seen.some((s) => s.startsWith('pool:'))).toBe(false);
+});
+
+test.fails('no tool parameter accepts SQL or free-form expressions', () => {
+  expect(TOOLS.map((t) => t.function.name).sort()).toEqual(['aggregate', 'get_employee', 'query_changes', 'query_employees']);
+  const loose: string[] = [];
+  const walk = (schema: Record<string, unknown>, path: string) => {
+    if (schema.type === 'object') {
+      if (schema.additionalProperties !== false) loose.push(`${path} allows unknown keys`);
+      for (const [k, v] of Object.entries((schema.properties ?? {}) as Record<string, Record<string, unknown>>)) walk(v, `${path}.${k}`);
+    }
+    if (schema.type === 'array') walk(schema.items as Record<string, unknown>, `${path}[]`);
+    if (schema.type === 'string' && !schema.enum && !schema.pattern) {
+      // The only free text: a search phrase, used as a literal LIKE value (wildcards escaped), length-limited.
+      if (!(path.endsWith('.search') && (schema.maxLength as number) <= 100)) loose.push(`${path} is free text`);
+    }
+  };
+  for (const t of TOOLS) {
+    expect(t.function.description.length).toBeGreaterThan(40);
+    walk(t.function.parameters as Record<string, unknown>, t.function.name);
+  }
+  expect(loose).toEqual([]);
 });

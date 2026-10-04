@@ -280,3 +280,6 @@ export async function runTool(db: pg.Pool, today: string, name: string, args: un
   return readOnlyTx(db, (tx) => (tool.run as (db: Db, today: string, args: unknown) => Promise<ToolResult>)(tx, today, parsed.data));
 }
 
+
+export type ToolSpec = { type: 'function'; function: { name: string; description: string; parameters: unknown } };
+export const TOOLS: ToolSpec[] = [];
