@@ -21,7 +21,7 @@ const upload = async () => userEvent.upload(await screen.findByLabelText('CSV fi
 const tableRows = (name: string) =>
   within(screen.getByRole('table', { name })).getAllByRole('row').slice(1).map((r) => within(r).getAllByRole('cell').map((c) => c.textContent));
 
-test.fails('preview shows rows and problems by row and column', async () => {
+test('preview shows rows and problems by row and column', async () => {
   const calls = start({
     'POST /api/imports/preview': () => ({
       status: 200,
@@ -52,7 +52,7 @@ test.fails('preview shows rows and problems by row and column', async () => {
   expect(calls.some((c) => c.url.pathname === '/api/imports')).toBe(false);
 });
 
-test.fails('Import is enabled only with no problems and shows the result', async () => {
+test('Import is enabled only with no problems and shows the result', async () => {
   let taken = true; // someone uses E010001 between the preview and the import
   const calls = start({
     'POST /api/imports/preview': () => ({ status: 200, body: { rows: [row('E010001', 'Lucas', 2), row('E010002', 'Rafael', 3)], problems: [] } }),

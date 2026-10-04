@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from 'react-router';
 import { AddEmployee } from './pages/AddEmployee.tsx';
 import { EmployeeDetail } from './pages/EmployeeDetail.tsx';
 import { EmployeeList } from './pages/EmployeeList.tsx';
+import { Import } from './pages/Import.tsx';
 import { PayOverview } from './pages/PayOverview.tsx';
 import { Layout } from './shell/Layout.tsx';
 import { RequireSession } from './shell/RequireSession.tsx';
@@ -25,7 +26,7 @@ export function App({ env }: { env?: 'default' | 'test' }) {
           <Route path="/employees/:code" element={<EmployeeDetail />} />
           <Route path="/pay" element={<PayOverview />} />
           <Route path="/assistant" element={<Page title="Assistant" />} />
-          <Route path="/import" element={<Page title="Import" />} />
+          <Route path="/import" element={<Import />} />
         </Route>
       </Routes>
     </MantineProvider>
