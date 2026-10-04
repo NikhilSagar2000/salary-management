@@ -1,5 +1,6 @@
 import { expect, test } from 'vitest';
 import { runTool } from '../src/assistant/tools.ts';
+import { readOnlyTx } from '../src/db.ts';
 import { code, insertPeople, testApp } from './helpers.ts';
 
 const TODAY = '2026-10-01';
@@ -138,4 +139,23 @@ test('bad arguments and unknown tools return an error result', async () => {
   expect(((await tool('aggregate', 'not an object')).result as { error: string }).error).toBeTypeOf('string');
   expect(((await tool('get_employee', { code: 'E1; DROP TABLE employees' })).result as { error: string }).error).toMatch(/code/);
   expect(((await tool('query_employees', { filters: { sql: 'SELECT 1' } })).result as { error: string }).error).toMatch(/sql/);
+});
+
+test.fails('tool queries run in a read-only transaction', async () => {
+  const { db } = await setup([{ code: 'E000001' }]);
+  await expect(readOnlyTx(db, (tx) => tx.query("INSERT INTO sessions VALUES ('x', now())"))).rejects.toThrow(/read-only transaction/);
+
+  // Every statement a tool sends goes through one client that began a read-only transaction.
+  const seen: string[] = [];
+  const spy = Object.create(db) as typeof db;
+  spy.query = (async (...a: Parameters<typeof db.query>) => { seen.push(`pool: ${String(a[0])}`); return db.query(...a); }) as typeof db.query;
+  spy.connect = (async () => {
+    const client = await db.connect();
+    const query = client.query.bind(client);
+    client.query = ((...a: Parameters<typeof client.query>) => { seen.push(`client: ${String(a[0]).slice(0, 20)}`); return query(...a); }) as typeof client.query;
+    return client;
+  }) as typeof db.connect;
+  await runTool(spy, TODAY, 'query_employees', {});
+  expect(seen[0]).toBe('client: BEGIN READ ONLY');
+  expect(seen.some((s) => s.startsWith('pool:'))).toBe(false);
 });

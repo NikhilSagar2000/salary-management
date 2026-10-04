@@ -26,3 +26,7 @@ export async function withTx<T>(db: pg.Pool, fn: (client: pg.PoolClient) => Prom
     client.release();
   }
 }
+
+export async function readOnlyTx<T>(_db: pg.Pool, _fn: (client: pg.PoolClient) => Promise<T>): Promise<T> {
+  throw new Error('not implemented');
+}
