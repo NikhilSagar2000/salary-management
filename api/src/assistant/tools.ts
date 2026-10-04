@@ -1,6 +1,7 @@
 // The pay assistant's tools (AST-4, AST-5): read-only, typed arguments, no SQL from the model.
 import { COUNTRIES, COUNTRY_NAMES, CURRENCY, DEPARTMENTS, formatMoney, GENDERS, MSG, ROLE_NAMES, SORTS, STATUSES, type Country } from '@acme/shared';
 import type pg from 'pg';
+import { readOnlyTx, type Db } from '../db.ts';
 import { z } from 'zod';
 import { employeeDetail } from '../employees/detail.ts';
 import { listFilter, STATUS_SQL, type Filters } from '../employees/list.ts';
@@ -83,7 +84,7 @@ export function listQueryOf(f: ToolFilters): string {
 
 const salaryNeedsOneCountry = (f: ToolFilters) => (f.salaryMin !== undefined || f.salaryMax !== undefined) && f.country?.length !== 1;
 
-async function queryEmployees(db: pg.Pool, today: string, args: z.infer<typeof queryEmployeesSchema>): Promise<ToolResult> {
+async function queryEmployees(db: Db, today: string, args: z.infer<typeof queryEmployeesSchema>): Promise<ToolResult> {
   const f = args.filters;
   if (salaryNeedsOneCountry(f) || (args.sort === 'salary' && f.country?.length !== 1)) {
     return { result: { error: 'Salary filters and salary sorting need exactly one country, because salaries are in different currencies.' }, sources: [] };
@@ -108,7 +109,7 @@ async function queryEmployees(db: pg.Pool, today: string, args: z.infer<typeof q
 
 const getEmployeeSchema = z.object({ code }).strict();
 
-async function getEmployee(db: pg.Pool, today: string, args: z.infer<typeof getEmployeeSchema>): Promise<ToolResult> {
+async function getEmployee(db: Db, today: string, args: z.infer<typeof getEmployeeSchema>): Promise<ToolResult> {
   const detail = await employeeDetail(db, args.code, today);
   if (!detail) return { result: { error: MSG.noEmployee(args.code) }, sources: [] };
   return { result: detail, sources: [{ kind: 'person', code: detail.code, name: `${detail.firstName} ${detail.lastName}` }] };
@@ -133,7 +134,7 @@ const queryChangesSchema = z
 type Money = { amount: number; currency: string };
 const FIELDS = ['country', 'department', 'role', 'level'] as const;
 
-async function queryChanges(db: pg.Pool, today: string, args: z.infer<typeof queryChangesSchema>): Promise<ToolResult> {
+async function queryChanges(db: Db, today: string, args: z.infer<typeof queryChangesSchema>): Promise<ToolResult> {
   const f = args.filters;
   if (salaryNeedsOneCountry(f)) return { result: { error: 'Salary filters need exactly one country.' }, sources: [] };
   const { params, fromWhere } = listFilter(toFilters(f), today);
@@ -212,7 +213,7 @@ const aggregateSchema = z
 const MAX_GROUPS = 500;
 const PCT = (expr: string) => `round(${expr}::numeric, 1)::float`;
 
-async function aggregate(db: pg.Pool, today: string, args: z.infer<typeof aggregateSchema>): Promise<ToolResult> {
+async function aggregate(db: Db, today: string, args: z.infer<typeof aggregateSchema>): Promise<ToolResult> {
   const f = args.filters;
   if (salaryNeedsOneCountry(f)) return { result: { error: 'Salary filters need exactly one country.' }, sources: [] };
   const asOf = args.metric === 'raise_pct' ? today : (args.asOf ?? today);
@@ -276,6 +277,6 @@ export async function runTool(db: pg.Pool, today: string, name: string, args: un
   const tool = TOOLS_BY_NAME[name as keyof typeof TOOLS_BY_NAME];
   const parsed = tool.schema.safeParse(args);
   if (!parsed.success) return { result: { error: z.prettifyError(parsed.error) }, sources: [] };
-  return (tool.run as (db: pg.Pool, today: string, args: unknown) => Promise<ToolResult>)(db, today, parsed.data);
+  return readOnlyTx(db, (tx) => (tool.run as (db: Db, today: string, args: unknown) => Promise<ToolResult>)(tx, today, parsed.data));
 }
 

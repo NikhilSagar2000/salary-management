@@ -406,6 +406,7 @@ is done (hashes copied from `git log`).
 - Task 16 · red: bad arguments and unknown tool names come back as error results, not crashes (AST-5).
 - Task 16 · green: an unknown tool name or bad arguments come back to the model as a readable error (`z.prettifyError`), never a crash; unknown keys such as `sql` are refused (AST-5).
 - Task 16 · red: tool queries run in a read-only transaction (AST-5).
+- Task 16 · green: `readOnlyTx` (BEGIN READ ONLY … ROLLBACK); every tool call runs on one read-only client, so Postgres refuses any write (AST-5).
 
 ---
 

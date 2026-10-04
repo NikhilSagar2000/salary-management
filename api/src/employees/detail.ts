@@ -1,5 +1,5 @@
 import type { Status } from '@acme/shared';
-import type pg from 'pg';
+import type { Db } from '../db.ts';
 import { peerStats } from '../stats/peers.ts';
 
 export function statusOn(today: string, hireDate: string, leaveDate: string | null): Status {
@@ -9,7 +9,7 @@ export function statusOn(today: string, hireDate: string, leaveDate: string | nu
 }
 
 /** Everything the employee page shows, or null when the code is unknown. */
-export async function employeeDetail(db: pg.Pool, code: string, today: string) {
+export async function employeeDetail(db: Db, code: string, today: string) {
   const { rows } = await db.query('SELECT * FROM employees WHERE code = $1', [code]);
   const e = rows[0];
   if (!e) return null;
@@ -55,7 +55,7 @@ type Person = { code: string; name: string };
 type Value = string | number | Money | Person | null;
 
 /** Changes (with from → to against the changes that apply before them) and leave events, in date order. */
-async function timeline(db: pg.Pool, employeeId: number, today: string, leaveDate: string | null) {
+async function timeline(db: Db, employeeId: number, today: string, leaveDate: string | null) {
   const { rows: changes } = await db.query(
     `SELECT c.*, m.code AS manager_code, m.first_name || ' ' || m.last_name AS manager_name
      FROM job_changes c LEFT JOIN employees m ON m.id = c.manager_id

@@ -141,7 +141,7 @@ test('bad arguments and unknown tools return an error result', async () => {
   expect(((await tool('query_employees', { filters: { sql: 'SELECT 1' } })).result as { error: string }).error).toMatch(/sql/);
 });
 
-test.fails('tool queries run in a read-only transaction', async () => {
+test('tool queries run in a read-only transaction', async () => {
   const { db } = await setup([{ code: 'E000001' }]);
   await expect(readOnlyTx(db, (tx) => tx.query("INSERT INTO sessions VALUES ('x', now())"))).rejects.toThrow(/read-only transaction/);
 

@@ -27,6 +27,17 @@ export async function withTx<T>(db: pg.Pool, fn: (client: pg.PoolClient) => Prom
   }
 }
 
-export async function readOnlyTx<T>(_db: pg.Pool, _fn: (client: pg.PoolClient) => Promise<T>): Promise<T> {
-  throw new Error('not implemented');
+/** Anything that can run a query: the pool or one client inside a transaction. */
+export type Db = Pick<pg.Pool, 'query'>;
+
+/** Runs `fn` in a READ ONLY transaction (rolled back at the end): Postgres refuses any write inside it. */
+export async function readOnlyTx<T>(db: pg.Pool, fn: (client: pg.PoolClient) => Promise<T>): Promise<T> {
+  const client = await db.connect();
+  try {
+    await client.query('BEGIN READ ONLY');
+    return await fn(client);
+  } finally {
+    await client.query('ROLLBACK').catch(() => {});
+    client.release();
+  }
 }
