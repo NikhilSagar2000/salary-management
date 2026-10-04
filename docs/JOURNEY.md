@@ -268,6 +268,7 @@ is done (hashes copied from `git log`).
 - Task 3 · green: one error handler answers 400 "The request couldn't be read…" for unreadable bodies and a plain 500 otherwise; details only in the server log.
 - Task 3 · red: `hash-password` script test.
 - Task 3 · green: `npm run hash-password` reads a password from stdin and prints the `APP_PASSWORD_HASH` value.
+- Task 4 · red: identity guard test (EMP-5).
 
 ---
 

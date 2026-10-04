@@ -446,3 +446,20 @@ SHA-256 and expiry, so no signing secret is needed. Lockout counts live in memor
   a negative property, so no red commit; proven by a mutation check (temporarily leak the
   hash, watch it fail, revert).
 - [x] Task check: `npm test`, `npm run typecheck`.
+
+### Task 4: Employee tables and history guards
+
+Files: `api/db/migrations/002_employees.sql`, `api/test/db.test.ts`.
+Tables: `employees` (identity + personal fields, `version`), `job_changes` (dated changes
+holding only what they change; `manager_set` marks a change that sets the manager, so "no
+manager" is expressible; `currency` must match `country` when both are set; country needs a
+salary; `cancelled_at`), `leave_events` (left / undone). Triggers: code and hire date never
+change; employees, job changes and leave events are never deleted; a job change's fields never
+change, and `cancelled_at` can be set once.
+
+- [ ] Step 1: `db.test.ts` › "database refuses changing code or hire date" (EMP-5): updating
+  either raises "The employee code and hire date can't be changed."; updating a name works.
+- [ ] Step 2: `db.test.ts` › "database refuses UPDATE of change fields and any DELETE of
+  history" (EMP-12): updating a change's salary, deleting a change, deleting an employee,
+  updating or deleting a leave event all fail; setting `cancelled_at` once works, twice fails.
+- [ ] Task check: `npm test`, `npm run typecheck`.
