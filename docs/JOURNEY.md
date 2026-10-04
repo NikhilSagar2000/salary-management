@@ -478,6 +478,7 @@ is done (hashes copied from `git log`).
 - Task 20 · green: Sign out in the header ends the session and returns to sign-in. Web build checked (`vite build`).
 - Task 21 · red: on the list, salary controls are disabled with the reason unless one country is chosen (LIST-5).
 - Task 21 · green: employee list page — search, multi-select filters, salary range only for one country (with the reason shown otherwise), sortable headers, paging and page size, export and add buttons; the URL query is the API query (LIST-5).
+- Task 21 · test: list state round-trips through the URL — search (debounced), filters, sort direction and page are read from it, written to it and sent to the API unchanged (LIST-6). Passed first run; a mutation that never sorts descending failed it. Web tests now allow 15 s each.
 
 ---
 
