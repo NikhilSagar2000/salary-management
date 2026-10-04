@@ -17,6 +17,8 @@ export const MSG = {
   salaryTooLarge: 'That salary is too large. The most allowed is 10,000,000,000.',
   roleNotInDepartment: (role: string, department: string) => `${role} isn't a role in ${department}.`,
   fixFields: 'Some fields need fixing.',
+  chatTitle: 'A chat name needs 1 to 80 characters.',
+  noChat: "That chat doesn't exist. It may have been deleted.",
   importTooLarge: 'The file is larger than 5 MB. Split it into smaller files and import each one.',
   importTooManyRows: (n: number) => `The file has ${n.toLocaleString('en-US')} rows; one import can take at most 10,000. Split it into smaller files.`,
   importUnclosedQuote: (line: number) => `The file couldn't be read: a quote opened on line ${line} is never closed.`,

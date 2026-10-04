@@ -428,6 +428,7 @@ is done (hashes copied from `git log`).
 - Task 17 · red: free model requests left today, read from OpenRouter's key info (AST-16).
 - Task 17 · green: `freeRequestsLeft` reads `free_model_daily_requests.remaining` from OpenRouter's GET /key, or null when unknown (AST-16).
 - Task 18 · red: chats can be created, listed newest first, renamed (1–80 characters) and deleted (AST-1); the app now takes the model and OpenRouter settings as dependencies.
+- Task 18 · green: chats — create ("New chat"), list newest first, open, rename (1–80 characters, plain message) and delete with their messages (AST-1).
 
 ---
 

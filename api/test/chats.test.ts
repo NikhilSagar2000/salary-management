@@ -1,7 +1,7 @@
 import { expect, test } from 'vitest';
 import { signIn, testApp } from './helpers.ts';
 
-test.fails('creates, lists newest first, renames (1–80 characters) and deletes chats', async () => {
+test('creates, lists newest first, renames (1–80 characters) and deletes chats', async () => {
   const { app, clock } = await testApp();
   const agent = await signIn(app);
   const first = await agent.post('/api/chats').send({});

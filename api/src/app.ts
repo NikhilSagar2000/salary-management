@@ -5,6 +5,7 @@ import { authRoutes, requireSession } from './auth/routes.ts';
 import { deleteSession, SESSION_COOKIE, sessionToken } from './auth/sessions.ts';
 import type { ErrorRequestHandler } from 'express';
 import type { ModelFn } from './assistant/model.ts';
+import { assistantRoutes } from './assistant/routes.ts';
 import { requestTimezone, todayIn, type Clock } from './clock.ts';
 import { employeeRoutes } from './employees/routes.ts';
 import { FieldProblem, sendFieldErrors } from './http.ts';
@@ -39,6 +40,7 @@ export function createApp(deps: { db: pg.Pool; clock: Clock; config: Config; mod
   app.use(employeeRoutes(deps));
   app.use(statsRoutes(deps));
   app.use(importRoutes(deps));
+  app.use(assistantRoutes(deps));
   app.use('/api', (_req, res) => {
     res.status(404).json({ error: 'Not found.' });
   });

@@ -167,3 +167,8 @@ export type ListQuery = z.infer<typeof listQuerySchema>;
 
 /** Pay overview query: one country at a time. */
 export const overviewQuerySchema = z.object({ country: z.enum(COUNTRIES, { error: MSG.country }) });
+
+/** Renaming a chat (AST-1). */
+export const chatTitleSchema = z.object({
+  title: z.string({ error: MSG.chatTitle }).trim().min(1, { error: MSG.chatTitle }).max(80, { error: MSG.chatTitle }),
+});
