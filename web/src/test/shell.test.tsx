@@ -3,6 +3,7 @@ import { userEvent } from '@testing-library/user-event';
 import { expect, test } from 'vitest';
 import { fakeApi } from './fakeApi.ts';
 import { renderApp } from './render.tsx';
+import { setPrefersDark } from './setup.ts';
 
 test('signed-out visit goes to sign-in and returns afterwards', async () => {
   let signedIn = false;
@@ -27,4 +28,23 @@ test('signed-out visit goes to sign-in and returns afterwards', async () => {
   await userEvent.type(password, 'right one{Enter}');
   expect(await screen.findByRole('heading', { name: 'Pay overview' })).toBeInTheDocument();
   expect(screen.getByTestId('location')).toHaveTextContent('/pay?country=DE');
+});
+
+const signedIn = () => fakeApi({ 'GET /api/session': () => ({ status: 200, body: { signedIn: true } }) });
+const scheme = () => document.documentElement.getAttribute('data-mantine-color-scheme');
+
+test.fails('theme follows the device and the toggle is remembered', async () => {
+  signedIn();
+  setPrefersDark(true);
+  const first = renderApp('/employees');
+  await screen.findByRole('heading', { name: 'Employees' });
+  expect(scheme()).toBe('dark');
+  await userEvent.click(screen.getByRole('button', { name: 'Switch to light theme' }));
+  expect(scheme()).toBe('light');
+  first.unmount();
+
+  renderApp('/employees'); // the device still prefers dark, the choice is remembered
+  await screen.findByRole('heading', { name: 'Employees' });
+  expect(scheme()).toBe('light');
+  expect(screen.getByRole('button', { name: 'Switch to dark theme' })).toBeInTheDocument();
 });

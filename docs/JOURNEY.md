@@ -467,6 +467,7 @@ is done (hashes copied from `git log`).
 - Task 20 · chore: `web` workspace — Vite on 4731 (proxy `/api` to 4732), React 19, Mantine 9 (teal accent, "sm" radius, system fonts, light/dark from the device), Tabler icons, Vitest with jsdom and Testing Library; root `npm test` type-checks and runs it.
 - Task 20 · red: a signed-out visit goes to sign-in and returns to the page asked for (AUTH-5); fake fetch and app render helpers; web uses bundler module resolution.
 - Task 20 · green: app shell with routes, a session guard that sends signed-out visits to `/signin?next=…` and back afterwards, the sign-in page, a sidebar layout with a skip link, and an `api()` client that turns failures into plain messages (AUTH-5).
+- Task 20 · red: the theme follows the device and a remembered toggle overrides it (UI-1).
 
 ---
 
