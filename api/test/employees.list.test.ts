@@ -49,3 +49,18 @@ test('names with apostrophes and hyphens are found', async () => {
   expect(codes(await list('?q=%25'))).toEqual([]); // a typed % is literal, not "anything"
   expect(codes(await list('?q=_'))).toEqual(['E000003']);
 });
+
+test.fails('filters combine with AND across fields and OR within one', async () => {
+  const { list } = await setup([
+    { code: 'E000001', country: 'US', department: 'Engineering', level: 3, gender: 'female' },
+    { code: 'E000002', country: 'US', department: 'Sales', role: 'Account Executive', level: 3, gender: 'male' },
+    { code: 'E000003', country: 'IN', department: 'Engineering', level: 4, gender: 'female' },
+    { code: 'E000004', country: 'GB', department: 'Engineering', level: 3, gender: 'non_binary' },
+  ]);
+  const sorted = async (q: string) => codes(await list(q)).sort();
+  expect(await sorted('?country=US,IN')).toEqual(['E000001', 'E000002', 'E000003']);
+  expect(await sorted('?country=US&department=Engineering')).toEqual(['E000001']);
+  expect(await sorted('?level=3,4&gender=female')).toEqual(['E000001', 'E000003']);
+  expect(await sorted('?role=Account%20Executive')).toEqual(['E000002']);
+  expect(await sorted('?gender=non_binary&country=GB,US')).toEqual(['E000004']);
+});
