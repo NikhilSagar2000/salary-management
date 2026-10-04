@@ -1,5 +1,6 @@
 import { MantineProvider, Title } from '@mantine/core';
 import { Navigate, Route, Routes } from 'react-router';
+import { AddEmployee } from './pages/AddEmployee.tsx';
 import { EmployeeDetail } from './pages/EmployeeDetail.tsx';
 import { EmployeeList } from './pages/EmployeeList.tsx';
 import { Layout } from './shell/Layout.tsx';
@@ -19,6 +20,7 @@ export function App({ env }: { env?: 'default' | 'test' }) {
         <Route element={<RequireSession><Layout /></RequireSession>}>
           <Route index element={<Navigate replace to="/employees" />} />
           <Route path="/employees" element={<EmployeeList />} />
+          <Route path="/employees/new" element={<AddEmployee />} />
           <Route path="/employees/:code" element={<EmployeeDetail />} />
           <Route path="/pay" element={<Page title="Pay overview" />} />
           <Route path="/assistant" element={<Page title="Assistant" />} />

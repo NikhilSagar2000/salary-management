@@ -1,8 +1,9 @@
-import { employeeDetailsSchema, GENDERS } from '@acme/shared';
+import { employeeDetailsSchema } from '@acme/shared';
 import { Alert, Button, Group, Select, Stack, TextInput } from '@mantine/core';
 import { useState, type FormEvent } from 'react';
 import { api } from '../../api.ts';
 import { issuesToFields, useFormErrors } from '../../forms.ts';
+import { GENDER_OPTIONS } from './choices.ts';
 import type { Detail } from './types.ts';
 
 /** EMP-6: name, gender and work email are edited in place. */
@@ -28,7 +29,7 @@ export function DetailsForm({ detail, onSaved, onReload }: { detail: Detail; onS
         <FormAlert error={form.formError} onReload={() => { form.clearFormError(); onReload(); }} />
         <TextInput label="First name" value={values.firstName} onChange={(e) => set('firstName')(e.currentTarget.value)} error={form.fields.firstName} />
         <TextInput label="Last name" value={values.lastName} onChange={(e) => set('lastName')(e.currentTarget.value)} error={form.fields.lastName} />
-        <Select label="Gender" data={GENDERS.map((g) => ({ value: g, label: g === 'non_binary' ? 'Non-binary' : g[0]!.toUpperCase() + g.slice(1) }))}
+        <Select label="Gender" data={GENDER_OPTIONS}
           value={values.gender} onChange={(v) => set('gender')(v ?? '')} error={form.fields.gender} allowDeselect={false} />
         <TextInput label="Work email" type="email" value={values.workEmail} onChange={(e) => set('workEmail')(e.currentTarget.value)} error={form.fields.workEmail} />
         <Group justify="flex-end">

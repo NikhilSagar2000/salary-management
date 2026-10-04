@@ -1,8 +1,9 @@
-import { COUNTRIES, COUNTRY_NAMES, CURRENCY, DEPARTMENTS, jobChangeSchema, LEVELS, ROLES, type Country } from '@acme/shared';
+import { CURRENCY, DEPARTMENTS, jobChangeSchema, LEVELS, type Country } from '@acme/shared';
 import { Alert, Button, Group, NumberInput, Select, SimpleGrid, Stack, Text, Textarea, TextInput } from '@mantine/core';
 import { useState, type FormEvent } from 'react';
 import { api } from '../../api.ts';
 import { issuesToFields, useFormErrors } from '../../forms.ts';
+import { COUNTRY_OPTIONS, roleChoices } from './choices.ts';
 import { FormAlert } from './DetailsForm.tsx';
 import type { Detail } from './types.ts';
 
@@ -15,7 +16,6 @@ export function JobChangeForm({ detail, onSaved, onReload }: { detail: Detail; o
   });
   const form = useFormErrors();
   const set = (key: keyof typeof v) => (value: string | number | null) => setV((s) => ({ ...s, [key]: value ?? '' }));
-  const roles = Object.entries(ROLES).filter(([, r]) => r.department === v.department).map(([name]) => name);
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
@@ -41,11 +41,11 @@ export function JobChangeForm({ detail, onSaved, onReload }: { detail: Detail; o
         <TextInput type="date" label="Effective date" description="Today, a past date, or a future date for a scheduled change"
           value={v.effectiveDate} onChange={(e) => set('effectiveDate')(e.currentTarget.value)} error={form.fields.effectiveDate} />
         <SimpleGrid cols={{ base: 1, sm: 2 }}>
-          <Select label="Country" data={COUNTRIES.map((c) => ({ value: c, label: COUNTRY_NAMES[c] }))} value={v.country}
+          <Select label="Country" data={COUNTRY_OPTIONS} value={v.country}
             onChange={set('country')} error={form.fields.country} allowDeselect={false} />
           <Select label="Department" data={[...DEPARTMENTS]} value={v.department} allowDeselect={false} error={form.fields.department}
             onChange={(d) => setV((s) => ({ ...s, department: d ?? s.department, role: '' }))} />
-          <Select label="Role" data={roles} value={v.role || null} onChange={set('role')} error={form.fields.role} allowDeselect={false} />
+          <Select label="Role" data={roleChoices(v.department)} value={v.role || null} onChange={set('role')} error={form.fields.role} allowDeselect={false} />
           <Select label="Level" data={LEVELS.map((l) => ({ value: String(l), label: `L${l}` }))} value={v.level}
             onChange={set('level')} error={form.fields.level} allowDeselect={false} />
           <NumberInput label="Salary" description={`Annual base, in ${CURRENCY[v.country as Country]}`} thousandSeparator="," allowDecimal={false}

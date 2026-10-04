@@ -506,6 +506,7 @@ is done (hashes copied from `git log`).
 - Visual check in Chrome (seeded data, dark and light, 1568 px and 390 px): list and employee page render correctly; found the phone filters filling the first screen and the skip link peeking at the top. Red: on a phone the filters open in a drawer (LIST-10).
 - Green: on a phone, Search stays on screen beside a Filters (n) button and the other filters open in a bottom drawer; desktop layout unchanged (LIST-10). The skip link is now fully hidden until focused. Rechecked in Chrome at 390 px and 1280 px.
 - Task 23 · red: Add employee page: pre-fills the suggested code, editable (EMP-1); role choices follow the department, level choices follow the role (EMP-2); each field's message shows next to it and the first invalid field gets focus (EMP-3, A11Y-3).
+- Task 23 · green: Add employee page: the code is pre-filled from the next free code and can be changed; roles follow the department and levels follow the role, and a choice that no longer fits clears; the shared rules check every field before sending and the server's messages (such as a used code) land on their fields (EMP-1, EMP-2, EMP-3). The role, level, gender and country choice lists are now shared with the change forms. The red test's last check was loosened to 'contains', because the code field also carries help text.
 
 ---
 

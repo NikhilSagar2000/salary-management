@@ -43,7 +43,7 @@ const fillValid = async () => {
   await userEvent.type(screen.getByLabelText('Salary'), '80000');
 };
 
-test.fails('pre-fills the suggested code, editable', async () => {
+test('pre-fills the suggested code, editable', async () => {
   const calls = start({ 'POST /api/employees': () => ({ status: 201, body: { code: 'E010050', version: 1 } }) });
   expect(await screen.findByRole('heading', { name: 'Add employee' })).toBeInTheDocument();
   const code = await suggestedCode();
@@ -60,7 +60,7 @@ test.fails('pre-fills the suggested code, editable', async () => {
   });
 });
 
-test.fails('role choices follow the department, level choices follow the role', async () => {
+test('role choices follow the department, level choices follow the role', async () => {
   start();
   await suggestedCode();
   await pick('Department', 'Sales');
@@ -77,7 +77,7 @@ test.fails('role choices follow the department, level choices follow the role', 
   expect(await options('Role')).toEqual(['Accountant', 'Financial Analyst']);
 });
 
-test.fails("shows each field's message next to it", async () => {
+test("shows each field's message next to it", async () => {
   const calls = start({
     'POST /api/employees': () => ({ status: 400, body: { error: MSG.fixFields, fields: { code: MSG.codeUsed('E010001') } } }),
   });
@@ -103,6 +103,6 @@ test.fails("shows each field's message next to it", async () => {
   await fillValid();
   await userEvent.click(screen.getByRole('button', { name: 'Add employee' }));
   expect(await screen.findByText(MSG.codeUsed('E010001'))).toBeInTheDocument();
-  expect(code).toHaveAccessibleDescription(MSG.codeUsed('E010001'));
+  expect(code).toHaveAccessibleDescription(expect.stringContaining(MSG.codeUsed('E010001')));
   expect(code).toHaveFocus();
 });
