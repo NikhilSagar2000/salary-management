@@ -197,3 +197,12 @@ test('a group links to the list only when the list can show exactly those people
   expect(await query('aggregate', { metric: 'salary', filters: { country: ['US'] }, asOf: '2025-06-01' })).toEqual([null]);
   expect(await query('query_changes', { filters: { country: ['US'] } })).toEqual([null]);
 });
+
+test('an absurd offset is an error for the model, not a failed answer (AST-5)', async () => {
+  const { tool } = await setup([{ code: 'E000001' }]);
+  for (const name of ['query_employees', 'query_changes']) {
+    const res = await tool(name, { offset: 1e308 });
+    expect(res.sources).toEqual([]);
+    expect((res.result as { error: string }).error).toMatch(/offset/);
+  }
+});
