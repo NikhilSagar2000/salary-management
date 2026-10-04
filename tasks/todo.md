@@ -595,3 +595,20 @@ starting), `shared/src/schemas.ts` (`listQuerySchema`, shared with the web URL s
 - [x] Step 9: "rows carry current job, salary with currency, hire date and status" (LIST-8).
 - [x] Step 10: "no matches gives an empty page, not an error" (review focus 5).
 - [x] Task check: `npm test`.
+
+### Task 12: Pay statistics
+
+Files: `api/src/employees/list.ts` (filter builder shared with stats), `api/src/stats/{summary,overview}.ts`,
+`api/src/stats/routes.ts`, `api/test/stats.test.ts`. The list response gains
+`stats: [{ currency, median, min, max, headcount }]` (one per currency, country order) for the
+whole filtered set, counting people per STATS-2 (never starting; left only if the status filter
+includes them). `GET /api/pay-overview?country=US` → `{ country, currency, cells: [{ department,
+level, median, min, max, headcount }] }` for people active or leaving today.
+
+- [ ] Step 1: "list summary gives median, min, max and headcount per currency for the whole filtered set" (LIST-9).
+- [ ] Step 2: "median is percentile_cont rounded half away from zero" (STATS-1).
+- [ ] Step 3: "never combines currencies" (STATS-1).
+- [ ] Step 4: "counts active and leaving, not starting; left only when asked" (STATS-2, LEAVE-6).
+- [ ] Step 5: "overview gives department × level cells for one country" (STATS-3).
+- [ ] Step 6: "a relocated person counts only in their current country" (STATS-4).
+- [ ] Task check: `npm test`.
