@@ -106,3 +106,17 @@ test("shows each field's message next to it", async () => {
   expect(code).toHaveAccessibleDescription(expect.stringContaining(MSG.codeUsed('E010001')));
   expect(code).toHaveFocus();
 });
+
+test.fails('a field loses its message as soon as it is changed', async () => {
+  start();
+  await suggestedCode();
+  await userEvent.click(screen.getByRole('button', { name: 'Add employee' }));
+  const first = screen.getByLabelText('First name');
+  expect(first).toHaveAccessibleDescription(MSG.firstName);
+  await userEvent.type(first, 'L');
+  expect(first).not.toHaveAccessibleDescription(MSG.firstName);
+  expect(first).not.toHaveAttribute('aria-invalid', 'true');
+  expect(screen.getByLabelText('Last name')).toHaveAccessibleDescription(MSG.lastName); // the others stay until fixed
+  await pick('Gender', 'Male');
+  expect(combobox('Gender')).not.toHaveAccessibleDescription(expect.stringContaining(MSG.gender));
+});
