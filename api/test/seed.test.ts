@@ -99,3 +99,25 @@ test('group medians within ±15% of the researched bands', async () => {
     expect(ratio, `${g.country} ${g.role} L${g.level} (n=${g.n})`).toBeLessThan(1.15);
   }
 });
+
+test("women's median below men's by the country's gap", async () => {
+  const { rows } = await db.query(
+    `SELECT s.country, s.role, s.department, s.level, s.salary, e.gender
+     FROM employee_state($1) s JOIN employees e ON e.id = s.employee_id
+     WHERE e.hire_date <= $1 AND (e.leave_date IS NULL OR e.leave_date > $1) AND e.code <> ALL($2)`,
+    [SEED_ANCHOR, seed.outliers],
+  );
+  const median = (xs: number[]) => {
+    const s = [...xs].sort((a, b) => a - b);
+    const m = s.length / 2;
+    return s.length % 2 ? s[Math.floor(m)]! : (s[m - 1]! + s[m]!) / 2;
+  };
+  const gaps: Record<string, number> = { US: 0.01, IN: 0.08, GB: 0.04, DE: 0.06, BR: 0.06, JP: 0.12 }; // D61
+  for (const country of Object.keys(gaps)) {
+    const people = rows.filter((r) => r.country === country);
+    const relative = (g: string) => median(people.filter((r) => r.gender === g).map((r) => r.salary / band(r.country, r.role, r.department, r.level)));
+    const ratio = relative('female') / relative('male');
+    expect(ratio, country).toBeLessThan(1);
+    expect(Math.abs(ratio - (1 - gaps[country]!)), `${country}: ratio ${ratio.toFixed(3)}`).toBeLessThan(0.03);
+  }
+});
