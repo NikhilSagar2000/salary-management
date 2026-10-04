@@ -25,18 +25,18 @@ JPY/INR amounts, loading, empty and error states, reload, and Back.
 | # | Screen | What to check | Result | Notes |
 |---|---|---|---|---|
 | S1 | Sign-in | pass | Dark (device) at 1440: layout fine; wrong password → "That password isn't right."; Enter submits (once Chrome's own password pop-up is closed, it eats the first Enter); next kept |
-| S2 | Employee list, desktop | Filters, stats line, table columns, sorting arrows, paging, page size, empty state, loading, a bad URL value's message | | |
-| S3 | Employee list, phone | Cards, Filters (n) button and drawer, no sideways scroll, Export and Add buttons fit | | |
-| S4 | Employee page | Facts, current job and pay, peers line, manager (has-left flag), reports, history newest first, dark mode, long names | | |
+| S2 | Employee list, desktop | pass | Dark and light at desktop: filters, stats lines, sortable headers, paging, empty state with Clear filters, loading skeleton. Found: rows from the previous search stay without any sign while the next loads (about 0.1 s; ruling: leave) |
+| S3 | Employee list, phone | fail → fix queued | Cards, Filters button and drawer, no sideways scroll. Found: the pagination's next arrow wraps to its own line at 390 |
+| S4 | Employee page | fail → fix queued | Desktop and 390: facts, job, peers, reports, history. Found: (1) a leaver's long email overlaps Gender at 390; (2) a leaver shows "Current job" and a peer comparison against today's peers; (3) a past leave reads "Leaves"; (4) an undone leave still reads "Leaves"; (5) a starting person's hire shows Scheduled with a Cancel that the server refuses, and the refusal shows only "Some fields need fixing." |
 | S5 | Edit details dialog | pass | Pre-filled, case-blind email clash message, save, Escape closes |
 | S6 | Change job or pay dialog | pass | Starts from the current job; messages under the right fields; scheduled change and cancel work. Found: level list ignores the role (Add employee filters it) |
 | S7 | Mark as leaving / Undo | Future and past leave dates, header and actions while leaving and after leaving, undo | | |
 | S8 | Add employee | pass | Layout, choices follow each other, messages, success lands on the new page. Found: corrected fields keep their red message until the next submit |
-| S9 | Pay overview | Six countries (widest amounts in JPY and INR), dashes, cell links, phone blocks | | |
-| S10 | Import | Instructions, preview with problems, preview clean, import, result link, phone width | | |
-| S11 | Assistant | New chat, ask, steps and streaming, Based on, Stop, rename, delete, reload mid-answer, phone list/chat, free requests left | | |
-| S12 | Shell | Navigation, active link, burger menu on phone, theme toggle remembered, sign out, skip link | | |
-| S13 | Errors | Server unreachable mid-session (stop the server): every screen says so in plain words | | |
+| S9 | Pay overview | pass | 1440 light: US and JP (widest amounts) fit; 390 dark: one block per department for IN; cell link works |
+| S10 | Import | pass | Instructions, previews, import and result at 1440; 390 dark screenshot fine (the native file button is plain but readable) |
+| S11 | Assistant | fail → fix queued | All flows work. Found: the chat doesn't scroll to a new question or answer (hidden behind the question box); clicking Stop also submits what is in the box |
+| S12 | Shell | pass | Menu with the active page highlighted, theme toggle, sign out; header fits at 390 with the menu button |
+| S13 | Errors | pass | Server stopped: Pay overview, Assistant and Employees each show "Can't reach the server. Check your connection and try again." |
 
 ## Rules
 
@@ -45,7 +45,7 @@ JPY/INR amounts, loading, empty and error states, reload, and Back.
 | TIME-1 | API, browser | Hire someone dated tomorrow-in-Tokyo; read status with `X-Timezone` UTC vs Asia/Tokyo; export link has `tz=` | pass | API: hire dated today in Kiritimati is active there, starting in Pago Pago, UTC rules for unknown/missing zones; export link carries tz= (fixed in phase 5) |
 | AUTH-1 | API | Call each `/api` route group without a cookie | pass | API: 12 routes 401 signed out; health 200 (e2e/qa-api.ts) |
 | AUTH-2 | browser, API | Sign in; read the cookie flags; wrong password | pass | API: cookie HttpOnly, SameSite=Lax, Max-Age 604800, no Secure outside production; browser: wrong password message |
-| AUTH-3 | API | Six wrong passwords in a row (run last: it locks this IP out for 15 min) | 6th answers 429 "Too many tries. Wait 15 minutes and try again." | | |
+| AUTH-3 | API | Six wrong passwords in a row (run last: it locks this IP out for 15 min) | pass | API: wrong passwords 1–5 → 401, 6th → 429 "Too many tries. Wait 15 minutes and try again."; the right password is refused too while locked (the lock is in memory; a restart clears it) |
 | AUTH-4 | browser, API | Sign out; reuse the old cookie | pass | API: old cookie 401 after sign-out; browser: Sign out → sign-in page |
 | AUTH-5 | browser | Open `/pay?country=DE` signed out, sign in | pass | Browser: /pay?country=DE signed out → sign-in → back on Germany's pay overview |
 | AUTH-6 | API, files | Search responses, the server log and the built bundle for the hash, token hashes and key | pass | API: no hash, token, stored token hash or key in 5 responses or the server log; bundle by e2e/secrets.spec.ts |
@@ -58,7 +58,7 @@ JPY/INR amounts, loading, empty and error states, reload, and Back.
 | LIST-7 | browser, API | `pageSize=1000`, `country=XX` | fail → fixed | The page showed "Some fields need fixing." for pageSize=1000; now the message naming the value (e03c66e → f94f725); browser re-check below |
 | LIST-8 | browser | Read a row | pass | Row: code, name, country, department, role, level, salary with currency, hire date, status badge |
 | LIST-9 | browser, SQL | Stats line for a filter; compare a median with SQL | pass | One line per currency above the list; with Left added, leavers counted; Inês (starting) listed, not counted (20 listed, 19 in stats) |
-| LIST-10 | browser | 390 px | Cards, filter drawer, no sideways scroll | | |
+| LIST-10 | browser | 390 px | pass | 390: cards, Filters drawer, no sideways scroll (screenshots + e2e phone.spec) |
 | LIST-11 | tests | `npm run measure:list` (Task 19) | pass | Automated tests pass (see Steps) |
 | EMP-1 | browser | Open Add employee | pass | Pre-filled E090951 (highest + 1 after the QA script's E090950); E000001 → "E000001 is already used."; custom E090960 saved |
 | EMP-2 | browser | Add with every field; currency shown from country | pass | Roles follow department (4 Engineering roles), levels follow role (L5–L7 for Engineering Manager), salary hint shows BRL, "95,000" accepted as 95000, manager optional |
@@ -73,43 +73,43 @@ JPY/INR amounts, loading, empty and error states, reload, and Back.
 | EMP-11 | browser | Schedule a change, cancel it; try to cancel a past change | pass | Scheduled change cancelled → "Cancelled on 5 Oct 2026", struck through; no Cancel on past changes. Found: the hire of a starting person also offers Cancel (see S4) |
 | EMP-12 | SQL, API | `UPDATE`/`DELETE` on job_changes and leave_events; look for edit routes | pass | API: no route (404); SQL: UPDATE/DELETE on job_changes and leave_events refused ("History can't be edited/deleted.") |
 | EMP-13 | browser | Two tabs on one person; save in one, then in the other | pass | Saved from another session, then from the page: the 409 message, typed name kept, Reload, save succeeded |
-| EMP-14 | browser | Person with manager who left, reports, scheduled and cancelled changes | All shown as described | | |
+| EMP-14 | browser | Person with manager who left, reports, scheduled and cancelled changes | fail → fix queued | Current job, peers line, manager, reports, history all shown. Found: for someone who has left, "Current job" and "6% above the median of 23 peers" compare a 2015 salary with today's peers |
 | LEAVE-1 | browser | Leave date before hire date; reason over 500 characters; valid | pass | Before hire → "The leave date can't be before the hire date (6 Jun 2012)."; incomplete date → "Enter the leave date."; 15 Nov 2026 with a reason saved (Leaving). Reason over 500 characters: the box stops at 500 (API limit covered by leave.test.ts) |
-| LEAVE-2 | browser | Undo leaving | Leave date and reason cleared; both events in history with their dates | | |
-| LEAVE-3 | browser, API | Person who has left: page actions; API writes | Only Undo shown; writes refused with the message | | |
+| LEAVE-2 | browser | Undo leaving | fail → fix queued | Undo clears the leave; history shows both events with their dates (undo on 5 Oct 2026). Found: the undone leave on 15 Nov 2026 still reads "Leaves", as if it will happen |
+| LEAVE-3 | browser, API | Person who has left: page actions; API writes | pass | API: writes to someone who has left → 409 with the message; page shows only Undo leaving and the explanation |
 | LEAVE-4 | API | `DELETE /api/employees/<code>` | pass | API: DELETE → 404; person still there |
 | LEAVE-5 | browser | Leaving with a later scheduled change; undo | pass | Move on 1 Dec 2026 showed "Won't apply (after leave date)" while leaving 15 Nov; applied again after undo |
 | LEAVE-6 | browser | Default list and stats; add Left to status | pass | Default list leaves leavers out (2,090); adding Left adds 249 to list and stats |
 | STATS-1 | SQL, browser | One peer group's median by hand vs the page | pass | SQL by hand vs page: IN Software Engineer L3 median 1,486,500, headcount 166, INR only |
 | STATS-2 | browser | Starting person in a filter | pass | BR Engineering Manager L5: 20 listed incl. Inês (starting), headcount 19 |
-| STATS-3 | browser | Pay overview cells, dashes, cell link | As described | | |
+| STATS-3 | browser | Pay overview cells, dashes, cell link | pass | US by default; dashes for empty cells; Engineering L2 cell opened the list for US + Engineering + L2: 197 people, same median USD 117,700 |
 | STATS-4 | browser, SQL | A relocated person | pass | E000029 moved IN → US: listed and counted in US only |
-| AST-1 | browser | New chat, list order, rename (empty, 81 characters, valid), delete with confirm | As described; title from the first question, 60 characters | | |
-| AST-2 | browser | Reload a chat with answers | Questions, answers and sources as saved | | |
-| AST-3 | browser | Ask | A step line, then words, then sources | | |
+| AST-1 | browser | New chat, list order, rename (empty, 81 characters, valid), delete with confirm | pass | New chat; list newest first; title from the first question cut to 60 characters; rename refuses empty and 81 characters ("A chat name needs 1 to 80 characters."), saves a valid name; delete asks first, Cancel keeps it, Delete chat removes it |
+| AST-2 | browser | Reload a chat with answers | pass | Reload and reopen: questions, answers, sources, error messages and the Stopped answer as saved |
+| AST-3 | browser | Ask | pass | Step "Looking up people: Brazil · Engineering…", then the words, then Based on |
 | AST-4 | tests | `assistant.tools.test.ts` (each tool's filters, caps and totals) | pass | Automated tests pass (see Steps) |
 | AST-5 | tests | `assistant.tools.test.ts` (bad arguments, unknown tool, read-only transaction, absurd offset) | pass | Automated tests pass (see Steps) |
 | AST-6 | tests | `assistant.run.test.ts` (six-round cap) | pass | Automated tests pass (see Steps) |
 | AST-7 | tests | `assistant.run.test.ts` (system prompt content, no secrets) | pass | Automated tests pass (see Steps) |
-| AST-8 | browser | Click a group link and a person link in Based on | Matching list; the person's page | | |
-| AST-9 | browser | Ask with `[no tools]` | "Not based on ACME data" | | |
+| AST-8 | browser | Click a group link and a person link in Based on | pass | Group link opened BR + Engineering (262, as labelled); person links name and code |
+| AST-9 | browser | Ask with `[no tools]` | pass | [no tools] answer labelled "Not based on ACME data" |
 | AST-10 | not run | Needs the real model and the OpenRouter key | not run | Needs the real model; blocked on the OpenRouter key |
-| AST-11 | browser | Ask with `[html]` | Bold, table, list; HTML shown as text; title unchanged | | |
-| AST-12 | browser | 2,001 characters; second question while one streams; Stop with `[slow]` | Limit holds; one at a time; partial saved as Stopped | | |
+| AST-11 | browser | Ask with `[html]` | pass | [html]: bold, a table and a list render; the img/script tags show as text; no img or script element; title unchanged |
+| AST-12 | browser | 2,001 characters; second question while one streams; Stop with `[slow]` | fail → fix queued | Box stops at 2,000 characters; a second question waits while one streams; Stop saved the partial answer marked Stopped. But clicking Stop also submitted what was in the box (a 409 for the waiting question) |
 | AST-13 | tests | `assistant.run.test.ts` (last 20 messages) | pass | Automated tests pass (see Steps) |
-| AST-14 | browser | Ask with `[429]`; then other pages | The free-limit message; question saved; app works | | |
-| AST-15 | browser | Ask with `[500]`; then other pages | "The assistant isn't available right now…"; app works | | |
-| AST-16 | browser | Look under the question box | "42 free model requests left today" | | |
-| AST-17 | browser | Watch network requests while asking | Only localhost:4733 | | |
+| AST-14 | browser | Ask with `[429]`; then other pages | pass | [429] → the free-limit message; question saved; other pages fine |
+| AST-15 | browser | Ask with `[500]`; then other pages | pass | [500] → "The assistant isn't available right now. Try again in a minute." (announced once in the status line) |
+| AST-16 | browser | Look under the question box | pass | "42 free model requests left today" under the box |
+| AST-17 | browser | Watch network requests while asking | pass | Every request from the page went to localhost:4733 (resource timing and the network log) |
 | AST-18 | tests | `api/test/setup.ts` guard; e2e server uses the fake | pass | Automated tests pass (see Steps) |
-| CSV-1 | browser | Export a filtered list; open the file | All matching rows, BOM, the listed columns | | |
-| CSV-2 | browser | Person named `=SUM(1)`; export | Cell starts with `'` | | |
-| CSV-3 | browser | Semicolons, BOM, shuffled columns, upper-case headers, currency column | Accepted | | |
-| CSV-4 | browser | File with mistakes | Count, rows as saved, problems by row and column; nothing saved | | |
-| CSV-5 | browser | Wrong role for department, bad date, manager in file, manager loop | Problems as for the add form | | |
-| CSV-6 | browser | Code used in the database; email twice in the file | Problem on every row involved | | |
-| CSV-7 | browser | Import enabled only when clean; import | All saved; result and link | | |
-| CSV-8 | browser | Empty file, missing column, an .xlsx file | Plain words, before row checks | | |
+| CSV-1 | browser | Export a filtered list; open the file | pass | Export endpoint (as the link calls it): BOM, the 16 documented columns, 16 rows = the list's total for the same filter (browser download not used: downloads need Nikhil's say-so) |
+| CSV-2 | browser | Person named `=SUM(1)`; export | pass | First name =SUM(1) and last name +Kierkegaard export as '=SUM(1) and '+Kierkegaard |
+| CSV-3 | browser | Semicolons, BOM, shuffled columns, upper-case headers, currency column | pass | Semicolons, BOM, CRLF, shuffled columns, upper-case headers, a currency column, level "L2", names Søren Kierkegaard-Ørsted: 2 rows ready |
+| CSV-4 | browser | File with mistakes | pass | Mistakes file: "1 row ready to import, 9 problems to fix first. Nothing has been saved.", each problem by row and column; the clean row shown as it will be saved |
+| CSV-5 | browser | Wrong role for department, bad date, manager in file, manager loop | pass | Wrong role for department, bad date, currency not matching the country, a manager loop (both rows), a manager in the file and one in the database |
+| CSV-6 | browser | Code used in the database; email twice in the file | pass | Code in the database and salary separators on the same row both listed; an email twice (any case) on both rows |
+| CSV-7 | browser | Import enabled only when clean; import | pass | Import disabled while problems exist; clean file → "Imported 2 employees." with a link to the list |
+| CSV-8 | browser | Empty file, missing column, an .xlsx file | pass | Empty → "The file is empty."; no salary column → "The file is missing these columns: salary."; .xlsx → the Excel workbook message |
 | SEED-1 | SQL | Count by hire country | pass | SQL: BR 800, DE 1200, GB 1200, IN 3000, JP 800, US 3000 |
 | SEED-2 | tests | `seed.test.ts` (checksum of two runs) | pass | seed.test.ts (checksum of two runs) passes in the suite |
 | SEED-3 | SQL | Duplicate full names; a few names per country and gender | pass | SQL: no repeated full names; JP sample "Kokona Ishikawa" (given name first) |
@@ -121,13 +121,13 @@ JPY/INR amounts, loading, empty and error states, reload, and Back.
 | SEED-9 | SQL | Change kinds present; relocations with new currency; leavers | pass | SQL: 48,829 pay, 7,185 level, 4,325 manager changes, 104 relocations (all with a salary in the new currency), 1,093 leavers |
 | SEED-10 | tests, SQL | `seed.test.ts`; spot-check one manager's level | pass | seed.test.ts; SQL: 0 reports with a manager at their level or lower on 2026-09-30 |
 | A11Y-1 | tests | `e2e/a11y.spec.ts` (axe, both themes, both sizes) | pass | Automated tests pass (see Steps) |
-| A11Y-2 | browser | Keyboard only: sign in, find and open, add, job change, leave and undo, import, ask | All work | | |
-| A11Y-3 | browser | Tab through a page; skip link; failed submit | Focus visible; skip works; first invalid field focused | | |
-| A11Y-4 | browser | Ask; watch the hidden status line | One "Answer finished." at the end | | |
-| UI-1 | browser | Device dark/light; toggle; reload | Follows device; toggle remembered | | |
-| UI-2 | browser | Money and dates on every screen | "USD 128,000"; "4 Oct 2026" | | |
-| UI-3 | browser | Every screen at 375 and 1440 px | No sideways scroll | | |
-| UI-4 | browser | Failed requests on each screen | Plain-word message; nothing silent | | |
+| A11Y-2 | browser | Keyboard only: sign in, find and open, add, job change, leave and undo, import, ask | pass | e2e/keyboard.spec.ts runs all seven flows keyboard-only (green); by hand: Tab order on the list and dialogs works |
+| A11Y-3 | browser | Tab through a page; skip link; failed submit | pass | Skip link shows on focus with a visible outline and moves focus to the main content; failed submit focused First name; e2e checks focus rings |
+| A11Y-4 | browser | Ask; watch the hidden status line | pass | The only status/live region read "Answer finished." after the answer; nothing announced word by word |
+| UI-1 | browser | Device dark/light; toggle; reload | pass | First load followed the device (dark); the toggle chose light and it stayed light after a full reload |
+| UI-2 | browser | Money and dates on every screen | pass | "USD 117,700", "JPY 4,003,000", "EUR 48,000"; dates "6 Jun 2012", "Cancelled on 5 Oct 2026" on every screen seen |
+| UI-3 | browser | Every screen at 375 and 1440 px | pass | Screenshots at 390: list, employee page, add, pay overview (IN), import, assistant all scrollWidth = 390; 1440 likewise; e2e phone.spec checks seven screens. Found: on a leaver's page at 390 the long email runs into Gender (see S4) |
+| UI-4 | browser | Failed requests on each screen | pass | Bad list address shows the message naming the value (after fix f94f725); server down → "Can't reach the server. Check your connection and try again." on each screen. Found: a refused cancel of a hire showed only "Some fields need fixing." (see S4) |
 
 ## Data changed during the run
 

@@ -589,6 +589,7 @@ is done (hashes copied from `git log`).
 - Phase 6 QA fix 2 · red (found by QA, LIST-4): country sorts by the name shown (Germany, India, United Kingdom, United States), not the two-letter code, which put United Kingdom between Germany and India.
 - Phase 6 QA fix 2 · green: the list's country sort orders by the English country name (from COUNTRY_NAMES), so the column reads alphabetically; export and the assistant's tool share the same order.
 - Phase 6 · results so far: sign-in, list, employee page, the three change dialogs and add employee run in Chrome and by API/SQL (e2e/qa-api.ts, e2e/qa-shots.ts); two fixes already made (bad list addresses, country sort); more findings queued for one fix batch.
+- Phase 6 · results: every screen and rule has been run; 13 findings queued for the fix batch (Stop also submits, refused actions losing their message, the hire's Cancel, misleading leave history and leaver pay comparison, overlap at 390, the chat not scrolling, stale field messages, job-change levels, pagination wrap).
 
 ---
 
