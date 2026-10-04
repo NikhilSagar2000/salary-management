@@ -22,6 +22,7 @@ globalThis.ResizeObserver = class {
   disconnect() {}
 };
 window.scrollTo = () => {};
+Element.prototype.scrollIntoView = () => {};
 
 afterEach(() => {
   cleanup();

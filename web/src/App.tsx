@@ -10,9 +10,10 @@ import { theme } from './theme.ts';
 const Page = ({ title }: { title: string }) => <Title order={1} size="h2">{title}</Title>;
 
 /** Providers and routes; main.tsx adds the browser router, tests add an in-memory one. */
-export function App() {
+/** `env="test"` turns off Mantine transitions and portals for tests. */
+export function App({ env }: { env?: 'default' | 'test' }) {
   return (
-    <MantineProvider theme={theme} defaultColorScheme="auto">
+    <MantineProvider theme={theme} defaultColorScheme="auto" env={env}>
       <Routes>
         <Route path="/signin" element={<SignIn />} />
         <Route element={<RequireSession><Layout /></RequireSession>}>

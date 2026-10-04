@@ -11,7 +11,7 @@ function LocationProbe() {
 export function renderApp(at: string) {
   return render(
     <MemoryRouter initialEntries={[at]}>
-      <App />
+      <App env="test" />
       <LocationProbe />
     </MemoryRouter>,
   );

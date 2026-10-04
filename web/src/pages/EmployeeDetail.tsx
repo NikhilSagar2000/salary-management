@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { Link, useParams } from 'react-router';
 import { api } from '../api.ts';
 import { DetailsForm } from './employee/DetailsForm.tsx';
+import { JobChangeForm } from './employee/JobChangeForm.tsx';
 import { Timeline } from './employee/Timeline.tsx';
 import type { Detail } from './employee/types.ts';
 
@@ -15,7 +16,7 @@ export function EmployeeDetail() {
   const { code } = useParams();
   const [detail, setDetail] = useState<Detail | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [form, setForm] = useState<'details' | null>(null);
+  const [form, setForm] = useState<'details' | 'job' | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   /** One-click writes (cancel, undo): send the loaded version, then reload; a failure is shown above the history. */
   const run = async (path: string) => {
@@ -45,11 +46,15 @@ export function EmployeeDetail() {
         </Group>
         <Group gap="xs">
           <Button variant="default" onClick={() => setForm('details')}>Edit details</Button>
+          <Button onClick={() => setForm('job')}>Change job or pay</Button>
         </Group>
       </Group>
       <Modal opened={form === 'details'} onClose={() => setForm(null)} title="Edit details">
         {/* EMP-13: Reload refreshes the page behind the form; what was typed stays, now on the latest version. */}
         <DetailsForm detail={d} onSaved={() => { setForm(null); load(); }} onReload={load} />
+      </Modal>
+      <Modal opened={form === 'job'} onClose={() => setForm(null)} title="Change job or pay" size="lg">
+        <JobChangeForm detail={d} onSaved={() => { setForm(null); load(); }} onReload={load} />
       </Modal>
       {/* EMP-5: code and hire date are facts, never inputs. */}
       <SimpleGrid component="ul" aria-label="Employee facts" cols={{ base: 2, sm: 4 }} p={0} m={0} style={{ listStyle: 'none' }}>
