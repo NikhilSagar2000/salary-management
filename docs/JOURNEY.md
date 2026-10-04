@@ -298,6 +298,7 @@ is done (hashes copied from `git log`).
 - Task 7 · green: a country change without a salary gets "Moving to another country needs a salary in the new currency." (EMP-9).
 - Task 7 · red: a move must not strand a later salary in the old currency (EMP-9).
 - Task 7 · green: the timeline check also refuses any date where the salary's currency differs from the country's, naming the stranded salary change (EMP-9).
+- Task 7 · red: manager rules on changes and on create (EMP-10).
 
 ---
 

@@ -86,3 +86,29 @@ test('refuses a relocation that would leave a later salary in the old currency',
   expect(move.body.fields).toEqual({ country: 'A salary change on 1 Jan 2027 is in BRL; cancel it before moving this person to Germany.' });
   expect(await stateOn(db, '2027-01-02')).toMatchObject({ country: 'BR', salary: 140000, currency: 'BRL' });
 });
+
+test.fails('manager must exist, not be the person, be employed on the date, and not form a loop', async () => {
+  const { agent, db, change } = await setup();
+  const person = (code: string, first: string, hireDate: string, extra = {}) =>
+    agent.post('/api/employees').send({ ...newEmployee, code, firstName: first, lastName: 'Lima', workEmail: `${first}@acme.example`, hireDate, ...extra });
+  expect((await person('E000200', 'Bruno', '2020-01-01')).status).toBe(201);
+  expect((await person('E000300', 'Carla', '2026-06-01')).status).toBe(201);
+  const field = async (body: Record<string, unknown>) => (await change(body)).body.fields?.managerCode;
+
+  expect(await field({ effectiveDate: '2025-01-01', managerCode: 'E000999' })).toBe('No employee with code E000999.');
+  expect(await field({ effectiveDate: '2025-01-01', managerCode: 'E000123' })).toBe("Someone can't be their own manager.");
+  expect(await field({ effectiveDate: '2025-01-01', managerCode: 'E000300' })).toBe("Carla Lima isn't employed on 1 Jan 2025.");
+  expect((await change({ effectiveDate: '2025-01-01', managerCode: 'E000200' })).status).toBe(201);
+
+  const loop = await agent.post('/api/employees/E000200/changes').send({ version: 1, effectiveDate: '2025-06-01', managerCode: 'E000123' });
+  expect(loop.body.fields).toEqual({ managerCode: 'That would make a reporting loop.' });
+
+  expect((await change({ effectiveDate: '2025-09-01', managerCode: null })).status).toBe(201);
+  expect((await stateOn(db, '2025-09-01')).manager_id).toBeNull();
+  await db.query("UPDATE employees SET leave_date = '2025-12-31' WHERE code = 'E000200'");
+  expect(await field({ effectiveDate: '2026-01-15', managerCode: 'E000200' })).toBe("Bruno Lima isn't employed on 15 Jan 2026.");
+
+  const created = await person('E000400', 'Davi', '2025-01-01', { managerCode: 'E000999' });
+  expect(created.body.fields).toEqual({ managerCode: 'No employee with code E000999.' });
+  expect((await person('E000400', 'Davi', '2025-01-01', { managerCode: 'E000123' })).status).toBe(201);
+});
