@@ -17,7 +17,11 @@ export async function api<T = unknown>(path: string, init: { method?: string; bo
   try {
     res = await fetch(path, {
       method: init.method ?? 'GET',
-      headers: init.body === undefined ? {} : { 'content-type': 'application/json' },
+      headers: {
+        // TIME-1: the server works out "today" in the browser's timezone.
+        'X-Timezone': Intl.DateTimeFormat().resolvedOptions().timeZone,
+        ...(init.body === undefined ? {} : { 'content-type': 'application/json' }),
+      },
       body: init.body === undefined ? undefined : JSON.stringify(init.body),
       credentials: 'same-origin',
     });

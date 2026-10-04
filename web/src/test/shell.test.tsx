@@ -69,7 +69,7 @@ test('a failed request shows a plain message', async () => {
   expect(await screen.findByRole('heading', { name: 'Employees' })).toBeInTheDocument();
 });
 
-test.fails("every API request sends the browser's timezone", async () => {
+test("every API request sends the browser's timezone", async () => {
   const calls = fakeApi({ 'GET /api/x': () => ({ status: 200, body: {} }), 'POST /api/y': () => ({ status: 204 }) });
   await api('/api/x');
   await api('/api/y', { method: 'POST', body: { a: 1 } });
