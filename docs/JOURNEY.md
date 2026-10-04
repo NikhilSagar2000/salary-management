@@ -573,6 +573,7 @@ is done (hashes copied from `git log`).
 - Minor fix 4 · red: after sign-in, a next address that points at another site (//host or /\\host) is ignored and HR lands on the employee list (it used to throw and leave HR on the sign-in page).
 - Minor fix 4 · green: sign-in follows next only when it is a path on this site (starts with one slash, not // or /\\); anything else goes to the employee list.
 - Minor fix 5 · red: the search box takes at most 100 characters, the search's own limit (longer text gave a vague "Some fields need fixing.").
+- Minor fix 5 · green: the search box stops at 100 characters.
 
 ---
 

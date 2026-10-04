@@ -83,6 +83,7 @@ export function EmployeeList() {
     <TextInput
       label="Search"
       placeholder="Name, email or code"
+      maxLength={100}
       value={search}
       onChange={(e) => {
         setSearch(e.currentTarget.value);
