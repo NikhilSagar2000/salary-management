@@ -23,7 +23,7 @@ function start(env: Record<string, string>, until: RegExp) {
   });
 }
 
-test.fails('the server applies migrations to an empty database before it listens', async () => {
+test('the server applies migrations to an empty database before it listens', async () => {
   const admin = testPool();
   await admin.query('DROP DATABASE IF EXISTS acme_start_test WITH (FORCE)');
   await admin.query('CREATE DATABASE acme_start_test');
@@ -42,7 +42,7 @@ test.fails('the server applies migrations to an empty database before it listens
   }
 }, 30_000);
 
-test.fails('the server refuses to start without a password hash, saying why', async () => {
+test('the server refuses to start without a password hash, saying why', async () => {
   const server = await start({ DATABASE_URL: testDbUrl(), APP_PASSWORD_HASH: '' }, /listening/);
   server.stop();
   expect(server.code).toBe(1);
