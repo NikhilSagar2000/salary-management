@@ -199,3 +199,12 @@ test('reports an empty file, missing columns or an unreadable file plainly', asy
     whole('This looks like an Excel workbook, not a CSV file. In Excel choose File › Save As › CSV UTF-8, then import that file.'),
   );
 });
+
+test.fails('rows that manage each other in a circle are refused, on every row in the circle (CSV-5, EMP-10)', async () => {
+  const { preview, commit, db } = await setup();
+  const csv = [`${HEADER},manager_code`, row(1, ',E000002'), row(2, ',E000003'), row(3, ',E000001'), row(4, ',E000001')].join('\n');
+  const loop = { column: 'manager_code', message: 'That would make a reporting loop.' };
+  expect((await preview(csv)).body.problems).toEqual([{ line: 2, ...loop }, { line: 3, ...loop }, { line: 4, ...loop }]);
+  expect((await commit(csv)).status).toBe(400);
+  expect((await db.query('SELECT count(*)::int AS n FROM employees')).rows[0].n).toBe(0);
+});
