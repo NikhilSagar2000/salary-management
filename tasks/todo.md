@@ -573,3 +573,25 @@ Timeline entries in date order: changes (`changes: [{ field, from, to }]`, `sche
 - [x] Step 3: "timeline lists each change with from → to, and marks scheduled, cancelled,
   won't-apply and leave events".
 - [x] Task check: `npm test`.
+
+### Task 11: Employee list
+
+Files: `api/db/migrations/005_list.sql` (`unaccent` + `pg_trgm`, immutable `f_unaccent`,
+trigram index, `current_state(today)` = each person's state today, or on their hire date if
+starting), `shared/src/schemas.ts` (`listQuerySchema`, shared with the web URL state),
+`api/src/employees/list.ts`, routes, `api/test/employees.list.test.ts`, `api/test/helpers.ts`
+(`insertPeople` bulk fixture). `GET /api/employees?q=&country=US,IN&department=&role=&level=
+&gender=&status=starting,active,leaving&salaryMin=&salaryMax=&sort=name&dir=asc&page=1&pageSize=25`
+→ `{ rows, total, page, pageSize }`. Name sort = last name, then first name; ties by code.
+
+- [ ] Step 1: "returns a page of 25 with the total; 50 and 100 allowed" (LIST-1).
+- [ ] Step 2: "search matches part of name, email or code ignoring case and accents" (LIST-2).
+- [ ] Step 3: "names with apostrophes and hyphens are found" (review focus 2; `%`/`_` typed literally).
+- [ ] Step 4: "filters combine with AND across fields and OR within one" (LIST-3).
+- [ ] Step 5: "default status filter hides people who have left" (LIST-3, LEAVE-6).
+- [ ] Step 6: "sorts by each column both ways, ties broken by code" (LIST-4).
+- [ ] Step 7: "salary sort and range need exactly one country" (LIST-5).
+- [ ] Step 8: "rejects invalid query values naming the value" (LIST-7).
+- [ ] Step 9: "rows carry current job, salary with currency, hire date and status" (LIST-8).
+- [ ] Step 10: "no matches gives an empty page, not an error" (review focus 5).
+- [ ] Task check: `npm test`.
