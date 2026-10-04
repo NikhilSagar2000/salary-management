@@ -238,6 +238,17 @@ instead of three runs in one go.
 planned model smoke test (D44) on the free models and the real-model QA row (AST-10), within the
 free daily quota.
 
+### Phase 6 report (question dialog, 2026-10-05)
+
+| # | Question | Options offered | Answer |
+|---|---|---|---|
+| Q43 | Phase 7 deploys to Neon (Postgres) and Render (one web service), which needs the code on GitHub first. What do you approve? | Push, then deploy (Recommended) · Push only for now · Not yet | "Push, then deploy (Recommended)" |
+| Q44 | Do you already have Neon and Render accounts, and the empty GitHub repo NikhilSagar2000/salary-management? | All three exist · Some are missing | "Some are missing" |
+
+**My reply:** approval recorded for the GitHub push and the Neon + Render deploy (D70). Before
+pushing: checked history for secrets and the work email. Account and repo creation stays with
+Nikhil (sign-ups need him).
+
 ---
 
 ## 3. Timeline
@@ -638,6 +649,7 @@ is done (hashes copied from `git log`).
 - Phase 6 QA fix 14 · green: one system-prompt rule for money: currency code and amount with separators, no symbols.
 - AST-10 rechecked with the real model after the fix: the answer starts "The data can't answer this because…". npm run smoke:model gained --only-data-cant-answer. 5 free requests left today.
 - Phase 6 complete: 99 QA cases, 87 pass, 12 failed and fixed test-first, none open; the model smoke test and AST-10 ran with the real key; lessons 7–8 added.
+- Phase 7 · Q43–Q44 logged (D70); history checked (one author, personal email; no work email, keys or hashes); remote origin added with the personal key; pushed master to GitHub.
 
 ---
 
@@ -717,6 +729,7 @@ accepted when Nikhil approved the plan (P4).
 | D67 | Unknown fields in write requests | Strict vs lenient schemas | Refuse · ignore | Ignored; identity fields (code, hire date) are refused explicitly | The only client is our UI; a strict refusal message would be technical | C |
 | D68 | Reviewer's minor findings | Final review left nine Minor items | Fix all · user-facing only · leave | Fix all nine test-first before manual QA | Small, contained fixes; QA then starts from a cleaner base | N (Q41) |
 | D69 | When the code leaves this machine | No remote yet; CI unproven on GitHub | Push now · keep local until deploy | Keep local until the deploy approval; CI first runs then | Nikhil's choice | N (Q42) |
+| D70 | Phase 7 go-ahead | Phase 6 done; deploy needs GitHub, Neon, Render | Push + deploy · push only · not yet | Push master to GitHub, then deploy on Neon + Render free tiers; Nikhil creates accounts and keys | Nikhil's approval | N (Q43, Q44) |
 
 ---
 
