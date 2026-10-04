@@ -52,7 +52,7 @@ test('saves the hire change dated on the hire date', async () => {
   }]);
 });
 
-test.fails('rejects an email already used, ignoring case', async () => {
+test('rejects an email already used, ignoring case', async () => {
   const { app } = await testApp();
   const agent = await signIn(app);
   expect((await agent.post('/api/employees').send(newEmployee)).status).toBe(201);

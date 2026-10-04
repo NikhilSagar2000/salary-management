@@ -11,6 +11,7 @@ export function duplicateField(err: unknown, e: { code: string }): Record<string
   const pgErr = err as { code?: string; constraint?: string };
   if (pgErr.code !== '23505') return null;
   if (pgErr.constraint === 'employees_code_key') return { code: `${e.code} is already used.` };
+  if (pgErr.constraint === 'employees_work_email_key') return { workEmail: 'That work email is already used.' };
   return null;
 }
 

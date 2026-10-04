@@ -279,6 +279,7 @@ is done (hashes copied from `git log`).
 - Task 5 · red: hire change tests (EMP-2, EMP-4); money reads back as JS numbers.
 - Task 5 · green: create saves the person and the hire change (all fields, currency from country, dated on the hire date) in one transaction; bigint values read as JS numbers.
 - Task 5 · red: duplicate email test (EMP-2).
+- Task 5 · green: a work email already used (any case) gets "That work email is already used."
 
 ---
 
