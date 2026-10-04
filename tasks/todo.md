@@ -291,7 +291,7 @@ is written just before the task starts, from the interfaces that exist at that p
 - [x] **Task 23: Add employee page.** Tests: `AddEmployee.test.tsx` › "pre-fills the
   suggested code, editable" (EMP-1) · "role choices follow the department, level choices
   follow the role" (EMP-2) · "shows each field's message next to it" (EMP-3).
-- [ ] **Task 24: Pay overview page.** Tests: `PayOverview.test.tsx` › "one country at a time,
+- [x] **Task 24: Pay overview page.** Tests: `PayOverview.test.tsx` › "one country at a time,
   empty cells show —, a cell opens the matching list" (STATS-3).
 - [ ] **Task 25: Import page.** Tests: `Import.test.tsx` › "preview shows rows and problems by
   row and column" (CSV-4) · "Import is enabled only with no problems and shows the result"
