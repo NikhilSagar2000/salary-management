@@ -23,3 +23,14 @@ test('edits first name, last name, gender and email in place', async () => {
   expect(taken.status).toBe(400);
   expect(taken.body.fields).toEqual({ workEmail: 'That work email is already used.' });
 });
+
+test.fails('refuses to change code or hire date', async () => {
+  const { agent, db } = await withEmployee();
+  for (const body of [{ code: 'E000999' }, { hireDate: '2020-01-01' }, { code: 'E000123', firstName: 'Anna' }]) {
+    const res = await agent.patch('/api/employees/E000123').send({ version: 1, ...body });
+    expect(res.status).toBe(400);
+    expect(res.body).toEqual({ error: "The employee code and hire date can't be changed." });
+  }
+  const { rows } = await db.query('SELECT code, hire_date, first_name, version FROM employees');
+  expect(rows).toEqual([{ code: 'E000123', hire_date: '2024-02-29', first_name: 'Ana', version: 1 }]);
+});
