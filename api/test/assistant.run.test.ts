@@ -79,3 +79,11 @@ test('sources come from the tool calls: groups with filters and headcount, peopl
   expect(answer.sources.people[0]).toEqual({ kind: 'person', code: 'E000001', name: 'P1 Kim' });
   expect(answer.sources.morePeople).toBe(5);
 });
+
+test('an answer without tool calls is marked not based on ACME data', async () => {
+  const { answer, events } = await ask([[{ type: 'token', text: 'Generally, salaries rise with seniority.' }, { type: 'done' }]]);
+  expect(answer.basedOnData).toBe(false);
+  expect(events.find((e) => e.type === 'sources')).toEqual({
+    type: 'sources', basedOnData: false, sources: { groups: [], people: [], morePeople: 0 },
+  });
+});
