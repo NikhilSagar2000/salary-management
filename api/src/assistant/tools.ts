@@ -282,4 +282,28 @@ export async function runTool(db: pg.Pool, today: string, name: string, args: un
 
 
 export type ToolSpec = { type: 'function'; function: { name: string; description: string; parameters: unknown } };
-export const TOOLS: ToolSpec[] = [];
+
+const DESCRIPTIONS: Record<keyof typeof TOOLS_BY_NAME, string> = {
+  query_employees:
+    'Find employees by any of the filters and list them with their current job, annual base salary and currency, ' +
+    `status and manager. Returns the total and at most ${MAX_ROWS} rows; page with offset. Use aggregate for medians and counts.`,
+  get_employee: "One employee by code: details, current job and pay, pay against peers (same country, role, level), manager, " +
+    'direct reports and their full history of changes (with from → to values) and leaving.',
+  query_changes:
+    'Job and pay changes over time (hires, raises, pay cuts, promotions, demotions, role, department, country and manager ' +
+    `changes, leaving and undoing it), newest first, with raise % where pay changed in the same currency. At most ${MAX_ROWS} rows.`,
+  aggregate:
+    'Exact statistics computed by the database: salary median/min/max/headcount (always split by currency), headcount, or ' +
+    'raise % median/min/max/count, grouped by up to four fields, as of a date. Use this for any median, count or comparison.',
+};
+
+/** The tools as the model sees them (OpenAI function format), generated from the same schemas that check the arguments. */
+export const TOOLS: ToolSpec[] = Object.entries(TOOLS_BY_NAME).map(([name, tool]) => ({
+  type: 'function',
+  function: {
+    name,
+    description: DESCRIPTIONS[name as keyof typeof TOOLS_BY_NAME],
+    // Some providers reject the top-level $schema key; it adds nothing for the model.
+    parameters: (({ $schema: _, ...rest }) => rest)(z.toJSONSchema(tool.schema, { io: 'input' })),
+  },
+}));

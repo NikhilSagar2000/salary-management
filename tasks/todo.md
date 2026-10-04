@@ -238,7 +238,7 @@ is written just before the task starts, from the interfaces that exist at that p
   file" (CSV-5) · "a duplicate code or email in the database or file flags every row involved"
   (CSV-6) · "import saves all rows in one transaction or none, re-checking at commit" (CSV-7)
   · "reports an empty file, missing columns or an unreadable file plainly" (CSV-8).
-- [ ] **Task 16: Assistant tools.** Files: `api/src/assistant/tools.ts`. Tests:
+- [x] **Task 16: Assistant tools.** Files: `api/src/assistant/tools.ts`. Tests:
   `assistant.tools.test.ts` › "query_employees filters any field, caps at 200 rows and
   reports the total" · "get_employee returns the full history" · "query_changes classifies
   kinds and caps at 200" · "aggregate computes exact stats split by currency" (AST-4) · "bad
@@ -683,11 +683,11 @@ country, department, role, level, gender, status, hired/left date ranges, salary
 country), manager. Sources: `{ kind: 'group', label, query, headcount }` or
 `{ kind: 'person', code, name }`.
 
-- [ ] Step 1: "query_employees filters any field, caps at 200 rows and reports the total" (AST-4).
-- [ ] Step 2: "get_employee returns the full history" (AST-4).
-- [ ] Step 3: "query_changes classifies kinds and caps at 200" (AST-4).
-- [ ] Step 4: "aggregate computes exact stats split by currency" (AST-4).
-- [ ] Step 5: "bad arguments and unknown tools return an error result" (AST-5).
-- [ ] Step 6: "tool queries run in a read-only transaction" (AST-5).
-- [ ] Step 7: "no tool parameter accepts SQL or free-form expressions" (AST-5).
-- [ ] Task check: `npm test`.
+- [x] Step 1: "query_employees filters any field, caps at 200 rows and reports the total" (AST-4).
+- [x] Step 2: "get_employee returns the full history" (AST-4).
+- [x] Step 3: "query_changes classifies kinds and caps at 200" (AST-4).
+- [x] Step 4: "aggregate computes exact stats split by currency" (AST-4).
+- [x] Step 5: "bad arguments and unknown tools return an error result" (AST-5).
+- [x] Step 6: "tool queries run in a read-only transaction" (AST-5).
+- [x] Step 7: "no tool parameter accepts SQL or free-form expressions" (AST-5).
+- [x] Task check: `npm test`.

@@ -160,7 +160,7 @@ test('tool queries run in a read-only transaction', async () => {
   expect(seen.some((s) => s.startsWith('pool:'))).toBe(false);
 });
 
-test.fails('no tool parameter accepts SQL or free-form expressions', () => {
+test('no tool parameter accepts SQL or free-form expressions', () => {
   expect(TOOLS.map((t) => t.function.name).sort()).toEqual(['aggregate', 'get_employee', 'query_changes', 'query_employees']);
   const loose: string[] = [];
   const walk = (schema: Record<string, unknown>, path: string) => {
