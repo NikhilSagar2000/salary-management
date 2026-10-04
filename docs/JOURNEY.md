@@ -285,6 +285,7 @@ is done (hashes copied from `git log`).
 - Task 6 · green: `PATCH /api/employees/:code` edits name, gender and email in place and bumps `version` (EMP-6).
 - Task 6 · red: API refuses code/hire-date changes (EMP-5).
 - Task 6 · green: a body carrying `code` or `hireDate` is refused with "The employee code and hire date can't be changed." (EMP-5).
+- Task 6 · red: stale version and unknown employee tests (EMP-13).
 
 ---
 
