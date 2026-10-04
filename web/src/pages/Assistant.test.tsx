@@ -1,7 +1,7 @@
 import { MSG } from '@acme/shared';
 import { cleanup, screen, waitFor, within } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
-import { expect, test } from 'vitest';
+import { expect, test, vi } from 'vitest';
 import { fakeApi, gate, sse, sseEvent } from '../test/fakeApi.ts';
 import { renderApp } from '../test/render.tsx';
 
@@ -220,4 +220,16 @@ test('a source group the list cannot show is named without a link', async () => 
   expect(basedOn).toHaveTextContent('United States · hired 2025-01-01 to 2025-12-31 (2 people)');
   expect(basedOn).toHaveTextContent('and 3 more');
   expect(within(basedOn).queryByRole('link')).not.toBeInTheDocument();
+});
+
+test.fails('sending a question scrolls the chat to it', async () => {
+  const scrolled = vi.spyOn(Element.prototype, 'scrollIntoView');
+  start('/assistant/2', {
+    'POST /api/chats/2/messages': () => ({ status: 200, events: sse(sseEvent('token', { text: 'Hi.' }), sseEvent('done', {})) }),
+  });
+  await screen.findByLabelText('Your question');
+  scrolled.mockClear();
+  await ask('What is the median pay in Brazil?');
+  await waitFor(() => expect(scrolled).toHaveBeenCalled());
+  scrolled.mockRestore();
 });
