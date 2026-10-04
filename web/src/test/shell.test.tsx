@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { expect, test } from 'vitest';
 import { api } from '../api.ts';
@@ -95,14 +95,19 @@ test('sign out ends the session and returns to sign-in', async () => {
 
 test('after sign-in, a next address on another site is ignored', async () => {
   for (const next of ['//evil.example/x', '/\\evil.example/x']) {
+    let signedIn = false;
     fakeApi({
-      'GET /api/session': () => ({ status: 401, body: { error: 'Please sign in.' } }),
-      'POST /api/session': () => ({ status: 204 }),
+      'GET /api/session': () => (signedIn ? { status: 200, body: { signedIn: true } } : { status: 401, body: { error: 'Please sign in.' } }),
+      'POST /api/session': () => {
+        signedIn = true;
+        return { status: 204 };
+      },
       'GET /api/employees': () => ({ status: 200, body: { rows: [], total: 0, page: 1, pageSize: 25, stats: [] } }),
     });
     const { unmount } = renderApp(`/signin?next=${encodeURIComponent(next)}`);
     await userEvent.type(await screen.findByLabelText('Password'), 'right one{Enter}');
-    await waitFor(() => expect(screen.getByTestId('location').textContent).toBe('/employees'));
+    expect(await screen.findByRole('heading', { name: 'Employees' })).toBeInTheDocument();
+    expect(screen.getByTestId('location').textContent).toBe('/employees');
     unmount();
   }
 });
