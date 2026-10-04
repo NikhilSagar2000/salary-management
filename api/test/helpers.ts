@@ -33,7 +33,7 @@ export function mutableClock(iso: string) {
 }
 
 /** A fresh app on a migrated, emptied test database. */
-export async function testApp(opts: { now?: string; production?: boolean; model?: ModelFn; openRouter?: { baseUrl: string; apiKey: string } } = {}) {
+export async function testApp(opts: { now?: string; production?: boolean; model?: ModelFn; openRouter?: { baseUrl: string; apiKey: string }; webDir?: string } = {}) {
   const db = testPool();
   await migrate(db);
   const { rows } = await db.query("SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename <> 'schema_migrations'");
@@ -43,6 +43,7 @@ export async function testApp(opts: { now?: string; production?: boolean; model?
     passwordHash: await passwordHash,
     production: opts.production ?? false,
     openRouter: opts.openRouter ?? { baseUrl: 'http://127.0.0.1:9/api/v1', apiKey: 'test-only-key' },
+    webDir: opts.webDir,
   };
   const model = opts.model ?? scriptedModel([]).model;
   return { app: createApp({ db, clock, config, model }), db, clock, config };

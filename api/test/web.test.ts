@@ -1,0 +1,26 @@
+import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import request from 'supertest';
+import { expect, test } from 'vitest';
+import { signIn, testApp } from './helpers.ts';
+
+test.fails('serves the built web app: its files, index.html for app routes, JSON under /api', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'acme-web-'));
+  writeFileSync(join(dir, 'index.html'), '<!doctype html><title>ACME Pay</title>');
+  mkdirSync(join(dir, 'assets'));
+  writeFileSync(join(dir, 'assets', 'app.js'), 'console.log(1)');
+  const { app } = await testApp({ webDir: dir });
+
+  const page = await request(app).get('/employees/E000123?country=BR');
+  expect(page.status).toBe(200);
+  expect(page.type).toBe('text/html');
+  expect(page.text).toContain('<title>ACME Pay</title>');
+  expect((await request(app).get('/assets/app.js')).text).toBe('console.log(1)');
+  expect((await request(app).get('/assets/gone.js')).status).toBe(404); // a missing file is not answered with the page
+
+  const agent = await signIn(app);
+  const missing = await agent.get('/api/nothing-here');
+  expect(missing.status).toBe(404);
+  expect(missing.body).toEqual({ error: 'Not found.' });
+});

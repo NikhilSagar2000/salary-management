@@ -515,6 +515,7 @@ is done (hashes copied from `git log`).
 - Task 26 · green: Assistant page: chats listed newest first beside the open chat (on a phone the list and the chat take turns), New chat, Rename (shared 1–80 rule) and Delete behind a confirm dialog; questions stream into the thread with progress steps and a Stop button, one answer at a time, 2,000-character limit, refused questions put back in the box; answers render markdown (react-markdown shows raw HTML as text by itself, so no extra plugin; images are dropped, and removing that makes the test fail); 'Based on' links and 'Not based on ACME data'; one hidden status line announces 'Answer finished.'; free requests left under the box. The API client's fetch, headers and errors are shared by the JSON and streaming calls. The visual check found the dev database missing 007_chats.sql (the API doesn't migrate on start); ran npm run migrate on the local dev database.
 - Task 26 · red: the chat heading takes the title the first question gives the chat (found in the visual check: the list showed the new title, the heading still said New chat).
 - Task 26 · green: the open chat's heading follows the chat list, so the title from the first question shows at once. Rechecked in Chrome against the dev API (no OpenRouter key yet, so the question got the 'isn't available' message as expected) at 1280 px and 390 px.
+- Task 27 · red: the API serves the built web app: its files, index.html for app routes (so a reloaded or shared link works), a 404 for a missing file, and JSON under /api (D66).
 
 ---
 

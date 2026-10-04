@@ -12,7 +12,8 @@ import { FieldProblem, sendFieldErrors } from './http.ts';
 import { importRoutes } from './csv/routes.ts';
 import { statsRoutes } from './stats/routes.ts';
 
-export type Config = { passwordHash: string; production: boolean; openRouter: { baseUrl: string; apiKey: string } };
+/** `webDir` is the built web app to serve (D66); without it the API serves only /api. */
+export type Config = { passwordHash: string; production: boolean; openRouter: { baseUrl: string; apiKey: string }; webDir?: string };
 
 export function createApp(deps: { db: pg.Pool; clock: Clock; config: Config; model: ModelFn }) {
   const app = express();
