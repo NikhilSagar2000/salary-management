@@ -483,6 +483,7 @@ is done (hashes copied from `git log`).
 - Task 21 · green: on a phone the list shows one card per employee (name link, role and level, department and country, salary, status) instead of the table (LIST-8, LIST-10).
 - Task 21 · red: a pay summary per currency above the list (LIST-9).
 - Task 21 · green: above the list, one line per currency with median, min, max and headcount for the whole filtered set (LIST-9).
+- Task 21 · red: no matches shows a plain empty state with Clear filters, and no table or stats (review focus 5).
 
 ---
 

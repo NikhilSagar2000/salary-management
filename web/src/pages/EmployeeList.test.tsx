@@ -81,3 +81,13 @@ test('stats line per currency above the list', async () => {
     'INR: median 1,550,000, min 480,000, max 9,800,000, 1 person',
   ]);
 });
+
+test.fails('no matches shows the empty state and no stats', async () => {
+  signedInWith(listResponse({ rows: [], total: 0, stats: [] }));
+  renderApp('/employees?country=JP&q=zz');
+  expect(await screen.findByText('No employees match these filters.')).toBeInTheDocument();
+  expect(screen.queryByRole('table')).not.toBeInTheDocument();
+  expect(screen.queryByRole('list', { name: 'Pay for these employees' })).not.toBeInTheDocument();
+  await userEvent.click(screen.getByRole('button', { name: 'Clear filters' }));
+  expect(screen.getByTestId('location')).toHaveTextContent(/^\/employees$/);
+});
