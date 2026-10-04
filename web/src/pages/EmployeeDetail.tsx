@@ -1,10 +1,11 @@
-import { COUNTRY_NAMES, formatDate, formatMoney, type Country } from '@acme/shared';
+import { COUNTRY_NAMES, formatDate, formatMoney, MSG, type Country } from '@acme/shared';
 import { Alert, Anchor, Badge, Button, Group, Modal, Paper, SimpleGrid, Skeleton, Stack, Text, Title } from '@mantine/core';
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { Link, useParams } from 'react-router';
 import { api } from '../api.ts';
 import { DetailsForm } from './employee/DetailsForm.tsx';
 import { JobChangeForm } from './employee/JobChangeForm.tsx';
+import { LeaveForm } from './employee/LeaveForm.tsx';
 import { Timeline } from './employee/Timeline.tsx';
 import type { Detail } from './employee/types.ts';
 
@@ -16,7 +17,7 @@ export function EmployeeDetail() {
   const { code } = useParams();
   const [detail, setDetail] = useState<Detail | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [form, setForm] = useState<'details' | 'job' | null>(null);
+  const [form, setForm] = useState<'details' | 'job' | 'leave' | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   /** One-click writes (cancel, undo): send the loaded version, then reload; a failure is shown above the history. */
   const run = async (path: string) => {
@@ -44,14 +45,29 @@ export function EmployeeDetail() {
           <Title order={1} size="h2">{d.firstName} {d.lastName}</Title>
           <Badge variant="light" color={STATUS_COLOR[d.status]}>{capital(d.status)}</Badge>
         </Group>
-        <Group gap="xs">
-          <Button variant="default" onClick={() => setForm('details')}>Edit details</Button>
-          <Button onClick={() => setForm('job')}>Change job or pay</Button>
-        </Group>
+        {/* LEAVE-3: once someone has left, the only change is undoing it. */}
+        {d.status === 'left' ? (
+          <Button onClick={() => run(`/api/employees/${d.code}/undo-leave`)}>Undo leaving</Button>
+        ) : (
+          <Group gap="xs">
+            <Button variant="default" onClick={() => setForm('details')}>Edit details</Button>
+            {d.status === 'leaving' ? (
+              <Button variant="default" onClick={() => run(`/api/employees/${d.code}/undo-leave`)}>Undo leaving</Button>
+            ) : (
+              <Button variant="default" onClick={() => setForm('leave')}>Mark as leaving</Button>
+            )}
+            <Button onClick={() => setForm('job')}>Change job or pay</Button>
+          </Group>
+        )}
       </Group>
       <Modal opened={form === 'details'} onClose={() => setForm(null)} title="Edit details">
         {/* EMP-13: Reload refreshes the page behind the form; what was typed stays, now on the latest version. */}
         <DetailsForm detail={d} onSaved={() => { setForm(null); load(); }} onReload={load} />
+      </Modal>
+      {d.status === 'left' && <Alert color="gray">{MSG.hasLeft}</Alert>}
+      {actionError && <Alert color="red" role="alert">{actionError}</Alert>}
+      <Modal opened={form === 'leave'} onClose={() => setForm(null)} title="Mark as leaving">
+        <LeaveForm detail={d} onSaved={() => { setForm(null); load(); }} onReload={load} />
       </Modal>
       <Modal opened={form === 'job'} onClose={() => setForm(null)} title="Change job or pay" size="lg">
         <JobChangeForm detail={d} onSaved={() => { setForm(null); load(); }} onReload={load} />
@@ -101,7 +117,6 @@ export function EmployeeDetail() {
 
       <Stack gap="xs">
         <Title order={2} size="h4">History</Title>
-        {actionError && <Alert color="red" role="alert">{actionError}</Alert>}
         <Timeline
           entries={d.timeline}
           action={(c) =>

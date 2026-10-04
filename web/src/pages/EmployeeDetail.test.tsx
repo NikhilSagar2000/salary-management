@@ -151,7 +151,7 @@ test('change job or pay sends a dated change with only what changed', async () =
   });
 });
 
-test.fails('mark as leaving, then only Undo is offered', async () => {
+test('mark as leaving, then only Undo is offered', async () => {
   const calls = open(undefined, { 'POST /api/employees/E000123/leave': () => ({ status: 200, body: { code: 'E000123', version: 5 } }) });
   await userEvent.click(await screen.findByRole('button', { name: 'Mark as leaving' }));
   const dialog = await screen.findByRole('dialog', { name: 'Mark as leaving' });
@@ -162,7 +162,7 @@ test.fails('mark as leaving, then only Undo is offered', async () => {
   expect(calls.find((c) => c.url.pathname.endsWith('/leave'))!.body).toEqual({ version: 4, leaveDate: '2026-12-31', reason: 'Moving abroad' });
 });
 
-test.fails('after leaving only Undo is offered', async () => {
+test('after leaving only Undo is offered', async () => {
   const calls = open(detailResponse({ status: 'left', leaveDate: '2026-09-30', leaveReason: 'Resigned' }), {
     'POST /api/employees/E000123/undo-leave': () => ({ status: 200, body: { code: 'E000123', version: 5 } }),
   });
