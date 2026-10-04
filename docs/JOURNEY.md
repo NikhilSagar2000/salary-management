@@ -255,6 +255,7 @@ is done (hashes copied from `git log`).
 - Task 2 · green: `isoDate(field)` accepts only real calendar dates written YYYY-MM-DD.
 - Task 2 · red: money and date formatting test (UI-2).
 - Task 2 · green: `formatMoney` ("USD 128,000") and `formatDate` ("4 Oct 2026", timezone-proof) (UI-2). Checked the API can import `@acme/shared` under Node type stripping.
+- Task 3 · red: signed-out requests test (AUTH-1); test helpers now migrate and empty the test database per file; D58 (session mechanism).
 
 ---
 
@@ -322,6 +323,7 @@ accepted when Nikhil approved the plan (P4).
 | D55 | Build execution | Phase 5 | Native · subagent-driven | Native: Claude builds every task in this session; one fresh review of the whole branch at the end | Fewer subagent prompts to log verbatim; the plan carries the design | N (Q38) |
 | D56 | Step-plan detail | writing-plans wants code for every step up front | Just before each task · all now | Code-level steps written just before each task, in `tasks/todo.md` under that task | Steps match the code that exists by then | N (Q39) |
 | D57 | Correction to D49 | D49 says "22 roles" | – | The SPEC table has **19** roles across 9 departments; the table was always right, the count in D49 (and in my stop message to Nikhil) was wrong | Found while typing the table into `shared/src/reference.ts` | C |
+| D58 | Session mechanism (refines D38) | D38 said "signed httpOnly cookie" | Signed cookie · random token in DB | Random 32-byte token in an httpOnly cookie; Postgres stores its SHA-256 and expiry; no `SESSION_SECRET` | Sign-out really ends the session (AUTH-4) and there is no secret to leak or rotate | C |
 
 ---
 

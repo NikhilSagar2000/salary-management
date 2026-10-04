@@ -51,8 +51,8 @@ after today is *scheduled*.
 - **AUTH-4** Signing out ends the session; the old cookie no longer works.
 - **AUTH-5** Opening any page while signed out goes to the sign-in page, and after signing in
   returns to the page first asked for.
-- **AUTH-6** The password hash, session secret and OpenRouter key never appear in an API
-  response, a log line or the web bundle.
+- **AUTH-6** The password hash, session tokens' stored hashes and the OpenRouter key never
+  appear in an API response, a log line or the web bundle.
 
 ## LIST: find employees
 

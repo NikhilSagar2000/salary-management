@@ -1,10 +1,15 @@
 import type pg from 'pg';
+import request from 'supertest';
 import { afterAll } from 'vitest';
 import { createApp } from '../src/app.ts';
-import { fixedClock } from '../src/clock.ts';
+import { hashPassword } from '../src/auth/password.ts';
+import type { Clock } from '../src/clock.ts';
 import { createPool } from '../src/db.ts';
+import { migrate } from '../src/migrate.ts';
 
 export const testDbUrl = () => process.env.TEST_DATABASE_URL!;
+export const PASSWORD = 'correct horse battery staple';
+const passwordHash = hashPassword(PASSWORD);
 
 const pools: pg.Pool[] = [];
 afterAll(async () => {
@@ -17,8 +22,27 @@ export function testPool() {
   return pool;
 }
 
-export async function testApp(opts: { now?: string } = {}) {
+/** A clock tests can move: `clock.set('2026-10-01T12:15:00Z')`. */
+export function mutableClock(iso: string) {
+  let current = new Date(iso);
+  return { now: () => current, set: (next: string) => void (current = new Date(next)) } satisfies Clock & object;
+}
+
+/** A fresh app on a migrated, emptied test database. */
+export async function testApp(opts: { now?: string; production?: boolean } = {}) {
   const db = testPool();
-  const clock = fixedClock(opts.now ?? '2026-10-01T12:00:00Z');
-  return { app: createApp({ db, clock }), db, clock };
+  await migrate(db);
+  const { rows } = await db.query("SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename <> 'schema_migrations'");
+  if (rows.length) await db.query(`TRUNCATE ${rows.map((r) => `"${r.tablename}"`).join(', ')} RESTART IDENTITY CASCADE`);
+  const clock = mutableClock(opts.now ?? '2026-10-01T12:00:00Z');
+  const config = { passwordHash: await passwordHash, production: opts.production ?? false };
+  return { app: createApp({ db, clock, config }), db, clock, config };
+}
+
+/** A supertest agent that is signed in (keeps the session cookie). */
+export async function signIn(app: Parameters<typeof request.agent>[0]) {
+  const agent = request.agent(app);
+  const res = await agent.post('/api/session').send({ password: PASSWORD });
+  if (res.status !== 204) throw new Error(`sign-in failed: ${res.status} ${JSON.stringify(res.body)}`);
+  return agent;
 }

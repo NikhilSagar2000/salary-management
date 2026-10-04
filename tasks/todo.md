@@ -422,3 +422,27 @@ imported from `messages.ts`.
   `INR 1,550,000`; `formatMoney(6070000,'JPY')` → `JPY 6,070,000`; `formatDate('2026-10-04')`
   → `4 Oct 2026` under any `TZ`.
 - [x] Task check: `npm test` and `npm run typecheck` pass.
+
+### Task 3: Sign-in
+
+Files: `api/db/migrations/001_sessions.sql`, `api/src/auth/{password,sessions,routes}.ts`,
+`api/src/app.ts` (guard + config), `scripts/hash-password.ts`, `api/test/auth.test.ts`,
+`api/test/helpers.ts` (migrate + truncate per test file, `mutableClock`, `signIn`).
+Session = random 32-byte token in an httpOnly cookie `acme_session`; Postgres stores only its
+SHA-256 and expiry, so no signing secret is needed. Lockout counts live in memory (one server).
+
+- [ ] Step 1: "rejects /api requests without a session": `GET /api/session` and
+  `GET /api/employees` → 401 `{ error: 'Please sign in.' }`; `/api/health` stays open.
+- [ ] Step 2: "signs in with the right password and sets a 7-day httpOnly cookie":
+  `POST /api/session` → 204, cookie `HttpOnly; SameSite=Lax; Max-Age=604800; Path=/`, then
+  `GET /api/session` → 200; Secure only when `production: true`. Session expires after 7 days.
+- [ ] Step 3: "rejects a wrong password with a plain message": 401 "That password isn't right."
+- [ ] Step 4: "locks sign-in for 15 minutes after 5 wrong tries from one IP": 6th try (even the
+  right password) → 429 "Too many tries. Wait 15 minutes and try again."; 15 minutes later the
+  right password works.
+- [ ] Step 5: "sign-out makes the old cookie stop working": `DELETE /api/session` → 204, old
+  cookie → 401.
+- [ ] Step 6: "no response or log line contains the password hash or API key" (AUTH-6):
+  a negative property, so no red commit; proven by a mutation check (temporarily leak the
+  hash, watch it fail, revert).
+- [ ] Task check: `npm test`, `npm run typecheck`.
