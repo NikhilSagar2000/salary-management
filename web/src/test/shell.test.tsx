@@ -49,7 +49,7 @@ test('theme follows the device and the toggle is remembered', async () => {
   expect(screen.getByRole('button', { name: 'Switch to dark theme' })).toBeInTheDocument();
 });
 
-test.fails('a failed request shows a plain message', async () => {
+test('a failed request shows a plain message', async () => {
   let fail: 'server' | 'network' | null = 'server';
   fakeApi({
     'GET /api/session': () => {
