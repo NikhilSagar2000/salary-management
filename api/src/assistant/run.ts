@@ -2,7 +2,7 @@
 import type pg from 'pg';
 import type { ChatMessage, ModelEvent, ModelFn, ToolCall } from './model.ts';
 import { systemPrompt } from './prompt.ts';
-import { describeFilters, runTool, TOOLS, type Source } from './tools.ts';
+import { describeFilters, runTool, TOOLS, validArgs, type Source } from './tools.ts';
 
 export type Sources = { groups: Extract<Source, { kind: 'group' }>[]; people: Extract<Source, { kind: 'person' }>[]; morePeople: number };
 export type AnswerEvent =
@@ -17,8 +17,19 @@ const MAX_TOOL_ROUNDS = 6;
 const HISTORY_LIMIT = 20;
 const OUT_OF_LOOKUPS = 'You have used all your lookups. Answer now from what you found, and say plainly what you could not check.';
 
-/** "Working out salary for United States…": what the assistant is doing, in words. */
-function stepText(name: string, args: Record<string, unknown>): string {
+/**
+ * "Working out salary for United States…": what the assistant is doing, in words. Only checked arguments are described;
+ * ones the tool will refuse (its error goes back to the model) get the plain wording.
+ */
+function stepText(name: string, raw: unknown): string {
+  const args = validArgs(name, raw);
+  if (!args) {
+    const metric = (raw as { metric?: unknown } | null)?.metric;
+    if (name === 'aggregate') return `Working out ${metric === 'raise_pct' ? 'raise %' : metric === 'salary' || metric === 'headcount' ? metric : 'numbers'}…`;
+    if (name === 'get_employee') return 'Reading a record…';
+    if (name === 'query_changes') return 'Looking at changes…';
+    return 'Looking up people…';
+  }
   const who = describeFilters((args.filters ?? {}) as Parameters<typeof describeFilters>[0]);
   if (name === 'aggregate') return `Working out ${String(args.metric ?? 'numbers').replace('_pct', ' %')} for ${who === 'Everyone' ? 'everyone' : who}…`;
   if (name === 'get_employee') return `Reading ${String(args.code)}'s record…`;
@@ -55,7 +66,7 @@ export async function answerQuestion(opts: {
       tool_calls: calls.map((c): ToolCall => ({ id: c.id, type: 'function', function: { name: c.name, arguments: JSON.stringify(c.args) } })),
     });
     for (const call of calls) {
-      opts.onEvent({ type: 'step', text: stepText(call.name, (call.args ?? {}) as Record<string, unknown>) });
+      opts.onEvent({ type: 'step', text: stepText(call.name, call.args) });
       const { result, sources } = await runTool(opts.db, opts.today, call.name, call.args);
       usedTools = true;
       found.push(...sources);

@@ -276,6 +276,13 @@ const TOOLS_BY_NAME = {
   aggregate: { schema: aggregateSchema, run: aggregate },
 } as const;
 
+/** The tool's arguments after its own checks, or null when the tool would refuse them. */
+export function validArgs(name: string, args: unknown): Record<string, unknown> | null {
+  if (!Object.hasOwn(TOOLS_BY_NAME, name)) return null;
+  const parsed = TOOLS_BY_NAME[name as keyof typeof TOOLS_BY_NAME].schema.safeParse(args);
+  return parsed.success ? (parsed.data as Record<string, unknown>) : null;
+}
+
 /** Runs one tool call from the model. Never throws for bad input: the error goes back to the model. */
 export async function runTool(db: pg.Pool, today: string, name: string, args: unknown): Promise<ToolResult> {
   if (!Object.hasOwn(TOOLS_BY_NAME, name)) return { result: { error: `There is no tool called "${name}".` }, sources: [] };

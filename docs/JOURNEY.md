@@ -627,6 +627,7 @@ is done (hashes copied from `git log`).
 - Phase 6 QA fixes 10–12 · green: Stop and Send are separate keyed buttons, so clicking Stop no longer submits the waiting question; long fact values (emails) wrap inside their column; the list shows fewer page buttons on a phone so they stay on one line.
 - Test fix: the keyboard add-employee test failed in 2 of 5 full runs with Role left empty (it passes alone). The arrow-key helper now reads only the focused field's own list, and the test checks each choice right after making it, so a repeat points at the exact step. Cause unconfirmed (likely Enter landing while the searchable Role list re-renders after the department change); 3 later runs green. Nikhil's "please continue" logged as P5.
 - Model smoke test fix 1 · red (found with the real free models): badly shaped tool arguments (a single value where a list is expected) go back to the model as an error; the step text read the unchecked arguments and crashed the whole answer ("f.country.map is not a function").
+- Model smoke test fix 1 · green: the step text describes only arguments that pass the tool's own checks (validArgs), with plain wording otherwise; the tool's error still goes back to the model, which can correct itself.
 
 ---
 
