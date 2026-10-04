@@ -185,3 +185,36 @@ test('every person starts with a hire change; raises, promotions, relocations wi
   const left = new Map(seed.leaveEvents.filter((ev) => ev.kind === 'left').map((ev) => [ev.code, ev.leaveDate]));
   for (const e of leavers) expect(left.get(e.code), e.code).toBe(e.leaveDate);
 });
+
+test.fails('managers employed, more senior, no loops', async () => {
+  // On a sample of dates, every manager in force is employed that day, in the same country and department, and more senior.
+  for (const date of ['2014-06-30', '2018-03-15', '2021-11-01', '2024-04-02', SEED_ANCHOR]) {
+    const { rows } = await db.query(
+      `WITH s AS (SELECT * FROM employee_state($1))
+       SELECT e.code, s.manager_id, ms.level AS manager_level, s.level, ms.country = s.country AS same_country,
+              ms.department = s.department AS same_department,
+              m.hire_date <= $1 AND (m.leave_date IS NULL OR m.leave_date > $1) AS manager_employed
+       FROM s JOIN employees e ON e.id = s.employee_id
+       JOIN employees m ON m.id = s.manager_id JOIN s ms ON ms.employee_id = s.manager_id
+       WHERE e.hire_date <= $1 AND (e.leave_date IS NULL OR e.leave_date > $1)`,
+      [date],
+    );
+    for (const r of rows) {
+      expect(r.manager_employed, `${date} ${r.code}`).toBe(true);
+      expect(r.same_country && r.same_department, `${date} ${r.code}`).toBe(true);
+      expect(r.manager_level, `${date} ${r.code}`).toBeGreaterThan(r.level);
+    }
+    if (date === SEED_ANCHOR) expect(rows.length).toBeGreaterThan(6000); // most people have a manager
+  }
+  // Strictly higher levels make loops impossible; check the anchor chain anyway.
+  const loops = await db.query(
+    `WITH RECURSIVE s AS MATERIALIZED (SELECT employee_id, manager_id FROM employee_state($1)),
+     chain (start, id, depth) AS (
+       SELECT employee_id, manager_id, 1 FROM s WHERE manager_id IS NOT NULL
+       UNION ALL SELECT chain.start, s.manager_id, depth + 1 FROM chain JOIN s ON s.employee_id = chain.id WHERE s.manager_id IS NOT NULL AND depth < 20
+     )
+     SELECT count(*)::int AS n FROM chain WHERE id = start`,
+    [SEED_ANCHOR],
+  );
+  expect(loops.rows[0].n).toBe(0);
+});
