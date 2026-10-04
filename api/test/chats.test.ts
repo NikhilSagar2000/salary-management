@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import type { ModelFn } from '../src/assistant/model.ts';
+import { ModelError, type ModelFn } from '../src/assistant/model.ts';
 import { asText, insertPeople, PASSWORD, scriptedModel, sseEvents, signIn, testApp } from './helpers.ts';
 
 test('creates, lists newest first, renames (1–80 characters) and deletes chats', async () => {
@@ -148,5 +148,26 @@ test('stopping saves the partial answer as Stopped', async () => {
     await again.text();
   } finally {
     server.close();
+  }
+});
+
+test.fails('rate limit keeps the question and saves the free-limit message', async () => {
+  const failing = (err: Error): ModelFn => async function* () { throw err; };
+  for (const [err, kind, message] of [
+    [new ModelError('rate_limited', '429'), 'rate_limited', 'The free AI model limit has been reached. Try again later; everything else in the app still works.'],
+    [new ModelError('unavailable', '502'), 'unavailable', "The assistant isn't available right now. Try again in a minute."],
+    [new Error('boom'), 'unavailable', "The assistant isn't available right now. Try again in a minute."],
+  ] as const) {
+    const { app } = await testApp({ model: failing(err) });
+    const agent = await signIn(app);
+    const chat = (await agent.post('/api/chats').send({})).body;
+    const res = await agent.post(`/api/chats/${chat.id}/messages`).send({ question: 'Median pay?' }).buffer(true).parse(asText);
+    expect(sseEvents(res.body)).toEqual([{ event: 'error', data: { kind, message } }]);
+    const { messages } = (await agent.get(`/api/chats/${chat.id}`)).body;
+    expect(messages).toEqual([
+      expect.objectContaining({ role: 'user', content: 'Median pay?', status: 'complete' }),
+      expect.objectContaining({ role: 'assistant', content: message, status: 'error', errorKind: kind }),
+    ]);
+    expect((await agent.get('/api/employees')).status).toBe(200); // the rest of the app keeps working
   }
 });

@@ -438,6 +438,7 @@ is done (hashes copied from `git log`).
 - Task 18 · green: while a chat is answering, another question to it gets 409 "Wait for the current answer to finish, or stop it."; other chats are unaffected (AST-12).
 - Task 18 · red: Stop saves the partial answer as "stopped" (AST-12).
 - Task 18 · green: closing the stream (Stop) aborts the model and saves the partial answer as "stopped"; the chat is free again at once (AST-12).
+- Task 18 · red: a rate limit or an unavailable model sends a plain error event, keeps the question and saves the message (AST-14, AST-15).
 
 ---
 
