@@ -104,3 +104,10 @@ export const leaveSchema = z.object({
   reason: z.string().trim().max(500, { error: MSG.reasonTooLong }).optional(),
 });
 export type Leave = z.infer<typeof leaveSchema>;
+
+/** Employee list query (URL state): filters, sort and paging. */
+export const listQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  pageSize: z.coerce.number().pipe(z.union([z.literal(25), z.literal(50), z.literal(100)])).default(25),
+});
+export type ListQuery = z.infer<typeof listQuerySchema>;

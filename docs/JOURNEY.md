@@ -328,6 +328,7 @@ is done (hashes copied from `git log`).
 - Task 10 · red: timeline with from → to and scheduled/cancelled/won't-apply/leave markers (EMP-14).
 - Task 10 · green: the detail timeline lists changes in date order with from → to values (salary with its currency, manager with code and name), marking the hire, scheduled, cancelled and won't-apply changes, plus leave and undo events (EMP-14).
 - Task 11 · red: list paging (LIST-1); `insertPeople` fixture inserts people straight into the database.
+- Task 11 · green: `GET /api/employees` pages (25 default; 25/50/100) with the total; migration 005 adds `unaccent`, `pg_trgm`, an indexed search expression and `current_state(today)`. Postgres 17 evaluates index expressions with a safe search_path, so the search functions are schema-qualified (first run failed on that).
 
 ---
 

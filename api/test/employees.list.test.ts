@@ -8,7 +8,7 @@ async function setup(people: Parameters<typeof insertPeople>[1] = []) {
   return { agent, db, list: (query = '') => agent.get(`/api/employees${query}`) };
 }
 
-test.fails('returns a page of 25 with the total; 50 and 100 allowed', async () => {
+test('returns a page of 25 with the total; 50 and 100 allowed', async () => {
   const { list } = await setup(Array.from({ length: 60 }, (_, i) => ({ code: code(i + 1), lastName: `Person${String(i + 1).padStart(2, '0')}` })));
   const first = await list();
   expect(first.status).toBe(200);

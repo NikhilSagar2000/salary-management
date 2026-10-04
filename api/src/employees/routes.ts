@@ -1,4 +1,4 @@
-import { employeeCreateSchema, employeeDetailsSchema, jobChangeSchema, leaveSchema, MSG } from '@acme/shared';
+import { employeeCreateSchema, employeeDetailsSchema, jobChangeSchema, leaveSchema, listQuerySchema, MSG } from '@acme/shared';
 import { Router, type RequestHandler } from 'express';
 import type pg from 'pg';
 import { fieldErrors, sendFieldErrors, sendStaleOrMissing } from '../http.ts';
@@ -7,6 +7,7 @@ import { addChange, cancelChange } from './changes.ts';
 import { employeeDetail } from './detail.ts';
 import { updateDetails } from './details.ts';
 import { markLeaving, undoLeaving } from './leave.ts';
+import { listEmployees } from './list.ts';
 
 export function employeeRoutes({ db }: { db: pg.Pool }) {
   const router = Router();
@@ -21,6 +22,12 @@ export function employeeRoutes({ db }: { db: pg.Pool }) {
     }
     next();
   };
+
+  router.get('/api/employees', async (req, res) => {
+    const parsed = listQuerySchema.safeParse(req.query);
+    if (!parsed.success) return fieldErrors(res, parsed.error.issues);
+    res.json(await listEmployees(db, parsed.data, res.locals.today));
+  });
 
   router.get('/api/employees/next-code', async (_req, res) => {
     res.json({ code: await nextCode(db) });
