@@ -59,3 +59,21 @@ test('refuses files over 5 MB or 10,000 rows', async () => {
     { line: 0, column: '', message: 'The file has 10,001 rows; one import can take at most 10,000. Split it into smaller files.' },
   ]);
 });
+
+test.fails('quoted commas and line breaks, CRLF and trailing blank lines parse correctly', async () => {
+  const { preview } = await setup();
+  const csv = [
+    HEADER,
+    'E000001,"Ana, Maria",Silva,female,ana@acme.example,BR,Engineering,Software Engineer,3,133000,2024-02-29',
+    'E000002,Bea,Costa,female,bea@acme.example,BR,Engineering,"Software\r\nEngineer",3,133000,2024-02-29', // lines 3–4
+    'E000003,Caio,Lima,male,caio@acme.example,BR,Engineering,Software Engineer,3,"95,000",2024-02-29', // line 5
+    '',
+    '',
+  ].join('\r\n');
+  const res = await preview(csv);
+  expect(res.body.rows.map((r: { code: string; firstName: string }) => [r.code, r.firstName])).toEqual([['E000001', 'Ana, Maria']]);
+  expect(res.body.problems).toEqual([
+    { line: 3, column: 'role', message: 'Choose a role.' },
+    { line: 5, column: 'salary', message: 'Write the salary without separators, like 95000.' },
+  ]);
+});

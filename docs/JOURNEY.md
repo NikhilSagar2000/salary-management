@@ -382,6 +382,7 @@ is done (hashes copied from `git log`).
 - Task 15 · green: a currency column must match the country, and the export's status/leave columns must be empty (CSV-3).
 - Task 15 · red: files over 5 MB or 10,000 rows are refused plainly (CSV-3).
 - Task 15 · green: files over 5 MB get 413 with a plain message; more than 10,000 rows is a whole-file problem (CSV-3).
+- Task 15 · red: Excel CSV quirks — quoted commas and line breaks, CRLF, trailing blank lines, with problems on the right line (review focus 3). Watched `csv-parse` report lines 4 and 6 instead of 3 and 5: it counts a quoted CRLF as two lines.
 
 ---
 
