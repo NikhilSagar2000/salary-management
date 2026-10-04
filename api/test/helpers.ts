@@ -1,7 +1,8 @@
-import pg from 'pg';
+import type pg from 'pg';
 import { afterAll } from 'vitest';
 import { createApp } from '../src/app.ts';
 import { fixedClock } from '../src/clock.ts';
+import { createPool } from '../src/db.ts';
 
 export const testDbUrl = () => process.env.TEST_DATABASE_URL!;
 
@@ -11,7 +12,7 @@ afterAll(async () => {
 });
 
 export function testPool() {
-  const pool = new pg.Pool({ connectionString: testDbUrl() });
+  const pool = createPool(testDbUrl());
   pools.push(pool);
   return pool;
 }

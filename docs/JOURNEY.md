@@ -242,6 +242,7 @@ is done (hashes copied from `git log`).
 - Task 1 · green: `requestTimezone` validates the IANA name (UTC fallback); `todayIn(clock, tz)` gives that zone's date (TIME-1).
 - Task 1 · red: AST-18 guard test (`setup.test.ts`).
 - Task 1 · green: every test file runs `assertFakeModel(process.env)` first; the suite refuses to start when `OPENROUTER_BASE_URL` points at openrouter.ai (checked: exit 1 with that message).
+- Task 1 · refactor: test pools are built with `createPool`, so the DATE parser always applies.
 
 ---
 
