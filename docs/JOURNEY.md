@@ -385,6 +385,7 @@ is done (hashes copied from `git log`).
 - Task 15 · red: Excel CSV quirks — quoted commas and line breaks, CRLF, trailing blank lines, with problems on the right line (review focus 3). Watched `csv-parse` report lines 4 and 6 instead of 3 and 5: it counts a quoted CRLF as two lines.
 - Task 15 · green: own RFC 4180 parser (D64) replaces `csv-parse`; quoted commas and line breaks, CRLF and trailing blank lines parse, and problems report the line a record starts on. While splitting the red/green commits, overlapping test runs against the shared test DB caused hangs and a misleading "2 failed"; the red commit was re-verified on its own (82 passed + 1 expected fail). Lesson 5 added.
 - Task 15 · red: preview lists valid rows and every problem by line and column, saving nothing (CSV-4). It caught a duplicate message for an out-of-range level ("Software Engineer goes from L1 to L7." after "Choose a level from L1 to L7.").
+- Task 15 · green: a level outside L1–L7 now gets one message, not two (the role/level range rule skips it), and the preview lists every remaining problem by line and column, saving nothing (CSV-4). Slow-run investigation recorded in section 9: the Mac was in 925–926 s maintenance sleeps.
 
 ---
 
@@ -550,6 +551,11 @@ Where the AI was wrong or could have been, and how it was caught:
 - The requirements' commit rules contradicted each other; I nearly wrote my own
   interpretation into `CLAUDE.md` without asking. Caught before committing; asked Q34.
 
+- During Task 15, test runs seemed to hang for ~15 minutes. I first suspected stale planner
+  statistics (wrong: plans were cheap either way) and lock contention from overlapping runs
+  (real once, but not the repeat cause). The stall length was the clue: 926,876 ms and
+  927,955 ms, matching `pmset -g log` entries "Entering Sleep state due to 'Maintenance Sleep'
+  … 925/926 secs". The laptop was asleep on battery. Test commands now run under `caffeinate -i`.
 - I wrote "22 roles" in D49 and in the stop message; the table has 19. Caught while
   typing the table into code in Task 2; corrected in D57.
 

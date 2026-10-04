@@ -78,7 +78,7 @@ test('quoted commas and line breaks, CRLF and trailing blank lines parse correct
   ]);
 });
 
-test.fails('preview lists rows and every problem by line and column, saving nothing', async () => {
+test('preview lists rows and every problem by line and column, saving nothing', async () => {
   const { preview, db } = await setup();
   const res = await preview([
     HEADER,

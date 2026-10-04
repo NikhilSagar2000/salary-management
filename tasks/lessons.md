@@ -15,3 +15,6 @@ Rules learned from Nikhil's corrections and preferences. Read at session start.
    killed runs left Postgres sessions holding locks, and a `;`-chained command committed after a
    failing run. Chain with `&&`, check `pgrep -f "vitest run"` before running, and terminate
    orphaned `acme_test` sessions after killing a run.
+6. **A constant "hang" length is a clue.** Test stalls of ~926 s every time matched the Mac's
+   925–926 s maintenance-sleep cycles in `pmset -g log`, not the code. Check the host before
+   chasing database theories, and run long commands under `caffeinate -i`.

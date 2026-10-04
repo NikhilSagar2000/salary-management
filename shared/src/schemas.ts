@@ -59,7 +59,8 @@ export type EmployeeCreate = z.infer<typeof employeeCreateSchema>;
 /** Problems with a department + role + level combination (used for new employees and job changes). */
 export function jobProblems(job: { department: string; role: string; level: number }) {
   const rule = ROLES[job.role as Role];
-  if (!rule) return [];
+  // An unknown role or a level outside L1–L7 already has its own message.
+  if (!rule || !Number.isInteger(job.level) || job.level < 1 || job.level > 7) return [];
   if (rule.department !== job.department) {
     return [{ path: ['role'], message: MSG.roleNotInDepartment(job.role, job.department) }];
   }
