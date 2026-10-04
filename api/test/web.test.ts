@@ -5,7 +5,7 @@ import request from 'supertest';
 import { expect, test } from 'vitest';
 import { signIn, testApp } from './helpers.ts';
 
-test.fails('serves the built web app: its files, index.html for app routes, JSON under /api', async () => {
+test('serves the built web app: its files, index.html for app routes, JSON under /api', async () => {
   const dir = mkdtempSync(join(tmpdir(), 'acme-web-'));
   writeFileSync(join(dir, 'index.html'), '<!doctype html><title>ACME Pay</title>');
   mkdirSync(join(dir, 'assets'));

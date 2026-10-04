@@ -45,6 +45,12 @@ export function createApp(deps: { db: pg.Pool; clock: Clock; config: Config; mod
   app.use('/api', (_req, res) => {
     res.status(404).json({ error: 'Not found.' });
   });
+  const { webDir } = deps.config;
+  if (webDir) {
+    app.use(express.static(webDir, { index: false }));
+    // App routes (no file extension) get the page, so reloads and shared links work; the browser router takes over.
+    app.get(/^\/[^.]*$/, (_req, res) => res.sendFile('index.html', { root: webDir }));
+  }
   app.use(errorHandler);
   return app;
 }

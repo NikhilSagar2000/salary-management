@@ -516,6 +516,7 @@ is done (hashes copied from `git log`).
 - Task 26 · red: the chat heading takes the title the first question gives the chat (found in the visual check: the list showed the new title, the heading still said New chat).
 - Task 26 · green: the open chat's heading follows the chat list, so the title from the first question shows at once. Rechecked in Chrome against the dev API (no OpenRouter key yet, so the question got the 'isn't available' message as expected) at 1280 px and 390 px.
 - Task 27 · red: the API serves the built web app: its files, index.html for app routes (so a reloaded or shared link works), a 404 for a missing file, and JSON under /api (D66).
+- Task 27 · green: with WEB_DIR set (or web/dist in production) the API serves the built web app: static files, index.html for any path without a file extension, everything under /api untouched (D66).
 
 ---
 
