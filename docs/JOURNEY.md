@@ -356,6 +356,7 @@ is done (hashes copied from `git log`).
 - Task 12 · green: `GET /api/pay-overview?country=` returns department × level cells (median, min, max, headcount) for people employed today, in department then level order (STATS-3).
 - Task 12 · test: someone who moved from the US to Germany counts only in EUR stats and the German overview (STATS-4). Passed first run (stats read the current state); a mutation making the state use the earliest country failed it.
 - Task 13 · data: seed name lists per country and gender (`api/src/seed/names.ts`; romaji for Japan; gender-neutral lists for non-binary people) and pay data copied from the research (`api/src/seed/bands.ts`); D59–D62 record the seed model.
+- Task 13 · red: seed creates exactly 10,000 people with the country split (SEED-1).
 
 ---
 
