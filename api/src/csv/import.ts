@@ -1,4 +1,4 @@
-import { CURRENCY, employeeCreateSchema, MSG, type Country } from '@acme/shared';
+import { CURRENCY, employeeCreateSchema, formatDate, MSG, type Country } from '@acme/shared';
 import type pg from 'pg';
 
 const MAX_ROWS = 10_000;
@@ -82,7 +82,7 @@ function readCsv(text: string): { records: Record_[]; problems: Problem[] } {
 const unguard = (s: string) => (/^'[=+\-@\t\r]/.test(s) ? s.slice(1) : s);
 
 /** Checks a CSV of new employees against every rule; returns the rows as they would be saved and all problems. */
-export async function checkImport(_db: pg.Pool | pg.PoolClient, text: string): Promise<{ rows: ImportRow[]; problems: Problem[] }> {
+export async function checkImport(db: pg.Pool | pg.PoolClient, text: string): Promise<{ rows: ImportRow[]; problems: Problem[] }> {
   const { records, problems } = readCsv(text);
   const rows: ImportRow[] = [];
   if (records.length > MAX_ROWS) return { rows, problems: [{ line: 0, column: '', message: MSG.importTooManyRows(records.length) }] };
@@ -106,5 +106,32 @@ export async function checkImport(_db: pg.Pool | pg.PoolClient, text: string): P
     if (problems.length > before) continue;
     rows.push({ line, ...e, currency: CURRENCY[e.country as Country], managerCode: e.managerCode ?? null });
   }
-  return { rows, problems };
+  const managerProblems = await checkManagers(db, rows);
+  problems.push(...managerProblems);
+  const bad = new Set(managerProblems.map((p) => p.line));
+  return { rows: rows.filter((r) => !bad.has(r.line)), problems: problems.sort((a, b) => a.line - b.line) };
+}
+
+/** CSV-5: a manager is an employee in the database or a row in this file, employed on the row's hire date, and not the person. */
+async function checkManagers(db: pg.Pool | pg.PoolClient, rows: ImportRow[]): Promise<Problem[]> {
+  const codes = [...new Set(rows.map((r) => r.managerCode).filter((c): c is string => c !== null))];
+  const { rows: found } = await db.query(
+    'SELECT code, first_name, last_name, hire_date, leave_date FROM employees WHERE code = ANY($1)',
+    [codes],
+  );
+  type Manager = { name: string; hireDate: string; leaveDate: string | null };
+  const managers = new Map<string, Manager>(
+    rows.map((r) => [r.code, { name: `${r.firstName} ${r.lastName}`, hireDate: r.hireDate, leaveDate: null }]),
+  );
+  for (const m of found) managers.set(m.code, { name: `${m.first_name} ${m.last_name}`, hireDate: m.hire_date, leaveDate: m.leave_date });
+  const problems: Problem[] = [];
+  for (const r of rows) {
+    if (r.managerCode === null) continue;
+    const m = managers.get(r.managerCode);
+    const problem = (message: string) => problems.push({ line: r.line, column: 'manager_code', message });
+    if (r.managerCode === r.code) problem(MSG.ownManager);
+    else if (!m) problem(MSG.noEmployee(r.managerCode));
+    else if (m.hireDate > r.hireDate || (m.leaveDate && m.leaveDate <= r.hireDate)) problem(MSG.managerNotEmployed(m.name, formatDate(r.hireDate)));
+  }
+  return problems;
 }

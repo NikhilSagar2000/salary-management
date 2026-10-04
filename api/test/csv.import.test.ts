@@ -96,7 +96,7 @@ test('preview lists rows and every problem by line and column, saving nothing', 
   expect((await db.query('SELECT count(*)::int AS n FROM employees')).rows[0].n).toBe(0);
 });
 
-test.fails('applies the add-employee rules, ISO dates, manager from the database or the same file', async () => {
+test('applies the add-employee rules, ISO dates, manager from the database or the same file', async () => {
   const { preview } = await setup([{ code: 'E000500' }, { code: 'E000501', leaveDate: '2023-01-01' }]);
   const header = `${HEADER},manager_code`;
   const res = await preview([

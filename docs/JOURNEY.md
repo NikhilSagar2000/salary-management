@@ -387,6 +387,7 @@ is done (hashes copied from `git log`).
 - Task 15 · red: preview lists valid rows and every problem by line and column, saving nothing (CSV-4). It caught a duplicate message for an out-of-range level ("Software Engineer goes from L1 to L7." after "Choose a level from L1 to L7.").
 - Task 15 · green: a level outside L1–L7 now gets one message, not two (the role/level range rule skips it), and the preview lists every remaining problem by line and column, saving nothing (CSV-4). Slow-run investigation recorded in section 9: the Mac was in 925–926 s maintenance sleeps.
 - Task 15 · red: import manager rules — in the database or the same file, employed on the hire date, not the person (CSV-5).
+- Task 15 · green: import checks each manager_code — the database or an earlier-hired row in the same file, employed on the row's hire date, not the person; problems sorted by line (CSV-5). One full run timed out two seed tests during a 208 s host sleep; the re-run passed (85/85).
 
 ---
 
