@@ -354,6 +354,7 @@ is done (hashes copied from `git log`).
 - Task 12 · green: list stats leave out people who haven't started; leavers count only when the status filter includes them (STATS-2, LEAVE-6).
 - Task 12 · red: pay overview grid for one country (STATS-3).
 - Task 12 · green: `GET /api/pay-overview?country=` returns department × level cells (median, min, max, headcount) for people employed today, in department then level order (STATS-3).
+- Task 12 · test: someone who moved from the US to Germany counts only in EUR stats and the German overview (STATS-4). Passed first run (stats read the current state); a mutation making the state use the earliest country failed it.
 
 ---
 

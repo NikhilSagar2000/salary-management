@@ -209,7 +209,7 @@ is written just before the task starts, from the interfaces that exist at that p
   range need exactly one country" (LIST-5) · "rejects invalid query values naming the value"
   (LIST-7) · "rows carry current job, salary with currency, hire date and status" (LIST-8) ·
   "no matches gives an empty page, not an error" (review focus 5).
-- [ ] **Task 12: Pay statistics.** Files: `api/src/stats/*`. Tests: `stats.test.ts` › "list
+- [x] **Task 12: Pay statistics.** Files: `api/src/stats/*`. Tests: `stats.test.ts` › "list
   summary gives median, min, max and headcount per currency for the whole filtered set"
   (LIST-9) · "median is percentile_cont rounded half away from zero" · "never combines
   currencies" (STATS-1) · "counts active and leaving, not starting; left only when asked"
@@ -605,10 +605,10 @@ whole filtered set, counting people per STATS-2 (never starting; left only if th
 includes them). `GET /api/pay-overview?country=US` → `{ country, currency, cells: [{ department,
 level, median, min, max, headcount }] }` for people active or leaving today.
 
-- [ ] Step 1: "list summary gives median, min, max and headcount per currency for the whole filtered set" (LIST-9).
-- [ ] Step 2: "median is percentile_cont rounded half away from zero" (STATS-1).
-- [ ] Step 3: "never combines currencies" (STATS-1).
-- [ ] Step 4: "counts active and leaving, not starting; left only when asked" (STATS-2, LEAVE-6).
-- [ ] Step 5: "overview gives department × level cells for one country" (STATS-3).
-- [ ] Step 6: "a relocated person counts only in their current country" (STATS-4).
-- [ ] Task check: `npm test`.
+- [x] Step 1: "list summary gives median, min, max and headcount per currency for the whole filtered set" (LIST-9).
+- [x] Step 2: "median is percentile_cont rounded half away from zero" (STATS-1).
+- [x] Step 3: "never combines currencies" (STATS-1).
+- [x] Step 4: "counts active and leaving, not starting; left only when asked" (STATS-2, LEAVE-6).
+- [x] Step 5: "overview gives department × level cells for one country" (STATS-3).
+- [x] Step 6: "a relocated person counts only in their current country" (STATS-4).
+- [x] Task check: `npm test`.

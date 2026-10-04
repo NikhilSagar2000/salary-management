@@ -81,3 +81,11 @@ test('overview gives department × level cells for one country', async () => {
   expect(missing.status).toBe(400);
   expect(missing.body.fields).toEqual({ country: 'Choose a country.' });
 });
+
+test('a relocated person counts only in their current country', async () => {
+  const { agent, db, stats } = await setup([{ code: 'E000001', country: 'US', salary: 150000 }]);
+  await db.query(`INSERT INTO job_changes (employee_id, effective_date, country, salary, currency) VALUES (1, '2025-01-01', 'DE', 95000, 'EUR')`);
+  expect(await stats()).toEqual([{ currency: 'EUR', median: 95000, min: 95000, max: 95000, headcount: 1 }]);
+  expect((await agent.get('/api/pay-overview?country=US')).body.cells).toEqual([]);
+  expect((await agent.get('/api/pay-overview?country=DE')).body.cells).toHaveLength(1);
+});
