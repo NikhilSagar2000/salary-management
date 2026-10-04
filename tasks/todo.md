@@ -282,7 +282,7 @@ is written just before the task starts, from the interfaces that exist at that p
   page are read from and written to the URL" (LIST-6) · "rows show the listed columns"
   (LIST-8) · "stats line per currency above the list" (LIST-9) · "no matches shows the empty
   state and no stats" (review focus 5) · "export downloads the current filter" (CSV-1).
-- [ ] **Task 22: Employee page and change forms.** Tests: `EmployeeDetail.test.tsx` › "code
+- [x] **Task 22: Employee page and change forms.** Tests: `EmployeeDetail.test.tsx` › "code
   and hire date are read-only" (EMP-5) · "invalid fields show their messages and focus the
   first" (EMP-3, A11Y-3) · "a 409 keeps the typed input and offers Reload" (EMP-13) · "shows
   peers' position, manager flag, reports and the history timeline" (EMP-14) · "cancel appears
@@ -778,12 +778,12 @@ Files: `web/src/pages/EmployeeDetail.tsx`, `web/src/pages/employee/{Timeline,Det
 Forms open in modals; client validation uses the shared Zod schemas, server field errors show
 next to the same fields; 409 keeps the input and offers Reload; Save is disabled while saving.
 
-- [ ] Step 1: "code and hire date are read-only" (EMP-5).
-- [ ] Step 2: "shows peers' position, manager flag, reports and the history timeline" (EMP-14).
-- [ ] Step 3: "invalid fields show their messages and focus the first" (EMP-3, A11Y-3).
-- [ ] Step 4: "a 409 keeps the typed input and offers Reload" (EMP-13).
-- [ ] Step 5: "cancel appears only on scheduled changes" (EMP-11).
-- [ ] Step 6: "change job or pay sends a dated change with only what changed" (EMP-7, EMP-9; needed by A11Y-2).
-- [ ] Step 7: "mark as leaving, then only Undo is offered" (LEAVE-1, LEAVE-3).
-- [ ] Step 8: "save button can't submit twice".
-- [ ] Task check: `npm test`.
+- [x] Step 1: "code and hire date are read-only" (EMP-5).
+- [x] Step 2: "shows peers' position, manager flag, reports and the history timeline" (EMP-14).
+- [x] Step 3: "invalid fields show their messages and focus the first" (EMP-3, A11Y-3).
+- [x] Step 4: "a 409 keeps the typed input and offers Reload" (EMP-13).
+- [x] Step 5: "cancel appears only on scheduled changes" (EMP-11).
+- [x] Step 6: "change job or pay sends a dated change with only what changed" (EMP-7, EMP-9; needed by A11Y-2).
+- [x] Step 7: "mark as leaving, then only Undo is offered" (LEAVE-1, LEAVE-3).
+- [x] Step 8: "save button can't submit twice".
+- [x] Task check: `npm test`.
