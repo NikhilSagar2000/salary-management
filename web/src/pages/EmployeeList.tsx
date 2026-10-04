@@ -110,6 +110,7 @@ export function EmployeeList() {
       {!data && !error && <Skeleton h={320} aria-label="Loading employees" />}
       {data && (
         <>
+          <PaySummary stats={data.stats} />
           <EmployeeCards rows={data.rows} />
           <EmployeeTable
             rows={data.rows}
@@ -205,6 +206,23 @@ function EmployeeCards({ rows }: { rows: Row[] }) {
             </Stack>
           </Group>
         </Paper>
+      ))}
+    </Stack>
+  );
+}
+
+const grouped = (n: number) => n.toLocaleString('en-US');
+
+/** LIST-9: median, min, max and headcount for the whole filtered set, one line per currency. */
+function PaySummary({ stats }: { stats: Stats[] }) {
+  if (!stats.length) return null;
+  return (
+    <Stack component="ul" aria-label="Pay for these employees" gap={2} p={0} m={0} style={{ listStyle: 'none' }}>
+      {stats.map((s) => (
+        <Text component="li" key={s.currency} size="sm">
+          <Text span fw={600}>{s.currency}:</Text> median {grouped(s.median)}, min {grouped(s.min)}, max {grouped(s.max)},{' '}
+          {grouped(s.headcount)} {s.headcount === 1 ? 'person' : 'people'}
+        </Text>
       ))}
     </Stack>
   );

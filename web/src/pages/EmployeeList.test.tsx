@@ -67,7 +67,7 @@ test('rows show the listed columns, as a table and as phone cards', async () => 
   expect(within(anaCard!).getByRole('link', { name: 'Ana Silva' })).toHaveAttribute('href', '/employees/E000123');
 });
 
-test.fails('stats line per currency above the list', async () => {
+test('stats line per currency above the list', async () => {
   signedInWith(listResponse({
     stats: [
       { currency: 'USD', median: 128000, min: 62000, max: 410000, headcount: 2914 },
