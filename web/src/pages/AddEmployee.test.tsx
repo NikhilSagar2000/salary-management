@@ -107,7 +107,7 @@ test("shows each field's message next to it", async () => {
   expect(code).toHaveFocus();
 });
 
-test.fails('a field loses its message as soon as it is changed', async () => {
+test('a field loses its message as soon as it is changed', async () => {
   start();
   await suggestedCode();
   await userEvent.click(screen.getByRole('button', { name: 'Add employee' }));

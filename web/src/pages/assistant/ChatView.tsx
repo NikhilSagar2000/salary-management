@@ -156,7 +156,10 @@ function RenameForm({ id, title: current, onCancel, onSaved }: { id: number; tit
     <form ref={form.ref} onSubmit={submit} noValidate>
       <Stack>
         {form.formError && <Alert color="red" role="alert">{form.formError.message}</Alert>}
-        <TextInput label="Chat name" data-autofocus value={title} onChange={(e) => setTitle(e.currentTarget.value)} error={form.fields.title} />
+        <TextInput label="Chat name" data-autofocus value={title} onChange={(e) => {
+          form.clearField('title');
+          setTitle(e.currentTarget.value);
+        }} error={form.fields.title} />
         <Group justify="flex-end">
           <Button variant="default" onClick={onCancel}>Cancel</Button>
           <Button type="submit" loading={form.saving}>Save</Button>

@@ -14,7 +14,10 @@ export function AddEmployee() {
     code: '', firstName: '', lastName: '', gender: '', workEmail: '', hireDate: '',
     country: '', department: '', role: '', level: '', salary: '' as number | string, managerCode: '',
   });
-  const set = (key: keyof typeof v) => (value: string | number | null) => setV((s) => ({ ...s, [key]: value ?? '' }));
+  const set = (key: keyof typeof v) => (value: string | number | null) => {
+    form.clearField(key);
+    setV((s) => ({ ...s, [key]: value ?? '' }));
+  };
 
   useEffect(() => {
     // Keep anything HR typed before the suggestion arrives.
@@ -57,9 +60,15 @@ export function AddEmployee() {
             <SimpleGrid cols={{ base: 1, sm: 2 }}>
               <Select label="Country" data={COUNTRY_OPTIONS} value={v.country || null} onChange={set('country')} error={form.fields.country} allowDeselect={false} />
               <Select label="Department" data={[...DEPARTMENTS]} value={v.department || null} error={form.fields.department} allowDeselect={false}
-                onChange={(d) => setV((s) => ({ ...s, department: d ?? '', role: roleChoices(d ?? '').includes(s.role) ? s.role : '' }))} />
+                onChange={(d) => {
+                  form.clearField('department');
+                  setV((s) => ({ ...s, department: d ?? '', role: roleChoices(d ?? '').includes(s.role) ? s.role : '' }));
+                }} />
               <Select label="Role" data={roleChoices(v.department)} value={v.role || null} error={form.fields.role} allowDeselect={false} searchable
-                onChange={(r) => setV((s) => ({ ...s, role: r ?? '', level: levelChoices(r ?? '').some((l) => l.value === s.level) ? s.level : '' }))} />
+                onChange={(r) => {
+                  form.clearField('role');
+                  setV((s) => ({ ...s, role: r ?? '', level: levelChoices(r ?? '').some((l) => l.value === s.level) ? s.level : '' }));
+                }} />
               <Select label="Level" data={levelChoices(v.role)} value={v.level || null} onChange={set('level')} error={form.fields.level} allowDeselect={false} />
               <NumberInput label="Salary" description={`Annual base, in ${v.country ? CURRENCY[v.country as Country] : "the country's currency"}`}
                 thousandSeparator="," allowDecimal={false} min={1} value={v.salary} onChange={set('salary')} error={form.fields.salary} />

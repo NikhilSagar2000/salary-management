@@ -12,7 +12,10 @@ export function DetailsForm({ detail, onSaved, onReload }: { detail: Detail; onS
     firstName: detail.firstName, lastName: detail.lastName, gender: detail.gender, workEmail: detail.workEmail,
   });
   const form = useFormErrors();
-  const set = (key: keyof typeof values) => (value: string) => setValues((v) => ({ ...v, [key]: value }));
+  const set = (key: keyof typeof values) => (value: string) => {
+    form.clearField(key);
+    setValues((v) => ({ ...v, [key]: value }));
+  };
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();

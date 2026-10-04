@@ -26,8 +26,14 @@ export function LeaveForm({ detail, onSaved, onReload }: { detail: Detail; onSav
       <Stack>
         <FormAlert error={form.formError} onReload={() => { form.clearFormError(); onReload(); }} />
         <TextInput type="date" label="Leave date" description="Their last day; a future date while they work their notice"
-          value={leaveDate} onChange={(e) => setLeaveDate(e.currentTarget.value)} error={form.fields.leaveDate} />
-        <Textarea label="Reason (optional)" rows={2} maxLength={500} value={reason} onChange={(e) => setReason(e.currentTarget.value)} error={form.fields.reason} />
+          value={leaveDate} onChange={(e) => {
+            form.clearField('leaveDate');
+            setLeaveDate(e.currentTarget.value);
+          }} error={form.fields.leaveDate} />
+        <Textarea label="Reason (optional)" rows={2} maxLength={500} value={reason} onChange={(e) => {
+          form.clearField('reason');
+          setReason(e.currentTarget.value);
+        }} error={form.fields.reason} />
         <Group justify="flex-end">
           <Button type="submit" loading={form.saving}>Save</Button>
         </Group>

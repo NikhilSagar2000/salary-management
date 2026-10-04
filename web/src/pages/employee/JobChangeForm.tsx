@@ -15,7 +15,10 @@ export function JobChangeForm({ detail, onSaved, onReload }: { detail: Detail; o
     salary: now.salary as number | string, managerCode: now.manager?.code ?? '', note: '',
   });
   const form = useFormErrors();
-  const set = (key: keyof typeof v) => (value: string | number | null) => setV((s) => ({ ...s, [key]: value ?? '' }));
+  const set = (key: keyof typeof v) => (value: string | number | null) => {
+    form.clearField(key);
+    setV((s) => ({ ...s, [key]: value ?? '' }));
+  };
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
@@ -44,7 +47,10 @@ export function JobChangeForm({ detail, onSaved, onReload }: { detail: Detail; o
           <Select label="Country" data={COUNTRY_OPTIONS} value={v.country}
             onChange={set('country')} error={form.fields.country} allowDeselect={false} />
           <Select label="Department" data={[...DEPARTMENTS]} value={v.department} allowDeselect={false} error={form.fields.department}
-            onChange={(d) => setV((s) => ({ ...s, department: d ?? s.department, role: '' }))} />
+            onChange={(d) => {
+              form.clearField('department');
+              setV((s) => ({ ...s, department: d ?? s.department, role: '' }));
+            }} />
           <Select label="Role" data={roleChoices(v.department)} value={v.role || null} onChange={set('role')} error={form.fields.role} allowDeselect={false} />
           <Select label="Level" data={LEVELS.map((l) => ({ value: String(l), label: `L${l}` }))} value={v.level}
             onChange={set('level')} error={form.fields.level} allowDeselect={false} />

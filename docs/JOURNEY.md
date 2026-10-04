@@ -599,6 +599,7 @@ is done (hashes copied from `git log`).
 - Phase 6 QA fix 6 · red (found by QA, EMP-14): someone who has left shows "Last job" and is not compared with today's peers (a 2015 salary was shown as "6% above the median of 23 peers").
 - Phase 6 QA fix 6 · green: the API returns no peers for someone who has left (the assistant's get_employee tool gets the same); the page titles the job "Last job" and says why there is no comparison.
 - Phase 6 QA fix 7 · red (found by QA, EMP-3): a field loses its message as soon as HR changes it; the rest stay until fixed (messages used to linger until the next submit).
+- Phase 6 QA fix 7 · green: changing a field drops its message (all five forms); a submit still moves focus to the first invalid field, a clear never moves focus.
 
 ---
 

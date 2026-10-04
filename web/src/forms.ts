@@ -14,11 +14,26 @@ export function issuesToFields(issues: readonly { path: readonly PropertyKey[]; 
  */
 export function useFormErrors() {
   const ref = useRef<HTMLFormElement>(null);
-  const [fields, setFields] = useState<Record<string, string>>({});
+  const [fields, setFieldState] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<{ message: string; stale: boolean } | null>(null);
   const [saving, setSaving] = useState(false);
+  // Only a submit moves focus; clearing a message while HR types must not.
+  const focusFirst = useRef(false);
+  const setFields = (next: Record<string, string>) => {
+    focusFirst.current = true;
+    setFieldState(next);
+  };
+  /** Drops a field's message once HR changes that field. */
+  const clearField = (key: string) =>
+    setFieldState((f) => {
+      if (!(key in f)) return f;
+      const { [key]: _, ...rest } = f;
+      return rest;
+    });
   useEffect(() => {
-    if (Object.keys(fields).length) ref.current?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
+    if (!focusFirst.current || !Object.keys(fields).length) return;
+    focusFirst.current = false;
+    ref.current?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
   }, [fields]);
 
   /** Runs a save once at a time; turns failures into field or form messages. Returns true when it saved. */
@@ -37,5 +52,5 @@ export function useFormErrors() {
       setSaving(false);
     }
   };
-  return { ref, fields, setFields, formError, clearFormError: () => setFormError(null), saving, save };
+  return { ref, fields, setFields, clearField, formError, clearFormError: () => setFormError(null), saving, save };
 }
