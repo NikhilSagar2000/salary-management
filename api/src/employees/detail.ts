@@ -1,3 +1,4 @@
+import { dateIn } from '../clock.ts';
 import type { Status } from '@acme/shared';
 import type { Db } from '../db.ts';
 import { peerStats } from '../stats/peers.ts';
@@ -8,8 +9,8 @@ export function statusOn(today: string, hireDate: string, leaveDate: string | nu
   return leaveDate ? 'leaving' : 'active';
 }
 
-/** Everything the employee page shows, or null when the code is unknown. */
-export async function employeeDetail(db: Db, code: string, today: string) {
+/** Everything the employee page shows, or null when the code is unknown. Dates of events are shown in `timezone`. */
+export async function employeeDetail(db: Db, code: string, today: string, timezone = 'UTC') {
   const { rows } = await db.query('SELECT * FROM employees WHERE code = $1', [code]);
   const e = rows[0];
   if (!e) return null;
@@ -46,7 +47,7 @@ export async function employeeDetail(db: Db, code: string, today: string) {
     },
     peers: peers && { ...peers, position: Math.round(((s.salary - peers.median) / peers.median) * 100) },
     reports,
-    timeline: await timeline(db, e.id, today, e.leave_date),
+    timeline: await timeline(db, e.id, today, timezone, e.leave_date),
   };
 }
 
@@ -55,7 +56,7 @@ type Person = { code: string; name: string };
 type Value = string | number | Money | Person | null;
 
 /** Changes (with from → to against the changes that apply before them) and leave events, in date order. */
-async function timeline(db: Db, employeeId: number, today: string, leaveDate: string | null) {
+async function timeline(db: Db, employeeId: number, today: string, timezone: string, leaveDate: string | null) {
   const { rows: changes } = await db.query(
     `SELECT c.*, m.code AS manager_code, m.first_name || ' ' || m.last_name AS manager_name
      FROM job_changes c LEFT JOIN employees m ON m.id = c.manager_id
@@ -79,7 +80,7 @@ async function timeline(db: Db, employeeId: number, today: string, leaveDate: st
     if (!cancelled && !wontApply) for (const [field, to] of set) running[field] = to;
     return {
       type: 'change' as const, id: Number(c.id), date: c.effective_date as string, hire: i === 0, note: c.note,
-      scheduled: c.effective_date > today, cancelled, wontApply, changes: diffs,
+      scheduled: c.effective_date > today, cancelled, cancelledOn: cancelled ? dateIn(c.cancelled_at, timezone) : null, wontApply, changes: diffs,
     };
   });
   const { rows: events } = await db.query('SELECT id, kind, leave_date, reason FROM leave_events WHERE employee_id = $1 ORDER BY id', [employeeId]);

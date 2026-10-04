@@ -14,7 +14,12 @@ export function requestTimezone(header: string | undefined): string {
   }
 }
 
+/** An instant's date as 'YYYY-MM-DD' in the given timezone. */
+export function dateIn(instant: Date, tz: string): string {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' }).format(instant);
+}
+
 /** Today's date as 'YYYY-MM-DD' in the given timezone. */
 export function todayIn(clock: Clock, tz: string): string {
-  return new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' }).format(clock.now());
+  return dateIn(clock.now(), tz);
 }

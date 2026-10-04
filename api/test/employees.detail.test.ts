@@ -67,7 +67,7 @@ test("timeline lists each change with from → to, and marks scheduled, cancelle
   const brl = (amount: number | null) => (amount === null ? null : { amount, currency: 'BRL' });
   expect(timeline.map(({ id: _id, ...rest }: { id?: number }) => rest)).toEqual([
     {
-      type: 'change', date: '2024-02-29', hire: true, note: null, scheduled: false, cancelled: false, wontApply: false,
+      type: 'change', date: '2024-02-29', hire: true, note: null, scheduled: false, cancelled: false, cancelledOn: null, wontApply: false,
       changes: [
         { field: 'country', from: null, to: 'BR' },
         { field: 'department', from: null, to: 'Engineering' },
@@ -77,22 +77,22 @@ test("timeline lists each change with from → to, and marks scheduled, cancelle
       ],
     },
     {
-      type: 'change', date: '2025-01-01', hire: false, note: 'Promotion', scheduled: false, cancelled: false, wontApply: false,
+      type: 'change', date: '2025-01-01', hire: false, note: 'Promotion', scheduled: false, cancelled: false, cancelledOn: null, wontApply: false,
       changes: [{ field: 'level', from: 3, to: 4 }, { field: 'salary', from: brl(133000), to: brl(145000) }],
     },
     { type: 'left', date: '2026-12-31', reason: 'Moving abroad' },
     {
-      type: 'change', date: '2027-01-01', hire: false, note: null, scheduled: true, cancelled: true, wontApply: false,
+      type: 'change', date: '2027-01-01', hire: false, note: null, scheduled: true, cancelled: true, cancelledOn: '2026-10-01', wontApply: false,
       changes: [{ field: 'salary', from: brl(145000), to: brl(150000) }],
     },
     {
-      type: 'change', date: '2027-02-01', hire: false, note: null, scheduled: true, cancelled: false, wontApply: true,
+      type: 'change', date: '2027-02-01', hire: false, note: null, scheduled: true, cancelled: false, cancelledOn: null, wontApply: true,
       changes: [{ field: 'salary', from: brl(145000), to: brl(155000) }],
     },
   ]);
 });
 
-test.fails("a cancelled change says when it was cancelled, as a date in HR's timezone (EMP-11)", async () => {
+test("a cancelled change says when it was cancelled, as a date in HR's timezone (EMP-11)", async () => {
   const { app, db } = await testApp({ now: '2026-10-01T20:00:00Z' }); // already 2 Oct in Tokyo
   const agent = await signIn(app);
   await agent.post('/api/employees').send(newEmployee);

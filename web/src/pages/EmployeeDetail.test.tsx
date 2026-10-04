@@ -195,7 +195,7 @@ test("save button can't submit twice", async () => {
   expect(calls.filter((c) => c.method === 'PATCH')).toHaveLength(1);
 });
 
-test.fails('a cancelled change says when it was cancelled', async () => {
+test('a cancelled change says when it was cancelled', async () => {
   open();
   const items = within(await screen.findByRole('list', { name: 'History' })).getAllByRole('listitem');
   expect(items[0]).toHaveTextContent('Cancelled on 3 Oct 2026');

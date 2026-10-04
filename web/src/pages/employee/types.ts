@@ -3,7 +3,7 @@ import type { Currency } from '@acme/shared';
 export type Money = { amount: number; currency: Currency };
 export type Person = { code: string; name: string };
 export type Change = {
-  type: 'change'; id: number; date: string; hire: boolean; note: string | null; scheduled: boolean; cancelled: boolean; wontApply: boolean;
+  type: 'change'; id: number; date: string; hire: boolean; note: string | null; scheduled: boolean; cancelled: boolean; cancelledOn: string | null; wontApply: boolean;
   changes: { field: string; from: unknown; to: unknown }[];
 };
 export type LeaveEvent = { type: 'left'; date: string; reason: string | null } | { type: 'undone'; date: string };

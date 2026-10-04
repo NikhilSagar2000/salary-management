@@ -1,6 +1,7 @@
 import { employeeCreateSchema, employeeDetailsSchema, jobChangeSchema, leaveSchema, listQuerySchema, MSG } from '@acme/shared';
 import { Router, type RequestHandler } from 'express';
 import type pg from 'pg';
+import type { Clock } from '../clock.ts';
 import { fieldErrors, sendFieldErrors, sendStaleOrMissing } from '../http.ts';
 import { createEmployee, duplicateField, nextCode } from './create.ts';
 import { addChange, cancelChange } from './changes.ts';
@@ -10,7 +11,7 @@ import { markLeaving, undoLeaving } from './leave.ts';
 import { exportCsv } from '../csv/export.ts';
 import { listEmployees } from './list.ts';
 
-export function employeeRoutes({ db }: { db: pg.Pool }) {
+export function employeeRoutes({ db, clock }: { db: pg.Pool; clock: Clock }) {
   const router = Router();
 
   /** LEAVE-3: once someone has left (leave date on or before today), only "undo leaving" may change them. */
@@ -44,7 +45,7 @@ export function employeeRoutes({ db }: { db: pg.Pool }) {
   });
 
   router.get('/api/employees/:code', async (req, res) => {
-    const detail = await employeeDetail(db, req.params.code, res.locals.today);
+    const detail = await employeeDetail(db, req.params.code, res.locals.today, res.locals.timezone);
     if (!detail) {
       res.status(404).json({ error: MSG.noEmployee(req.params.code) });
       return;
@@ -94,7 +95,7 @@ export function employeeRoutes({ db }: { db: pg.Pool }) {
     const version = Number(req.body?.version);
     const changeId = Number(req.params.id);
     if (!Number.isInteger(version) || !Number.isInteger(changeId)) return sendFieldErrors(res, { form: MSG.noChange });
-    const next = await cancelChange(db, req.params.code, changeId, version, res.locals.today);
+    const next = await cancelChange(db, req.params.code, changeId, version, res.locals.today, clock.now());
     if (next === null) return sendStaleOrMissing(res, db, req.params.code);
     res.json({ code: req.params.code, version: next });
   });

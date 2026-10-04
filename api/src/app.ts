@@ -22,7 +22,8 @@ export function createApp(deps: { db: pg.Pool; clock: Clock; config: Config; mod
   app.use(express.json());
   // "Today" is the date in the browser's timezone (TIME-1).
   app.use((req, res, next) => {
-    res.locals.today = todayIn(deps.clock, requestTimezone(req.get('X-Timezone')));
+    res.locals.timezone = requestTimezone(req.get('X-Timezone'));
+    res.locals.today = todayIn(deps.clock, res.locals.timezone);
     next();
   });
   app.get('/api/health', (_req, res) => {
