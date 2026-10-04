@@ -13,7 +13,7 @@ const person = async (db: import('pg').Pool) =>
 const events = async (db: import('pg').Pool) =>
   (await db.query('SELECT kind, leave_date, reason FROM leave_events ORDER BY id')).rows;
 
-test.fails('marks leaving with a date and optional reason', async () => {
+test('marks leaving with a date and optional reason', async () => {
   const { agent, db } = await setup();
   const res = await agent.post('/api/employees/E000123/leave').send({ version: 1, leaveDate: '2026-12-31', reason: 'Moving abroad' });
   expect(res.status).toBe(200);

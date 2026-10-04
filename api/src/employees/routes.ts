@@ -1,10 +1,11 @@
-import { employeeCreateSchema, employeeDetailsSchema, jobChangeSchema, MSG } from '@acme/shared';
+import { employeeCreateSchema, employeeDetailsSchema, jobChangeSchema, leaveSchema, MSG } from '@acme/shared';
 import { Router } from 'express';
 import type pg from 'pg';
 import { fieldErrors, sendFieldErrors, sendStaleOrMissing } from '../http.ts';
 import { createEmployee, duplicateField, nextCode } from './create.ts';
 import { addChange, cancelChange } from './changes.ts';
 import { updateDetails } from './details.ts';
+import { markLeaving } from './leave.ts';
 
 export function employeeRoutes({ db }: { db: pg.Pool }) {
   const router = Router();
@@ -58,6 +59,14 @@ export function employeeRoutes({ db }: { db: pg.Pool }) {
     const next = await cancelChange(db, req.params.code, changeId, version, res.locals.today);
     if (next === null) return sendStaleOrMissing(res, db, req.params.code);
     res.json({ code: req.params.code, version: next });
+  });
+
+  router.post('/api/employees/:code/leave', async (req, res) => {
+    const parsed = leaveSchema.safeParse(req.body);
+    if (!parsed.success) return fieldErrors(res, parsed.error.issues);
+    const version = await markLeaving(db, req.params.code, parsed.data);
+    if (version === null) return sendStaleOrMissing(res, db, req.params.code);
+    res.json({ code: req.params.code, version });
   });
 
   return router;

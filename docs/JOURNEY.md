@@ -312,6 +312,7 @@ is done (hashes copied from `git log`).
 - Task 8 · red: no route edits a change (EMP-12); unknown API routes must answer JSON 404.
 - Task 8 · green: unknown `/api` routes answer JSON 404 "Not found."; there is no route that edits a change (EMP-12).
 - Task 9 · red: mark leaving (LEAVE-1).
+- Task 9 · green: `POST /api/employees/:code/leave` sets leave date and optional reason and records a "left" event (LEAVE-1).
 
 ---
 

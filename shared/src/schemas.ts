@@ -96,3 +96,11 @@ export const jobChangeSchema = z.object({
   if (c.country !== undefined && c.salary === undefined) ctx.addIssue({ code: 'custom', path: ['salary'], message: MSG.moveNeedsSalary });
 });
 export type JobChange = z.infer<typeof jobChangeSchema>;
+
+/** Marking someone as leaving or left (LEAVE-1). */
+export const leaveSchema = z.object({
+  version: z.number().int().positive(),
+  leaveDate: isoDate('leave date'),
+  reason: z.string().trim().max(500, { error: MSG.reasonTooLong }).optional(),
+});
+export type Leave = z.infer<typeof leaveSchema>;
