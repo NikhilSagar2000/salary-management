@@ -180,3 +180,20 @@ test('no tool parameter accepts SQL or free-form expressions', () => {
   }
   expect(loose).toEqual([]);
 });
+
+test.fails('a group links to the list only when the list can show exactly those people (AST-8)', async () => {
+  const { tool } = await setup([
+    { code: 'E000001', country: 'US', level: 3, hireDate: '2025-03-01' },
+    { code: 'E000002', country: 'US', level: 3, hireDate: '2024-03-01' },
+  ]);
+  const query = async (name: string, args: unknown) => (await tool(name, args)).sources.filter((s) => s.kind === 'group').map((s) => s.query);
+  expect(await query('query_employees', { filters: { country: ['US'] } })).toEqual(['country=US']);
+  expect(await query('aggregate', { metric: 'salary', groupBy: ['level'], filters: { country: ['US'] } })).toEqual(['country=US&level=3']);
+  // The list has no hire-date, leave-date, manager or named-people filter, no past dates and no change history:
+  expect(await query('query_employees', { filters: { country: ['US'], hiredFrom: '2025-01-01' } })).toEqual([null]);
+  expect(await query('query_employees', { filters: { codes: ['E000001'] } })).toEqual([null]);
+  expect(await query('query_employees', { filters: { managerCode: 'E000002' } })).toEqual([null]);
+  expect(await query('aggregate', { metric: 'headcount', groupBy: ['hire_year'], filters: { country: ['US'] } })).toEqual([null, null]);
+  expect(await query('aggregate', { metric: 'salary', filters: { country: ['US'] }, asOf: '2025-06-01' })).toEqual([null]);
+  expect(await query('query_changes', { filters: { country: ['US'] } })).toEqual([null]);
+});

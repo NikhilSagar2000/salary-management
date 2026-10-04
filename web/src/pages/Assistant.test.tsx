@@ -202,3 +202,22 @@ test('the first question names the chat', async () => {
   await ask('What is the median pay in Brazil?');
   expect(await screen.findByRole('heading', { name: 'What is the median pay in Brazil?' })).toBeInTheDocument();
 });
+
+test.fails('a source group the list cannot show is named without a link', async () => {
+  start('/assistant/2', {
+    'GET /api/chats/2': () => ({
+      status: 200,
+      body: {
+        ...CHATS[0],
+        messages: [message('user', 'Who joined in 2025?'), message('assistant', 'Two people.', {
+          basedOnData: true,
+          sources: { groups: [{ kind: 'group', label: 'United States · hired 2025-01-01 to 2025-12-31', query: null, headcount: 2 }], people: [], morePeople: 3 },
+        })],
+      },
+    }),
+  });
+  const basedOn = within(await screen.findByRole('article', { name: 'Answer' })).getByRole('region', { name: 'Based on' });
+  expect(basedOn).toHaveTextContent('United States · hired 2025-01-01 to 2025-12-31 (2 people)');
+  expect(basedOn).toHaveTextContent('and 3 more');
+  expect(within(basedOn).queryByRole('link')).not.toBeInTheDocument();
+});
