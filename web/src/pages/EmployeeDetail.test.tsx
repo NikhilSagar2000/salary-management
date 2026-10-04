@@ -175,3 +175,22 @@ test('after leaving only Undo is offered', async () => {
   await userEvent.click(undo);
   await waitFor(() => expect(calls.find((c) => c.url.pathname.endsWith('/undo-leave'))!.body).toEqual({ version: 4 }));
 });
+
+test("save button can't submit twice", async () => {
+  let release!: () => void;
+  const answered = new Promise<void>((r) => (release = r));
+  const calls = open(undefined, {
+    'PATCH /api/employees/E000123': async () => {
+      await answered;
+      return { status: 200, body: { code: 'E000123', version: 5 } };
+    },
+  });
+  await userEvent.click(await screen.findByRole('button', { name: 'Edit details' }));
+  const dialog = await screen.findByRole('dialog', { name: 'Edit details' });
+  const save = within(dialog).getByRole('button', { name: 'Save' });
+  fireEvent.click(save);
+  fireEvent.click(save); // a double click before the page re-renders
+  release();
+  await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  expect(calls.filter((c) => c.method === 'PATCH')).toHaveLength(1);
+});

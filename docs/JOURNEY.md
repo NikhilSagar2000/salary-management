@@ -502,6 +502,7 @@ is done (hashes copied from `git log`).
 - Task 22 · green: Change job or pay form — starts from the current job, sends only the changed fields with the effective date, needs a salary for a move (shared rules), role choices follow the department (EMP-7, EMP-9). Web tests run Mantine in its test environment (no transitions or portals); the red test's element queries were corrected (Mantine 9 selects are comboboxes).
 - Task 22 · red: Mark as leaving sends date and reason; after leaving only Undo leaving is offered (LEAVE-1, LEAVE-3).
 - Task 22 · green: Mark as leaving (date and optional reason); a leaving person can be undone from the header; once someone has left, the page offers only Undo leaving and says why (LEAVE-1, LEAVE-3).
+- Task 22 · test: a double click on Save sends one request (the save is guarded and the button shows loading). Passed first run; removing the guard and the loading state made it fail.
 
 ---
 
