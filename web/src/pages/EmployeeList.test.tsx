@@ -120,3 +120,10 @@ test('on a phone the filters open in a drawer', async () => {
   expect(within(drawer).getByRole('combobox', { name: 'Department' })).toBeInTheDocument();
   expect(within(drawer).getByLabelText('Salary from')).toBeEnabled();
 });
+
+test.fails("the export link carries the browser's timezone", async () => {
+  signedInWith();
+  renderApp('/employees?country=US');
+  const href = (await screen.findByRole('link', { name: 'Export CSV' })).getAttribute('href')!;
+  expect(new URL(href, 'http://localhost').searchParams.get('tz')).toBe(Intl.DateTimeFormat().resolvedOptions().timeZone);
+});

@@ -543,6 +543,7 @@ is done (hashes copied from `git log`).
 - Final review fix 2 · green: the import follows each row's manager chain through the file and refuses a row that leads back to itself ("That would make a reporting loop."); a row that only points into a circle is fine on its own (CSV-5, EMP-10).
 - Final review fix 3 · red: the server applies migrations to an empty database before it listens, and refuses to start without APP_PASSWORD_HASH, saying why (deploy readiness).
 - Final review fix 3 · green: the API applies pending migrations before it listens (a fresh Neon database works on first start) and exits with a plain message when APP_PASSWORD_HASH is empty, instead of starting a server nobody can sign in to.
+- Final review fix 4 · red: the CSV export link carries the browser's timezone as ?tz=, and the API uses it when no X-Timezone header comes (a plain link can't send headers), so status and current pay follow HR's date (TIME-1).
 
 ---
 
