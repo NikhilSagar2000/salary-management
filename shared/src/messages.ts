@@ -17,6 +17,8 @@ export const MSG = {
   salaryTooLarge: 'That salary is too large. The most allowed is 10,000,000,000.',
   roleNotInDepartment: (role: string, department: string) => `${role} isn't a role in ${department}.`,
   fixFields: 'Some fields need fixing.',
+  stale: 'Someone changed this employee after you opened the page. Reload to see the latest, then make your change again.',
+  noEmployee: (code: string) => `No employee with code ${code}.`,
   identityFixed: "The employee code and hire date can't be changed.",
   codeUsed: (code: string) => `${code} is already used.`,
   emailUsed: 'That work email is already used.',

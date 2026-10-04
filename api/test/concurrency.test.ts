@@ -9,7 +9,7 @@ const writes = {
     agent.patch('/api/employees/E000123').send({ version, firstName: `Name${version}` }),
 };
 
-test.fails.each(Object.entries(writes))('an old version gets 409 and nothing changes (%s)', async (_name, write) => {
+test.each(Object.entries(writes))('an old version gets 409 and nothing changes (%s)', async (_name, write) => {
   const { app, db } = await testApp();
   const agent = await signIn(app);
   await agent.post('/api/employees').send(newEmployee);
@@ -22,7 +22,7 @@ test.fails.each(Object.entries(writes))('an old version gets 409 and nothing cha
   expect(await snapshot()).toEqual(before);
 });
 
-test.fails('a write to an unknown employee gets 404', async () => {
+test('a write to an unknown employee gets 404', async () => {
   const { app } = await testApp();
   const agent = await signIn(app);
   const res = await agent.patch('/api/employees/E000999').send({ version: 1, firstName: 'X' });

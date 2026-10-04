@@ -286,6 +286,7 @@ is done (hashes copied from `git log`).
 - Task 6 · red: API refuses code/hire-date changes (EMP-5).
 - Task 6 · green: a body carrying `code` or `hireDate` is refused with "The employee code and hire date can't be changed." (EMP-5).
 - Task 6 · red: stale version and unknown employee tests (EMP-13).
+- Task 6 · green: a write that matches no row answers 409 with the EMP-13 message when the employee exists (out-of-date version) and 404 "No employee with code …" otherwise.
 
 ---
 

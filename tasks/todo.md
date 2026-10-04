@@ -175,7 +175,7 @@ is written just before the task starts, from the interfaces that exist at that p
   used code" (EMP-1) · "creates an employee with currency from the country" (EMP-2) ·
   "saves the hire change dated on the hire date" (EMP-4) · "rejects an email already used,
   ignoring case" (EMP-2).
-- [ ] **Task 6: Edit personal details with version check.** Tests: `employees.edit.test.ts`
+- [x] **Task 6: Edit personal details with version check.** Tests: `employees.edit.test.ts`
   › "edits first name, last name, gender and email in place" (EMP-6) · "refuses to change code
   or hire date" (EMP-5) · `concurrency.test.ts` › "an old version gets 409 and nothing
   changes" (EMP-13, details; extended in tasks 7–9 to every write).
@@ -488,11 +488,11 @@ routes, `api/test/employees.edit.test.ts`, `api/test/concurrency.test.ts`.
 `PATCH /api/employees/:code` with `{ version, firstName?, lastName?, gender?, workEmail? }`;
 the update runs `WHERE code = $1 AND version = $2` and bumps `version`.
 
-- [ ] Step 1: "edits first name, last name, gender and email in place": 200 `{ code, version: 2 }`,
+- [x] Step 1: "edits first name, last name, gender and email in place": 200 `{ code, version: 2 }`,
   values saved, no history row added; an email used by someone else → "That work email is already used."
-- [ ] Step 2: "refuses to change code or hire date": body with `code` or `hireDate` → 400
+- [x] Step 2: "refuses to change code or hire date": body with `code` or `hireDate` → 400
   "The employee code and hire date can't be changed.", nothing saved.
-- [ ] Step 3: `concurrency.test.ts` › "an old version gets 409 and nothing changes" (details):
+- [x] Step 3: `concurrency.test.ts` › "an old version gets 409 and nothing changes" (details):
   second save with version 1 → 409 with the EMP-13 message; unknown code → 404
   "No employee with code E000999."
-- [ ] Task check: `npm test`, `npm run typecheck`.
+- [x] Task check: `npm test`, `npm run typecheck`.
