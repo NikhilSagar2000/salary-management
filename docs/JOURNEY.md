@@ -417,6 +417,7 @@ is done (hashes copied from `git log`).
 - Task 17 · red: sources merge groups and cap people at 20 with a count of the rest (AST-8).
 - Task 17 · green: sources list each group once and each person once; the first 20 people are shown and the rest counted (AST-8).
 - Task 17 · test: an answer that used no tool is flagged `basedOnData: false` with empty sources (AST-9). Passed first run (the loop tracks tool use since step 1); forcing the flag to true made it fail.
+- Task 17 · red: the model gets at most the last 20 earlier messages (AST-13).
 
 ---
 

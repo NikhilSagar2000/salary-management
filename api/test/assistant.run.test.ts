@@ -87,3 +87,12 @@ test('an answer without tool calls is marked not based on ACME data', async () =
     type: 'sources', basedOnData: false, sources: { groups: [], people: [], morePeople: 0 },
   });
 });
+
+test.fails('sends at most the last 20 messages', async () => {
+  const history = Array.from({ length: 30 }, (_, i) => ({ role: (i % 2 ? 'assistant' : 'user') as 'user' | 'assistant', content: `message ${i + 1}` }));
+  const { requests } = await ask([[{ type: 'token', text: 'ok' }, { type: 'done' }]], { history });
+  const sent = requests[0]!.messages;
+  expect(sent[0]!.role).toBe('system');
+  expect(sent.slice(1, -1).map((m) => m.content)).toEqual(Array.from({ length: 20 }, (_, i) => `message ${i + 11}`));
+  expect(sent.at(-1)).toEqual({ role: 'user', content: 'What is the median pay in the US?' });
+});
