@@ -251,6 +251,7 @@ is done (hashes copied from `git log`).
 - Task 2 · green: `jobProblems()` checks role-in-department and level range; the create schema uses it.
 - Task 2 · red: salary input test (review focus 4).
 - Task 2 · green: `salarySchema` turns typed text or numbers into a whole number from 1 to 10,000,000,000, with plain messages for separators, decimals, negatives, exponents and blanks.
+- Task 2 · red: calendar date test.
 
 ---
 
