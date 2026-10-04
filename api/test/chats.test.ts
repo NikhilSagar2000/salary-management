@@ -34,7 +34,7 @@ async function chatWith(rounds: Parameters<typeof scriptedModel>[0]) {
   return { agent, chat, ask, requests, db };
 }
 
-test.fails('titles a new chat with its first question cut to 60 characters', async () => {
+test('titles a new chat with its first question cut to 60 characters', async () => {
   const { agent, chat, ask } = await chatWith([
     [{ type: 'token', text: 'One.' }, { type: 'done' }],
     [{ type: 'token', text: 'Two.' }, { type: 'done' }],
