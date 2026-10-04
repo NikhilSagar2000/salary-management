@@ -91,3 +91,27 @@ test('a 429 becomes rate_limited', async () => {
   });
   expect(((await failure(openRouterModel({ baseUrl: midStream, apiKey: 'k', models: ['m'] })(request))) as ModelError).kind).toBe('rate_limited');
 });
+
+test.fails('network error, 5xx and a 60 s timeout become unavailable', async () => {
+  const kind = async (cfg: Parameters<typeof openRouterModel>[0], signal = new AbortController().signal) =>
+    ((await failure(openRouterModel(cfg)({ ...request, signal }))) as ModelError | null)?.kind;
+  expect(await kind({ baseUrl: 'http://127.0.0.1:9/api/v1', apiKey: 'k', models: ['m'] })).toBe('unavailable'); // nothing listens
+
+  const { baseUrl: broken } = await fakeOpenRouter((_req, res) => res.writeHead(502).end('Bad gateway'));
+  expect(await kind({ baseUrl: broken, apiKey: 'k', models: ['m'] })).toBe('unavailable');
+
+  const { baseUrl: silent } = await fakeOpenRouter(() => {}); // never answers
+  expect(await kind({ baseUrl: silent, apiKey: 'k', models: ['m'], timeoutMs: 200 })).toBe('unavailable');
+
+  const { baseUrl: stalls } = await fakeOpenRouter((_req, res) => {
+    res.writeHead(200, { 'content-type': 'text/event-stream' });
+    res.write('data: {"choices":[{"delta":{"content":"Thinking"}}]}\n\n'); // then nothing more
+  });
+  expect(await kind({ baseUrl: stalls, apiKey: 'k', models: ['m'], timeoutMs: 200 })).toBe('unavailable');
+
+  // Stopping on purpose is not a failure of the model: it surfaces as an abort.
+  const stop = new AbortController();
+  const { baseUrl: slow } = await fakeOpenRouter(() => setTimeout(() => stop.abort(), 50));
+  const err = await failure(openRouterModel({ baseUrl: slow, apiKey: 'k', models: ['m'] })({ ...request, signal: stop.signal }));
+  expect((err as Error).name).toBe('AbortError');
+});
