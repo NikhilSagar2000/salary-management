@@ -118,7 +118,7 @@ test('refuses a second answer while one streams', async () => {
   expect((await agent.post(`/api/chats/${other.id}/messages`).send({ question: 'Hi?' }).buffer(true).parse(asText)).status).toBe(200);
 });
 
-test.fails('stopping saves the partial answer as Stopped', async () => {
+test('stopping saves the partial answer as Stopped', async () => {
   const held = heldModel();
   const { app, db } = await testApp({ model: held.model });
   const server = app.listen(0);

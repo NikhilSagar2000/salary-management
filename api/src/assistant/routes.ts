@@ -56,16 +56,25 @@ export function assistantRoutes({ db, clock, model }: { db: pg.Pool; clock: Cloc
   async function answer(chatId: number, question: string, res: import('express').Response) {
     const history = await chatHistory(db, chatId);
     await saveQuestion(db, clock, chatId, question);
-
     res.writeHead(200, { 'content-type': 'text/event-stream', 'cache-control': 'no-cache', connection: 'keep-alive' });
-    const send = (e: AnswerEvent) => {
-      const { type, ...data } = e;
-      res.write(`event: ${type}\ndata: ${JSON.stringify(data)}\n\n`);
-    };
-    const result = await answerQuestion({
-      model, db, today: res.locals.today, history, question, signal: new AbortController().signal, onEvent: send,
+    // Closing the stream (the Stop button, or leaving the page) stops the model (AST-12).
+    const stop = new AbortController();
+    res.on('close', () => {
+      if (!res.writableFinished) stop.abort();
     });
-    await saveAnswer(db, clock, chatId, { content: result.text, sources: result.sources, basedOnData: result.basedOnData, status: 'complete' });
+    let partial = '';
+    const send = (e: AnswerEvent) => {
+      if (e.type === 'token') partial += e.text;
+      const { type, ...data } = e;
+      if (!stop.signal.aborted) res.write(`event: ${type}\ndata: ${JSON.stringify(data)}\n\n`);
+    };
+    try {
+      const result = await answerQuestion({ model, db, today: res.locals.today, history, question, signal: stop.signal, onEvent: send });
+      await saveAnswer(db, clock, chatId, { content: result.text, sources: result.sources, basedOnData: result.basedOnData, status: 'complete' });
+    } catch (err) {
+      if (!stop.signal.aborted) throw err;
+      await saveAnswer(db, clock, chatId, { content: partial, sources: null, basedOnData: null, status: 'stopped' });
+    }
     res.end();
   }
 

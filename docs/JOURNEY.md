@@ -437,6 +437,7 @@ is done (hashes copied from `git log`).
 - Task 18 · red: only one answer streams per chat at a time (AST-12); watched the second question hang on the held model.
 - Task 18 · green: while a chat is answering, another question to it gets 409 "Wait for the current answer to finish, or stop it."; other chats are unaffected (AST-12).
 - Task 18 · red: Stop saves the partial answer as "stopped" (AST-12).
+- Task 18 · green: closing the stream (Stop) aborts the model and saves the partial answer as "stopped"; the chat is free again at once (AST-12).
 
 ---
 
