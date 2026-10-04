@@ -358,6 +358,7 @@ is done (hashes copied from `git log`).
 - Task 13 · data: seed name lists per country and gender (`api/src/seed/names.ts`; romaji for Japan; gender-neutral lists for non-binary people) and pay data copied from the research (`api/src/seed/bands.ts`); D59–D62 record the seed model.
 - Task 13 · red: seed creates exactly 10,000 people with the country split (SEED-1).
 - Task 13 · green: `generateSeed()` makes 10,000 people (US 3000, IN 3000, GB 1200, DE 1200, BR 800, JP 800) with names, emails, hire dates, jobs and banded pay from a fixed-seed PRNG; `writeSeed` inserts them in batches (SEED-1). Codes follow hire order.
+- Task 13 · test: two seed runs give the same database checksum (SEED-2). Passed first run (fixed-seed PRNG); seeding the PRNG from the clock made it fail.
 
 ---
 
