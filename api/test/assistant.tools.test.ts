@@ -10,7 +10,7 @@ async function setup(people: Parameters<typeof insertPeople>[1]) {
   return { db, tool: (name: string, args: unknown) => runTool(db, TODAY, name, args) };
 }
 
-test.fails('query_employees filters any field, caps at 200 rows and reports the total', async () => {
+test('query_employees filters any field, caps at 200 rows and reports the total', async () => {
   const { tool } = await setup([
     ...Array.from({ length: 230 }, (_, i) => ({ code: code(i + 1), country: 'US', salary: 100000 + i })),
     { code: 'E000901', firstName: 'Priya', lastName: 'Sharma', country: 'IN', gender: 'female', level: 4, salary: 2500000, hireDate: '2019-05-01' },

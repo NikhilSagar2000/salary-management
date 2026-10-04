@@ -395,6 +395,7 @@ is done (hashes copied from `git log`).
 - Task 15 · red: whole-file problems in plain words — empty file, header only, missing or unknown columns, unclosed quote, an Excel workbook instead of CSV (CSV-8).
 - Task 15 · green: whole-file problems in plain words — empty file, header but no rows, missing columns, unknown columns, unclosed quote, and an Excel workbook uploaded instead of CSV (CSV-8).
 - Task 16 · red: `query_employees` tool — any filter, at most 200 rows, total, sources (AST-4).
+- Task 16 · green: `query_employees` tool — the list's filters plus hire/leave date ranges, codes and manager; at most 200 rows with the total; sources name the group in words with a list link, and the first 20 people (AST-4). `listFilter` now takes those extra filters.
 
 ---
 

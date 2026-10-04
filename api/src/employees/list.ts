@@ -1,4 +1,4 @@
-import type { ListQuery } from '@acme/shared';
+import { DEFAULT_STATUSES, type ListQuery } from '@acme/shared';
 import type pg from 'pg';
 import { CURRENCY_ORDER, PAY_STATS } from '../stats/peers.ts';
 
@@ -17,8 +17,13 @@ const ORDER: Record<ListQuery['sort'], string[]> = {
   hireDate: ['e.hire_date'],
 };
 
-/** The list's filters as SQL: `fromWhere()` (FROM … WHERE …, aliases e and s), its `params` ($1 = today) and `orderBy`. */
-export function listFilter(q: ListQuery, today: string) {
+/** The list's filters plus the extra ones the assistant's tools use. */
+export type Filters = Partial<Omit<ListQuery, 'page' | 'pageSize'>> & {
+  codes?: string[]; hiredFrom?: string; hiredTo?: string; leftFrom?: string; leftTo?: string; managerCode?: string;
+};
+
+/** The filters as SQL: `fromWhere()` (FROM … WHERE …, aliases e and s), its `params` ($1 = today) and `orderBy`. */
+export function listFilter(q: Filters, today: string) {
   const params: unknown[] = [today];
   const where: string[] = [];
   const param = (value: unknown) => `$${params.push(value)}`;
@@ -34,9 +39,15 @@ export function listFilter(q: ListQuery, today: string) {
   anyOf('s.role', q.role);
   anyOf('s.level', q.level);
   anyOf('e.gender', q.gender);
-  anyOf(`(${STATUS_SQL})`, q.status);
+  anyOf(`(${STATUS_SQL})`, q.status ?? DEFAULT_STATUSES);
   if (q.salaryMin !== undefined) where.push(`s.salary >= ${param(q.salaryMin)}`);
   if (q.salaryMax !== undefined) where.push(`s.salary <= ${param(q.salaryMax)}`);
+  anyOf('e.code', q.codes);
+  if (q.hiredFrom) where.push(`e.hire_date >= ${param(q.hiredFrom)}`);
+  if (q.hiredTo) where.push(`e.hire_date <= ${param(q.hiredTo)}`);
+  if (q.leftFrom) where.push(`e.leave_date >= ${param(q.leftFrom)}`);
+  if (q.leftTo) where.push(`e.leave_date <= ${param(q.leftTo)}`);
+  if (q.managerCode) where.push(`s.manager_id = (SELECT id FROM employees WHERE code = ${param(q.managerCode)})`);
   const fromWhere = (extra: string[] = [], join = '') => {
     const all = [...where, ...extra];
     return `FROM employees e JOIN current_state($1) s ON s.employee_id = e.id ${join} ${all.length ? `WHERE ${all.join(' AND ')}` : ''}`;
@@ -63,8 +74,8 @@ export async function listEmployees(db: pg.Pool, q: ListQuery, today: string) {
 }
 
 /** ORDER BY for the chosen column and direction; ties always by code, so paging is stable. */
-function orderBy(q: ListQuery) {
-  const columns = ORDER[q.sort];
+function orderBy(q: Filters) {
+  const columns = ORDER[q.sort ?? 'name'];
   const dir = q.dir === 'desc' ? 'DESC' : 'ASC';
   return [...columns.map((c) => `${c} ${dir}`), `e.code ${q.sort === 'code' ? dir : 'ASC'}`].join(', ');
 }
