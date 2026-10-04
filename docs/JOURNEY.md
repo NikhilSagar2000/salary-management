@@ -359,6 +359,7 @@ is done (hashes copied from `git log`).
 - Task 13 · red: seed creates exactly 10,000 people with the country split (SEED-1).
 - Task 13 · green: `generateSeed()` makes 10,000 people (US 3000, IN 3000, GB 1200, DE 1200, BR 800, JP 800) with names, emails, hire dates, jobs and banded pay from a fixed-seed PRNG; `writeSeed` inserts them in batches (SEED-1). Codes follow hire order.
 - Task 13 · test: two seed runs give the same database checksum (SEED-2). Passed first run (fixed-seed PRNG); seeding the PRNG from the clock made it fail.
+- Task 13 · test: all 10,000 full names differ, and each first and last name comes from the hire country's list for that gender (gender-neutral list for non-binary people) (SEED-3). Passed first run; two mutations (no uniqueness check; male names for non-binary people) each failed it.
 
 ---
 
