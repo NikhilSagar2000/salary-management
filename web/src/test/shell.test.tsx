@@ -1,6 +1,7 @@
 import { screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { expect, test } from 'vitest';
+import { api } from '../api.ts';
 import { fakeApi } from './fakeApi.ts';
 import { renderApp } from './render.tsx';
 import { setPrefersDark } from './setup.ts';
@@ -66,4 +67,13 @@ test('a failed request shows a plain message', async () => {
   fail = null;
   await userEvent.click(screen.getByRole('button', { name: 'Try again' }));
   expect(await screen.findByRole('heading', { name: 'Employees' })).toBeInTheDocument();
+});
+
+test.fails("every API request sends the browser's timezone", async () => {
+  const calls = fakeApi({ 'GET /api/x': () => ({ status: 200, body: {} }), 'POST /api/y': () => ({ status: 204 }) });
+  await api('/api/x');
+  await api('/api/y', { method: 'POST', body: { a: 1 } });
+  const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  expect(zone).toBeTruthy();
+  expect(calls.map((c) => c.headers.get('x-timezone'))).toEqual([zone, zone]);
 });

@@ -472,6 +472,7 @@ is done (hashes copied from `git log`).
 - Fix: test connections time out after 60 s, Postgres logs plans of statements over 20 s (`auto_explain`), and the seed ANALYZEs after writing — after a run hung behind one 622 s query (cause unconfirmed; section 9).
 - Task 20 · red: a failed request shows a plain message with Try again (UI-4).
 - Task 20 · green: if the session check fails (server error or no connection) the page shows the plain message and a Try again button (UI-4).
+- Task 20 · red: every API request carries the browser's IANA timezone (TIME-1).
 
 ---
 
