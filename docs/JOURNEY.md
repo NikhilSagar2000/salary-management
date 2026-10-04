@@ -409,6 +409,7 @@ is done (hashes copied from `git log`).
 - Task 16 · green: `readOnlyTx` (BEGIN READ ONLY … ROLLBACK); every tool call runs on one read-only client, so Postgres refuses any write (AST-5).
 - Task 16 · red: tool specs for the model — no parameter accepts SQL or free-form expressions (AST-5).
 - Task 16 · green: `TOOLS` — the four tools as OpenAI-style function specs generated from the same Zod schemas that check the arguments (strict objects, enums and patterns; the only free text is a length-limited search phrase); top-level `$schema` stripped for provider compatibility (AST-5).
+- Task 17 · red: the answer loop streams a step per tool call, then tokens, sources and done (AST-3); scripted fake model helper for tests.
 
 ---
 

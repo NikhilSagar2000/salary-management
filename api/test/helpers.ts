@@ -1,6 +1,7 @@
 import type pg from 'pg';
 import request from 'supertest';
 import { afterAll } from 'vitest';
+import type { ModelEvent, ModelFn, ModelRequest } from '../src/assistant/model.ts';
 import { createApp } from '../src/app.ts';
 import { hashPassword } from '../src/auth/password.ts';
 import type { Clock } from '../src/clock.ts';
@@ -80,3 +81,13 @@ export async function insertPeople(db: pg.Pool, people: Person[]) {
 }
 
 export const code = (n: number) => `E${String(n).padStart(6, '0')}`;
+
+/** A fake model that plays one scripted list of events per call and records every request. */
+export function scriptedModel(rounds: ModelEvent[][]) {
+  const requests: ModelRequest[] = [];
+  const model: ModelFn = async function* (req) {
+    requests.push(structuredClone({ ...req, signal: undefined }) as unknown as ModelRequest);
+    for (const event of rounds[requests.length - 1] ?? [{ type: 'token', text: '(no more script)' }, { type: 'done' }]) yield event;
+  };
+  return { model, requests };
+}
