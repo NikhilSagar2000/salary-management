@@ -168,6 +168,30 @@ each other literally, and asked:
 Set-up done in the commit "chore: project set-up and brainstorm record" (hash recorded in the
 next timeline entry).
 
+Phase 3 (requirements), still under P4:
+- Loaded the `llm-security` skill (OWASP LLM Top 10) before writing the assistant criteria;
+  applied: read-only tools in a read-only transaction, typed tool arguments, no secrets in
+  the system prompt, model HTML never rendered, caps on tool rounds, rows and history length.
+- Started a background research subagent for pay bands (prompt in section 9).
+- While writing `docs/SPEC.md` I found that full-snapshot history rows break when a change is
+  added before an already-scheduled one, and asked:
+
+| # | Question | Options offered | Answer |
+|---|---|---|---|
+| Q35 | A raise to 110,000 is scheduled for 1 Jan. Today HR adds a promotion (new role, salary 105,000) effective 1 Nov. What should 1 Jan look like? | Each change keeps only what it changed (Recommended) · Refuse it | "Each change keeps only what it changed (Recommended)" |
+| Q36 | History entries are never edited. Can HR cancel a change that's scheduled for the future (e.g. a raise entered by mistake)? | Yes, cancel scheduled only (Recommended) · No cancelling | "Yes, cancel scheduled only (Recommended)" |
+
+Phase 4 (plan), still under P4:
+- Used `superpowers:writing-plans`; the plan lives in `tasks/todo.md` as the requirements
+  say (the skill's default location is overridden).
+- 29 tasks in build order: backend (1–19, plus a manual model smoke test), UI (20–26), end to
+  end and CI (27–29). Each test is named and tied to its criterion ids.
+- Checked mechanically: all 85 criterion ids in `docs/SPEC.md` appear in `tasks/todo.md`
+  (bash loop over the ids; 0 missing). AST-10 is covered by manual QA only, against the real model.
+- Deviation from the skill, flagged to Nikhil: the skill wants code in every step now. The
+  plan names files, interfaces and tests, and writes each task's code-level steps just before
+  the task starts, so they're based on the interfaces that exist by then.
+
 ---
 
 ## 3. Timeline
@@ -177,6 +201,9 @@ next timeline entry).
 | 2026-10-04 | P1 + P2: read requirements, checked tooling and OpenRouter models, brainstorm rounds 1–2 | none |
 | 2026-10-04 | P3: persisted multi-chat assistant; brainstorm rounds 3–9; plan written | none |
 | 2026-10-04 | P4: plan approved; Q34 red-commit rule; git repo on `master`, `CLAUDE.md`, this journal, `tasks/` | set-up commit (hash in next entry) |
+| 2026-10-04 | Set-up committed | a12346c |
+| 2026-10-04 | Phase 3: pay research started (subagent); Q35–Q36; `docs/REQUIREMENTS.md`, `docs/SPEC.md` | this commit (hash in next entry) |
+| 2026-10-04 | Pay research returned and spot-checked; Phase 4 plan in `tasks/todo.md`; stop for Nikhil | same commit as above |
 
 ---
 
@@ -233,6 +260,13 @@ accepted when Nikhil approved the plan (P4).
 | D44 | Model choice | 16 free tool-capable models | – | Smoke test once the key exists: streamed tool-call deltas, several tool rounds while streaming, `models` fallback. If none pass, use progress steps then full answer (Nikhil's second choice) and tell him | Free models differ in tool + streaming support | C |
 | D45 | Answer sources | "Shows what it's based on" | Model cites · server derives | Built server-side from the tool calls made; no tool call means "not based on ACME data" | The model can't invent sources | C |
 | D46 | Migrations | Postgres via `pg` | Library · plain SQL | Plain SQL files plus a tiny runner with a `schema_migrations` table | No extra dependency | C |
+| D47 | History model | Q35: change dated before a scheduled one | Full snapshots · changed fields only · refuse | Each change stores only the fields it changes; the state on a date combines non-cancelled changes in date order (same date: later-entered wins). Replaces the "full snapshot per row" line in the plan | Out-of-order changes keep later scheduled changes intact | N (Q35) |
+| D48 | Cancelling scheduled changes | Immutable history | Cancel future only · no cancel | Future-dated changes can be cancelled; they stay in history marked cancelled. Past and current ones can't | Fix mistakes without editing history | N (Q36) |
+| D49 | Roles and level ranges per department | Taxonomy for forms, seed and stats | – | Table in `docs/SPEC.md` "Reference data": 22 roles across 9 departments, each with an allowed level range | Needed for validation and realistic pay; **for Nikhil's review at the plan stop** | C |
+| D50 | Search matching | HR typing names from six countries | Case-insensitive · + accent-insensitive | Case- and accent-insensitive (`unaccent` + `pg_trgm`) | "muller" should find "Müller" | C |
+| D51 | CSV format details | Excel round trip | – | Export: UTF-8 with BOM, comma, formula cells prefixed with `'`. Import: comma or semicolon (German/Brazilian Excel uses semicolons), ISO dates, digits-only salary, 5 MB / 10,000 rows | Opens in Excel without mangling; safe against formula injection | C |
+| D52 | Chat extras | Streaming answers | – | Stop button (partial answer saved as "Stopped"); last 20 messages sent to the model; questions up to 2,000 characters; free requests left shown when OpenRouter reports it | Bounds quota use and context size | C |
+| D53 | List performance target | "Measured, never guessed" | – | 95th percentile ≤ 300 ms for list requests on the seeded DB on the dev machine, measured by a script | A target to measure against; **for Nikhil's review** | C |
 
 ---
 
@@ -266,6 +300,11 @@ stats), next code, detail, create, edit personal fields, add job change, leave, 
 overview; meta (taxonomy); chats list/create/rename/delete; post a message (SSE stream).
 
 Assistant tools (planned): `query_employees`, `get_employee`, `query_changes`, `aggregate`.
+
+**Update (D47, D48):** `job_history` holds changes, not full snapshots: each row stores only
+the fields it changes (others null), plus `cancelled_at` for cancelled scheduled changes.
+The state on a date is computed by combining rows in date order. Performance of this
+computation will be measured (section 7).
 
 ---
 
@@ -309,10 +348,66 @@ Where the AI was wrong or could have been, and how it was caught:
 - The token estimate for sending all rows (250–300k) is a rough guess, **unverified**.
 - OpenRouter's free-tier limits (recalled as about 20 per minute and 50 per day) could not be
   read from the docs page, so they are **unverified** until checked with the real key.
+  *Update:* the daily limits (50 without credits, 1,000 with 10+ credits) are now verified
+  from the docs' markdown source (section 9, S1). My recall of 50/day was right.
 - The requirements' commit rules contradicted each other; I nearly wrote my own
   interpretation into `CLAUDE.md` without asking. Caught before committing; asked Q34.
 
-Subagent prompts: none used so far.
+Subagent prompts (verbatim):
+
+**S1: pay-band research** (general-purpose agent, background, 2026-10-04)
+
+```text
+Research realistic 2025–2026 annual BASE salaries (no bonus, no equity) for a mid-sized tech/software company, to seed a demo HR app. Write the result to /Users/nikhilsagar007/personal_work/salary-management/docs/research/pay-bands.md and reply with a 10-line summary. Do not create accounts, sign up, or pay for anything; use only public pages.
+
+Countries and currencies (never convert between them): US USD, IN INR, GB GBP, DE EUR, BR BRL, JP JPY.
+
+Roles by department (levels L1 entry → L7 principal/director):
+- Engineering: Software Engineer, Data Engineer, QA Engineer, Engineering Manager
+- Product: Product Manager
+- Design: Product Designer
+- Sales: Sales Development Representative, Account Executive, Sales Manager
+- Marketing: Marketing Specialist, Marketing Manager
+- Customer Support: Support Specialist, Support Manager
+- Finance: Accountant, Financial Analyst
+- HR: HR Generalist, Recruiter
+- Operations: Operations Analyst, IT Support Specialist
+
+What to produce in pay-bands.md:
+1. For each country, a table of every role above with the median annual base salary in local currency at mid level (about L3, 3–5 years' experience), as a whole number.
+2. For each country, level multipliers relative to L3 for L1, L2, L4, L5, L6, L7, separately for engineering/product/design and for the other departments if they differ materially.
+3. A typical spread within one role and level (e.g. p25 and p75 as a fraction of the median) per country.
+4. The official unadjusted gender pay gap per country (latest year available, e.g. Eurostat, ONS, BLS, OECD), and, if you find it, the adjusted gap within the same job.
+5. The current OpenRouter rate limits for free models (`:free` model ids): requests per minute and per day, with and without purchased credits. Check https://openrouter.ai/docs/api-reference/limits and any other official OpenRouter page; the numbers may be rendered by JavaScript, so try the docs' markdown or llms.txt versions too.
+
+Rules:
+- Cite a source URL for every figure or group of figures (e.g. levels.fyi, Glassdoor, Payscale, national statistics offices, recruiter salary guides such as Hays/Michael Page/Robert Half).
+- Label each figure CONFIRMED (read directly from a source page you opened) or ESTIMATED (derived, interpolated or from memory), and say how it was derived.
+- Mark anything you could not confirm, and say where you looked.
+- Round sensibly: USD/GBP/EUR to the nearest 1,000; INR and JPY to the nearest 10,000; BRL to the nearest 1,000.
+```
+
+Result (agent's summary, condensed): wrote `docs/research/pay-bands.md` (467 lines,
+239 links). Method: Payscale all-employer median per role, L3 = geometric mean of its
+1–4-year and 5–9-year figures, times a per-country tech factor F = √(levels.fyi ÷ Payscale)
+(US 1.276, IN 1.484, GB 1.323, DE 1.170, BR 1.295, JP 1.455; a modelling choice, not a measured
+fact). Every seed value is ESTIMATED from CONFIRMED inputs. Engineering Manager figures are
+L5 values; Sales/Marketing/Support Manager figures are L3 anchors. Level multipliers per
+country (separate for engineering/product/design where they differ). Spread p25/p75 per
+country (BR and JP borrowed). Official unadjusted gender gaps: US 16.1%, GB 12.8%, DE 16%
+(adjusted 6%), JP 23.4%, BR 21.4%, IN 24.2% (derived; no official figure). OpenRouter free
+models: 20/min; 50/day under 10 credits ever bought, 1,000/day at 10 or more; UTC day.
+Weakest: Brazil and Japan roles other than Software Engineer borrow ratios; Japan's
+non-engineering roles may be 10–25% low. Unreachable sources are listed in its section 6.
+
+My checks of its evidence:
+- OpenRouter limits: **verified** from `https://openrouter.ai/docs/api-reference/limits.md`
+  (`FREE_MODEL_NO_CREDITS_RPD = 50`, `FREE_MODEL_HAS_CREDITS_RPD = 1000`,
+  `FREE_MODEL_CREDITS_THRESHOLD = 10`). The 20/min figure I didn't see in my grep:
+  **unverified** by me.
+- Payscale US Software Engineer: sample size 24,077 and last reviewed 2026-07-14
+  **verified** in the page data; the 1–4-year and 5–9-year medians (95,107 / 110,646) were not
+  found by my quick search of the embedded data: **unverified** by me.
 
 ---
 
