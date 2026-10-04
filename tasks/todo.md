@@ -318,7 +318,7 @@ is written just before the task starts, from the interfaces that exist at that p
   on every screen, light and dark, desktop and phone" (A11Y-1) · `keyboard.spec.ts` › one test
   per flow: sign in; search, filter and open; add; job change; leave and undo; import; ask
   (A11Y-2) · "focus is visible, skip link works, errors are announced" (A11Y-3).
-- [ ] **Task 29: CI.** `.github/workflows/ci.yml`: Postgres service, `npm ci`, migrate,
+- [x] **Task 29: CI.** `.github/workflows/ci.yml`: Postgres service, `npm ci`, migrate,
   `npm test`, build, Playwright. Runs only after Nikhil approves a push. Verified locally by
   running the same commands in order.
 
