@@ -496,6 +496,7 @@ is done (hashes copied from `git log`).
 - Task 22 · green: Edit details form — the shared schema checks fields before sending; client and server messages show next to their fields (linked for screen readers) and the first invalid field gets focus (EMP-3, EMP-6, A11Y-3).
 - Task 22 · red: an out-of-date save keeps the typed input, offers Reload, and saves on the reloaded version (EMP-13).
 - Task 22 · green: Reload after an out-of-date save refreshes the page behind the form and keeps what was typed, so saving again uses the latest version (EMP-13). Plan gains two steps: job-change form and leave form.
+- Task 22 · red: only scheduled changes get a Cancel button (EMP-11).
 
 ---
 

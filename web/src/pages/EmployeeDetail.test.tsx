@@ -114,3 +114,14 @@ test('a 409 keeps the typed input and offers Reload', async () => {
   await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
   expect(calls.filter((c) => c.method === 'PATCH').map((c) => (c.body as { version: number }).version)).toEqual([4, 5]);
 });
+
+test.fails('cancel appears only on scheduled changes', async () => {
+  const calls = open(undefined, { 'POST /api/employees/E000123/changes/3/cancel': () => ({ status: 200, body: { code: 'E000123', version: 5 } }) });
+  await screen.findByRole('list', { name: 'History' });
+  const buttons = screen.getAllByRole('button', { name: /^Cancel the change on/ });
+  expect(buttons.map((b) => b.getAttribute('aria-label'))).toEqual(['Cancel the change on 1 Jan 2027']);
+  await userEvent.click(buttons[0]!);
+  await waitFor(() => expect(calls.some((c) => c.url.pathname.endsWith('/changes/3/cancel'))).toBe(true));
+  expect(calls.find((c) => c.url.pathname.endsWith('/cancel'))!.body).toEqual({ version: 4 });
+  await waitFor(() => expect(calls.filter((c) => c.url.pathname === '/api/employees/E000123')).toHaveLength(2)); // reloaded
+});
