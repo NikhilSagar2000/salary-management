@@ -169,3 +169,14 @@ test('a bad list address answers with the message itself, for the page to show (
   expect(both).toContain('Page size must be 25, 50 or 100, not "1000".');
   expect(both).toContain('There\'s no country called "XX".');
 });
+
+test.fails('country sorts by the name shown, not the two-letter code (LIST-4)', async () => {
+  const { list } = await setup([
+    { code: 'E000001', country: 'GB' }, // United Kingdom
+    { code: 'E000002', country: 'IN' }, // India
+    { code: 'E000003', country: 'US' }, // United States
+    { code: 'E000004', country: 'DE' }, // Germany
+  ]);
+  expect(codes(await list('?sort=country'))).toEqual(['E000004', 'E000002', 'E000001', 'E000003']);
+  expect(codes(await list('?sort=country&dir=desc'))).toEqual(['E000003', 'E000001', 'E000002', 'E000004']);
+});

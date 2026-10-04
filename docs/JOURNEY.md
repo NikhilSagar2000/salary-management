@@ -586,6 +586,7 @@ is done (hashes copied from `git log`).
 - Phase 6 QA fix 1 · red (found by QA, LIST-5/LIST-7): a bad list address answers with the specific message itself; the page showed only "Some fields need fixing." for it.
 - Test fix: the sign-in next-address test's fake API now keeps the session after sign-in; before, the app bounced back to sign-in and the test passed or failed on timing. Breaking the guard still fails it.
 - Phase 6 QA fix 1 · green: list, export and pay-overview addresses with bad values answer 400 with the messages themselves as the error (fields kept), so the page shows e.g. "Page size must be 25, 50 or 100, not \"1000\"." (LIST-5, LIST-7, UI-4). The QA script's date check is fixed (it compared Date objects).
+- Phase 6 QA fix 2 · red (found by QA, LIST-4): country sorts by the name shown (Germany, India, United Kingdom, United States), not the two-letter code, which put United Kingdom between Germany and India.
 
 ---
 

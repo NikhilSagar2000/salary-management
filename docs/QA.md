@@ -24,7 +24,7 @@ JPY/INR amounts, loading, empty and error states, reload, and Back.
 
 | # | Screen | What to check | Result | Notes |
 |---|---|---|---|---|
-| S1 | Sign-in | Layout both themes and widths; wrong password message; Enter submits; signed-out redirect keeps the page | | |
+| S1 | Sign-in | pass | Dark (device) at 1440: layout fine; wrong password → "That password isn't right."; Enter submits (once Chrome's own password pop-up is closed, it eats the first Enter); next kept |
 | S2 | Employee list, desktop | Filters, stats line, table columns, sorting arrows, paging, page size, empty state, loading, a bad URL value's message | | |
 | S3 | Employee list, phone | Cards, Filters (n) button and drawer, no sideways scroll, Export and Add buttons fit | | |
 | S4 | Employee page | Facts, current job and pay, peers line, manager (has-left flag), reports, history newest first, dark mode, long names | | |
@@ -43,13 +43,13 @@ JPY/INR amounts, loading, empty and error states, reload, and Back.
 | Id | How run | Steps | Expected | Result | Notes |
 |---|---|---|---|---|---|
 | TIME-1 | API, browser | Hire someone dated tomorrow-in-Tokyo; read status with `X-Timezone` UTC vs Asia/Tokyo; export link has `tz=` | Status follows the header's date; unknown zone → UTC | | |
-| AUTH-1 | API | Call each `/api` route group without a cookie | 401 everywhere except sign-in and health | | |
-| AUTH-2 | browser, API | Sign in; read the cookie flags; wrong password | httpOnly, SameSite=Lax, 7 days (Secure only in production); "That password isn't right." | | |
+| AUTH-1 | API | Call each `/api` route group without a cookie | pass | API: 12 routes 401 signed out; health 200 (e2e/qa-api.ts) |
+| AUTH-2 | browser, API | Sign in; read the cookie flags; wrong password | pass | API: cookie HttpOnly, SameSite=Lax, Max-Age 604800, no Secure outside production; browser: wrong password message |
 | AUTH-3 | API | Six wrong passwords in a row (run last: it locks this IP out for 15 min) | 6th answers 429 "Too many tries. Wait 15 minutes and try again." | | |
-| AUTH-4 | browser, API | Sign out; reuse the old cookie | Sign-in page; old cookie gets 401 | | |
-| AUTH-5 | browser | Open `/pay?country=DE` signed out, sign in | Back on that page | | |
-| AUTH-6 | API, files | Search responses, the server log and the built bundle for the hash, token hashes and key | None found | | |
-| LIST-1 | API | Default, 50 and 100 page sizes; total count | 25 by default; total matches | | |
+| AUTH-4 | browser, API | Sign out; reuse the old cookie | pass | API: old cookie 401 after sign-out; browser: Sign out → sign-in page |
+| AUTH-5 | browser | Open `/pay?country=DE` signed out, sign in | pass | Browser: /pay?country=DE signed out → sign-in → back on Germany's pay overview |
+| AUTH-6 | API, files | Search responses, the server log and the built bundle for the hash, token hashes and key | pass | API: no hash, token, stored token hash or key in 5 responses or the server log; bundle by e2e/secrets.spec.ts |
+| LIST-1 | API | Default, 50 and 100 page sizes; total count | pass | API: 25/50/100 rows, same total 8,907; pageSize=30 → 400 |
 | LIST-2 | browser | Search "muller", "jose", part of an email, part of a code | Accent-blind matches | | |
 | LIST-3 | browser | Two countries + one department; default status; add Left | OR within, AND across; leavers only when asked | | |
 | LIST-4 | browser | Each sortable column, both directions | Sorted; ties by code | | |
@@ -59,7 +59,7 @@ JPY/INR amounts, loading, empty and error states, reload, and Back.
 | LIST-8 | browser | Read a row | Code, name, country, department, role, level, salary with currency, hire date, status | | |
 | LIST-9 | browser, SQL | Stats line for a filter; compare a median with SQL | One line per currency; starting people not counted | | |
 | LIST-10 | browser | 390 px | Cards, filter drawer, no sideways scroll | | |
-| LIST-11 | tests | `npm run measure:list` (Task 19) | p95 ≤ 300 ms (recorded 99–104 ms) | | |
+| LIST-11 | tests | `npm run measure:list` (Task 19) | pass | Automated tests pass (see Steps) |
 | EMP-1 | browser | Open Add employee | Next free code pre-filled; editable; bad or used code refused | | |
 | EMP-2 | browser | Add with every field; currency shown from country | Saved; manager optional | | |
 | EMP-3 | browser | Submit empty; then bad values | A message under each field; first invalid field focused | | |
@@ -71,37 +71,37 @@ JPY/INR amounts, loading, empty and error states, reload, and Back.
 | EMP-9 | browser | Move country without salary; with salary; move with a later salary scheduled | Refused / saved in new currency / refused naming the later change | | |
 | EMP-10 | browser | Manager: self, unknown code, starting person, a report of this person | Each refused in plain words | | |
 | EMP-11 | browser | Schedule a change, cancel it; try to cancel a past change | "Cancelled on <date>"; no cancel on past changes | | |
-| EMP-12 | SQL, API | `UPDATE`/`DELETE` on job_changes and leave_events; look for edit routes | Database refuses; no route | | |
+| EMP-12 | SQL, API | `UPDATE`/`DELETE` on job_changes and leave_events; look for edit routes | pass | API: no route (404); SQL: UPDATE/DELETE on job_changes and leave_events refused ("History can't be edited/deleted.") |
 | EMP-13 | browser | Two tabs on one person; save in one, then in the other | 409 message, typed input kept, Reload works | | |
 | EMP-14 | browser | Person with manager who left, reports, scheduled and cancelled changes | All shown as described | | |
 | LEAVE-1 | browser | Leave date before hire date; reason over 500 characters; valid | Refused / refused / saved | | |
 | LEAVE-2 | browser | Undo leaving | Leave date and reason cleared; both events in history with their dates | | |
 | LEAVE-3 | browser, API | Person who has left: page actions; API writes | Only Undo shown; writes refused with the message | | |
-| LEAVE-4 | API | `DELETE /api/employees/<code>` | 404 | | |
+| LEAVE-4 | API | `DELETE /api/employees/<code>` | pass | API: DELETE → 404; person still there |
 | LEAVE-5 | browser | Leaving with a later scheduled change; undo | "Won't apply"; applies again after undo | | |
 | LEAVE-6 | browser | Default list and stats; add Left to status | Leavers out, then in | | |
-| STATS-1 | SQL, browser | One peer group's median by hand vs the page | Same number; per currency only | | |
+| STATS-1 | SQL, browser | One peer group's median by hand vs the page | pass | SQL by hand vs page: IN Software Engineer L3 median 1,486,500, headcount 166, INR only |
 | STATS-2 | browser | Starting person in a filter | Listed, not counted | | |
 | STATS-3 | browser | Pay overview cells, dashes, cell link | As described | | |
-| STATS-4 | browser, SQL | A relocated person | Counted in the current country only | | |
+| STATS-4 | browser, SQL | A relocated person | pass | E000029 moved IN → US: listed and counted in US only |
 | AST-1 | browser | New chat, list order, rename (empty, 81 characters, valid), delete with confirm | As described; title from the first question, 60 characters | | |
 | AST-2 | browser | Reload a chat with answers | Questions, answers and sources as saved | | |
 | AST-3 | browser | Ask | A step line, then words, then sources | | |
-| AST-4 | tests | `assistant.tools.test.ts` (each tool's filters, caps and totals) | — | | Fake model always calls one tool |
-| AST-5 | tests | `assistant.tools.test.ts` (bad arguments, unknown tool, read-only transaction, absurd offset) | — | | |
-| AST-6 | tests | `assistant.run.test.ts` (six-round cap) | — | | |
-| AST-7 | tests | `assistant.run.test.ts` (system prompt content, no secrets) | — | | |
+| AST-4 | tests | `assistant.tools.test.ts` (each tool's filters, caps and totals) | pass | Automated tests pass (see Steps) |
+| AST-5 | tests | `assistant.tools.test.ts` (bad arguments, unknown tool, read-only transaction, absurd offset) | pass | Automated tests pass (see Steps) |
+| AST-6 | tests | `assistant.run.test.ts` (six-round cap) | pass | Automated tests pass (see Steps) |
+| AST-7 | tests | `assistant.run.test.ts` (system prompt content, no secrets) | pass | Automated tests pass (see Steps) |
 | AST-8 | browser | Click a group link and a person link in Based on | Matching list; the person's page | | |
 | AST-9 | browser | Ask with `[no tools]` | "Not based on ACME data" | | |
-| AST-10 | not run | Needs the real model and the OpenRouter key | Answer starts "The data can't answer this because…" | | Blocked on the key |
+| AST-10 | not run | Needs the real model and the OpenRouter key | not run | Needs the real model; blocked on the OpenRouter key |
 | AST-11 | browser | Ask with `[html]` | Bold, table, list; HTML shown as text; title unchanged | | |
 | AST-12 | browser | 2,001 characters; second question while one streams; Stop with `[slow]` | Limit holds; one at a time; partial saved as Stopped | | |
-| AST-13 | tests | `assistant.run.test.ts` (last 20 messages) | — | | |
+| AST-13 | tests | `assistant.run.test.ts` (last 20 messages) | pass | Automated tests pass (see Steps) |
 | AST-14 | browser | Ask with `[429]`; then other pages | The free-limit message; question saved; app works | | |
 | AST-15 | browser | Ask with `[500]`; then other pages | "The assistant isn't available right now…"; app works | | |
 | AST-16 | browser | Look under the question box | "42 free model requests left today" | | |
 | AST-17 | browser | Watch network requests while asking | Only localhost:4733 | | |
-| AST-18 | tests | `api/test/setup.ts` guard; e2e server uses the fake | — | | |
+| AST-18 | tests | `api/test/setup.ts` guard; e2e server uses the fake | pass | Automated tests pass (see Steps) |
 | CSV-1 | browser | Export a filtered list; open the file | All matching rows, BOM, the listed columns | | |
 | CSV-2 | browser | Person named `=SUM(1)`; export | Cell starts with `'` | | |
 | CSV-3 | browser | Semicolons, BOM, shuffled columns, upper-case headers, currency column | Accepted | | |
@@ -110,17 +110,17 @@ JPY/INR amounts, loading, empty and error states, reload, and Back.
 | CSV-6 | browser | Code used in the database; email twice in the file | Problem on every row involved | | |
 | CSV-7 | browser | Import enabled only when clean; import | All saved; result and link | | |
 | CSV-8 | browser | Empty file, missing column, an .xlsx file | Plain words, before row checks | | |
-| SEED-1 | SQL | Count by hire country | 10,000: US 3000, IN 3000, GB 1200, DE 1200, BR 800, JP 800 | | |
-| SEED-2 | tests | `seed.test.ts` (checksum of two runs) | — | | |
-| SEED-3 | SQL | Duplicate full names; a few names per country and gender | None; names fit country and gender; Japanese given name first | | |
-| SEED-4 | SQL | Code range; duplicate emails | E000001–E010000; none | | |
-| SEED-5 | SQL | Latest date anywhere; earliest hire | ≤ 2026-09-30; ≥ 2012-01-01 | | |
-| SEED-6 | tests | `seed.test.ts` (medians within ±15% of the research) | — | | |
-| SEED-7 | SQL | Women's vs men's median in a large peer group per country | Small gap, varies by country | | |
-| SEED-8 | SQL | People beyond 1.8× / 0.55× of their peer median | About 30 | | |
-| SEED-9 | SQL | Change kinds present; relocations with new currency; leavers | All present | | |
-| SEED-10 | tests, SQL | `seed.test.ts`; spot-check one manager's level | Higher level, employed, no loops | | |
-| A11Y-1 | tests | `e2e/a11y.spec.ts` (axe, both themes, both sizes) | — | | |
+| SEED-1 | SQL | Count by hire country | pass | SQL: BR 800, DE 1200, GB 1200, IN 3000, JP 800, US 3000 |
+| SEED-2 | tests | `seed.test.ts` (checksum of two runs) | pass | seed.test.ts (checksum of two runs) passes in the suite |
+| SEED-3 | SQL | Duplicate full names; a few names per country and gender | pass | SQL: no repeated full names; JP sample "Kokona Ishikawa" (given name first) |
+| SEED-4 | SQL | Code range; duplicate emails | pass | SQL: E000001–E010000, 10,000 distinct emails |
+| SEED-5 | SQL | Latest date anywhere; earliest hire | pass | SQL: last change 2026-09-30, last leave 2026-09-29, hires 2012-01-03 to 2026-09-30 |
+| SEED-6 | tests | `seed.test.ts` (medians within ±15% of the research) | pass | seed.test.ts passes in the suite |
+| SEED-7 | SQL | Women's vs men's median in a large peer group per country | pass | SQL, largest peer group per country: BR 8.8%, DE 5.3%, GB 8.5%, IN 14.1%, JP 11.7%, US 5.7% lower for women |
+| SEED-8 | SQL | People beyond 1.8× / 0.55× of their peer median | pass | SQL: 30 current employees beyond the limits |
+| SEED-9 | SQL | Change kinds present; relocations with new currency; leavers | pass | SQL: 48,829 pay, 7,185 level, 4,325 manager changes, 104 relocations (all with a salary in the new currency), 1,093 leavers |
+| SEED-10 | tests, SQL | `seed.test.ts`; spot-check one manager's level | pass | seed.test.ts; SQL: 0 reports with a manager at their level or lower on 2026-09-30 |
+| A11Y-1 | tests | `e2e/a11y.spec.ts` (axe, both themes, both sizes) | pass | Automated tests pass (see Steps) |
 | A11Y-2 | browser | Keyboard only: sign in, find and open, add, job change, leave and undo, import, ask | All work | | |
 | A11Y-3 | browser | Tab through a page; skip link; failed submit | Focus visible; skip works; first invalid field focused | | |
 | A11Y-4 | browser | Ask; watch the hidden status line | One "Answer finished." at the end | | |
