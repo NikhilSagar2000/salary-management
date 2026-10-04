@@ -76,7 +76,7 @@ const failure = async (events: AsyncIterable<ModelEvent>) => {
   return null;
 };
 
-test.fails('a 429 becomes rate_limited', async () => {
+test('a 429 becomes rate_limited', async () => {
   const { baseUrl } = await fakeOpenRouter((_req, res) => {
     res.writeHead(429, { 'content-type': 'application/json', 'x-ratelimit-remaining': '0' });
     res.end('{"error":{"code":429,"message":"Rate limit exceeded","metadata":{"error_type":"rate_limit_exceeded"}}}');

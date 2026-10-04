@@ -30,6 +30,7 @@ export function openRouterModel(cfg: { baseUrl: string; apiKey: string; models: 
       body: JSON.stringify({ model: cfg.models[0], models: cfg.models, messages, stream: true, ...(tools.length ? { tools } : {}) }),
       signal,
     });
+    if (res.status === 429) throw new ModelError('rate_limited', 'OpenRouter rate limit');
     const calls = new Map<number, { id: string; name: string; args: string }>();
     const decoder = new TextDecoder();
     let buffer = '';
@@ -42,7 +43,9 @@ export function openRouterModel(cfg: { baseUrl: string; apiKey: string; models: 
         if (!line.startsWith('data:')) continue; // blank lines and ": OPENROUTER PROCESSING" keep-alives
         const data = line.slice(5).trim();
         if (data === '[DONE]') continue;
-        const delta = JSON.parse(data).choices?.[0]?.delta ?? {};
+        const event = JSON.parse(data);
+        if (event.error) throw new ModelError(event.error.code === 429 ? 'rate_limited' : 'unavailable', String(event.error.message));
+        const delta = event.choices?.[0]?.delta ?? {};
         if (delta.content) yield { type: 'token', text: delta.content };
         for (const tc of delta.tool_calls ?? []) {
           const call = calls.get(tc.index) ?? { id: '', name: '', args: '' };

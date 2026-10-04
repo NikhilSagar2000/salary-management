@@ -422,6 +422,7 @@ is done (hashes copied from `git log`).
 - Task 17 · red: OpenRouter client parses streamed tool-call deltas split across chunks; tests use a local fake OpenRouter server.
 - Task 17 · green: `openRouterModel` streams `/chat/completions` with the `models` fallback list, yields text tokens, joins tool-call fragments per index across chunks, skips keep-alive comments.
 - Task 17 · red: a 429 (status or mid-stream error) becomes `rate_limited` (AST-14).
+- Task 17 · green: OpenRouter 429s — as an HTTP status or an error inside the stream — throw `ModelError("rate_limited")` (AST-14).
 
 ---
 
