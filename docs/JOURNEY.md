@@ -263,6 +263,7 @@ is done (hashes copied from `git log`).
 - Task 3 · red: sign-in lockout test (AUTH-3).
 - Task 3 · green: 5 wrong passwords from one IP within 15 minutes lock sign-in for 15 minutes with 429 (AUTH-3); in-memory per IP (one server), trust one proxy in production.
 - Task 3 · red: sign-out test (AUTH-4).
+- Task 3 · green: `DELETE /api/session` deletes the session row and clears the cookie (AUTH-4).
 
 ---
 

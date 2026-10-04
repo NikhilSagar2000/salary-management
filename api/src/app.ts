@@ -1,6 +1,7 @@
 import express from 'express';
 import type pg from 'pg';
 import { authRoutes, requireSession } from './auth/routes.ts';
+import { deleteSession, SESSION_COOKIE, sessionToken } from './auth/sessions.ts';
 import type { Clock } from './clock.ts';
 
 export type Config = { passwordHash: string; production: boolean };
@@ -18,6 +19,10 @@ export function createApp(deps: { db: pg.Pool; clock: Clock; config: Config }) {
   app.use('/api', requireSession(deps));
   app.get('/api/session', (_req, res) => {
     res.json({ signedIn: true });
+  });
+  app.delete('/api/session', async (req, res) => {
+    await deleteSession(deps.db, sessionToken(req.get('cookie')));
+    res.clearCookie(SESSION_COOKIE, { path: '/' }).status(204).end();
   });
   return app;
 }
