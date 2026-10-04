@@ -84,7 +84,7 @@ export function assistantRoutes({ db, clock, model, config }: { db: pg.Pool; clo
       } else {
         // AST-14/15: say what happened in plain words; the question stays saved and the rest of the app is unaffected.
         const kind = err instanceof ModelError ? err.kind : 'unavailable';
-        if (!(err instanceof ModelError)) console.error(err);
+        if (kind === 'unavailable') console.error('Assistant unavailable:', err instanceof ModelError ? err.message : err);
         const message = kind === 'rate_limited' ? MSG.rateLimited : MSG.assistantUnavailable;
         res.write(`event: error\ndata: ${JSON.stringify({ kind, message })}\n\n`);
         await saveAnswer(db, clock, chatId, { content: message, sources: null, basedOnData: null, status: 'error', errorKind: kind });

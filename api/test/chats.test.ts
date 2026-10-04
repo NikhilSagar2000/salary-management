@@ -201,7 +201,7 @@ test('the key is never sent to the browser, and free requests left are reported'
   }
 });
 
-test.fails('an unavailable model is written to the server log with its reason, never to the browser', async () => {
+test('an unavailable model is written to the server log with its reason, never to the browser', async () => {
   const logged = vi.spyOn(console, 'error').mockImplementation(() => {});
   const reason = "OpenRouter answered 400: 'models' array must have 3 items or fewer.";
   const { app } = await testApp({ model: async function* () { throw new ModelError('unavailable', reason); } });

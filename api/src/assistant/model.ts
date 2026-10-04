@@ -24,6 +24,8 @@ export class ModelError extends Error {
  */
 export function openRouterModel(cfg: { baseUrl: string; apiKey: string; models: string[]; timeoutMs?: number }): ModelFn {
   const timeoutMs = cfg.timeoutMs ?? 60_000;
+  // OpenRouter refuses a `models` list longer than three (400), so extra fallbacks are dropped.
+  const models = cfg.models.slice(0, 3);
   return async function* ({ messages, tools, signal }) {
     // Gives up after `timeoutMs` without any data (AST-15); a stop from the caller stays an AbortError.
     const quiet = new AbortController();
@@ -40,11 +42,15 @@ export function openRouterModel(cfg: { baseUrl: string; apiKey: string; models: 
       const res = await fetch(`${cfg.baseUrl}/chat/completions`, {
         method: 'POST',
         headers: { 'content-type': 'application/json', authorization: `Bearer ${cfg.apiKey}`, 'x-title': 'ACME Salary Management' },
-        body: JSON.stringify({ model: cfg.models[0], models: cfg.models, messages, stream: true, ...(tools.length ? { tools } : {}) }),
+        body: JSON.stringify({ model: models[0], models, messages, stream: true, ...(tools.length ? { tools } : {}) }),
         signal: AbortSignal.any([signal, quiet.signal]),
       }).catch(unavailable);
       if (res.status === 429) throw new ModelError('rate_limited', 'OpenRouter rate limit');
-      if (!res.ok || !res.body) throw new ModelError('unavailable', `OpenRouter answered ${res.status}`);
+      if (!res.ok || !res.body) {
+        // OpenRouter's own reason goes into the server log (routes.ts); the browser only sees the plain message.
+        const reason = (await res.json().catch(() => null))?.error?.message;
+        throw new ModelError('unavailable', `OpenRouter answered ${res.status}${reason ? `: ${reason}` : ''}`);
+      }
       stillHearing();
       yield* readStream(res.body, stillHearing);
     } catch (err) {
