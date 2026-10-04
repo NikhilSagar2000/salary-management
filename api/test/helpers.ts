@@ -96,3 +96,23 @@ export function scriptedModel(rounds: ModelEvent[][]) {
   };
   return { model, requests };
 }
+
+/** Reads a server-sent-events response body into [{ event, data }]. */
+export function sseEvents(text: string): { event: string; data: unknown }[] {
+  return text
+    .split('\n\n')
+    .filter((block) => block.trim())
+    .map((block) => {
+      const event = /^event: (.*)$/m.exec(block)?.[1] ?? 'message';
+      const data = /^data: (.*)$/m.exec(block)?.[1];
+      return { event, data: data === undefined ? undefined : JSON.parse(data) };
+    });
+}
+
+/** supertest parser that keeps a streamed body as text. */
+export function asText(res: unknown, done: (err: Error | null, body: string) => void) {
+  const stream = res as NodeJS.ReadableStream;
+  let body = '';
+  stream.on('data', (c) => (body += c));
+  stream.on('end', () => done(null, body));
+}
