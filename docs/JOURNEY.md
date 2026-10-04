@@ -221,7 +221,17 @@ Then started phase 5.
 | 2026-10-04 | Pay research returned and spot-checked; Phase 4 plan in `tasks/todo.md`; stop for Nikhil | same commit as above |
 | 2026-10-04 | Phase 3 + 4 committed | 3d6a8e4 |
 | 2026-10-04 | LIST-9 clarified: stats count people as STATS-2 says (caught in review before the stop) | d4b6938 |
-| 2026-10-04 | Plan approved (Q37–Q40); TIME-1 added; phase 5 starts | this commit (hash in next entry) |
+| 2026-10-04 | Plan approved (Q37–Q40); TIME-1 added; phase 5 starts | 9fb5c05 |
+
+### Build log
+
+One line per commit, written in that commit. Each task's hash range is added once the task
+is done (hashes copied from `git log`).
+
+- Task 1 · chore: npm workspaces, Postgres 17 in Docker on 4734 (`acme`, `acme_test`), Vitest
+  harness, API on Node 24's built-in TypeScript type stripping. Docker already held a
+  `salary-management_pgdata` volume from 1 Oct with an unknown owner; left untouched, and the
+  Compose project is named `acme-salary` so this app gets its own volume.
 
 ---
 

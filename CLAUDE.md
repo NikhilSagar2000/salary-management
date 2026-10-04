@@ -52,7 +52,8 @@ employees in six countries, plus a read-only pay assistant. Built with Nikhil.
 - Pay statistics: median, shown with min, max and headcount.
 - Accessibility: WCAG AA, full keyboard use, error messages in plain words.
 - Employee code (`E000001`) and hire date never change after creation. Job, pay, manager and
-  country changes are new effective-dated history rows; history rows are never edited.
+  country changes are new effective-dated history rows holding only what changed; history
+  rows are never edited (a scheduled one can be cancelled).
 - Nothing is deleted except chats. Leavers are marked and can be undone.
 - "Today" is the date in HR's browser timezone (`X-Timezone` header, UTC fallback), from the
   app's injectable clock; tests fix it. The seed's dates sit on or before 2026-09-30.
