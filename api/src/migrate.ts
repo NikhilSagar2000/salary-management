@@ -1,6 +1,7 @@
 import { readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import pg from 'pg';
+import { withTx } from './db.ts';
 
 export const MIGRATIONS_DIR = new URL('../db/migrations', import.meta.url).pathname;
 
@@ -10,18 +11,13 @@ export async function migrate(db: pg.Pool, dir = MIGRATIONS_DIR): Promise<string
   const done = new Set((await db.query('SELECT name FROM schema_migrations')).rows.map((r) => r.name));
   const files = (await readdir(dir)).filter((f) => f.endsWith('.sql') && !done.has(f)).sort();
   for (const file of files) {
-    const client = await db.connect();
-    try {
-      await client.query('BEGIN');
-      await client.query(await readFile(join(dir, file), 'utf8'));
-      await client.query('INSERT INTO schema_migrations (name) VALUES ($1)', [file]);
-      await client.query('COMMIT');
-    } catch (err) {
-      await client.query('ROLLBACK');
+    const sql = await readFile(join(dir, file), 'utf8');
+    await withTx(db, async (tx) => {
+      await tx.query(sql);
+      await tx.query('INSERT INTO schema_migrations (name) VALUES ($1)', [file]);
+    }).catch((err) => {
       throw new Error(`Migration ${file} failed: ${(err as Error).message}`);
-    } finally {
-      client.release();
-    }
+    });
   }
   return files;
 }

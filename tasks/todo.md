@@ -170,7 +170,7 @@ is written just before the task starts, from the interfaces that exist at that p
 - [x] **Task 4: Employee tables and history guards.** Files: `001_init.sql` (or `002_…`).
   Tests: `db.test.ts` › "database refuses changing code or hire date" (EMP-5) · "database
   refuses UPDATE of change fields and any DELETE of history" (EMP-12).
-- [ ] **Task 5: Create employee.** Files: `api/src/employees/create.ts`, routes.
+- [x] **Task 5: Create employee.** Files: `api/src/employees/create.ts`, routes.
   Tests: `employees.create.test.ts` › "suggests the next free code" · "rejects a malformed or
   used code" (EMP-1) · "creates an employee with currency from the country" (EMP-2) ·
   "saves the hire change dated on the hire date" (EMP-4) · "rejects an email already used,
@@ -471,12 +471,12 @@ Files: `api/src/employees/{create,routes}.ts`, `api/src/http.ts` (field-error re
 `{ error: 'Some fields need fixing.', fields: { <field>: <message> } }`. The hire change stores
 every field (`manager_set` true; manager rules arrive with Task 7).
 
-- [ ] Step 1: "suggests the next free code": none → `E000001`; after `E000123` → `E000124`.
-- [ ] Step 2: "rejects a malformed or used code": `E12` → schema message; `E000123` twice →
+- [x] Step 1: "suggests the next free code": none → `E000001`; after `E000123` → `E000124`.
+- [x] Step 2: "rejects a malformed or used code": `E12` → schema message; `E000123` twice →
   "E000123 is already used."
-- [ ] Step 3: "creates an employee with currency from the country": 201 `{ code, version: 1 }`;
+- [x] Step 3: "creates an employee with currency from the country": 201 `{ code, version: 1 }`;
   the hire change has currency BRL for country BR.
-- [ ] Step 4: "saves the hire change dated on the hire date": one change on the hire date
+- [x] Step 4: "saves the hire change dated on the hire date": one change on the hire date
   with country, department, role, level, salary, currency set and `manager_set` true.
-- [ ] Step 5: "rejects an email already used, ignoring case" → "That work email is already used."
-- [ ] Task check: `npm test`, `npm run typecheck`.
+- [x] Step 5: "rejects an email already used, ignoring case" → "That work email is already used."
+- [x] Task check: `npm test`, `npm run typecheck`.

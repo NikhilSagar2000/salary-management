@@ -7,3 +7,19 @@ pg.types.setTypeParser(pg.types.builtins.DATE, (value) => value);
 pg.types.setTypeParser(pg.types.builtins.INT8, Number);
 
 export const createPool = (connectionString: string) => new pg.Pool({ connectionString });
+
+/** Runs `fn` in one transaction: commits if it resolves, rolls back if it throws. */
+export async function withTx<T>(db: pg.Pool, fn: (client: pg.PoolClient) => Promise<T>): Promise<T> {
+  const client = await db.connect();
+  try {
+    await client.query('BEGIN');
+    const result = await fn(client);
+    await client.query('COMMIT');
+    return result;
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  } finally {
+    client.release();
+  }
+}

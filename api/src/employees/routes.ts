@@ -1,7 +1,7 @@
 import { employeeCreateSchema } from '@acme/shared';
 import { Router } from 'express';
 import type pg from 'pg';
-import { fieldErrors } from '../http.ts';
+import { fieldErrors, sendFieldErrors } from '../http.ts';
 import { createEmployee, duplicateField, nextCode } from './create.ts';
 
 export function employeeRoutes({ db }: { db: pg.Pool }) {
@@ -19,7 +19,7 @@ export function employeeRoutes({ db }: { db: pg.Pool }) {
     } catch (err) {
       const fields = duplicateField(err, parsed.data);
       if (!fields) throw err;
-      res.status(400).json({ error: 'Some fields need fixing.', fields });
+      sendFieldErrors(res, fields);
     }
   });
 

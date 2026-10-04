@@ -16,5 +16,8 @@ export const MSG = {
   salaryPositive: 'Salary must be more than 0.',
   salaryTooLarge: 'That salary is too large. The most allowed is 10,000,000,000.',
   roleNotInDepartment: (role: string, department: string) => `${role} isn't a role in ${department}.`,
+  fixFields: 'Some fields need fixing.',
+  codeUsed: (code: string) => `${code} is already used.`,
+  emailUsed: 'That work email is already used.',
   levelOutOfRange: (role: string, min: number, max: number) => `${role} goes from L${min} to L${max}.`,
 } as const;
