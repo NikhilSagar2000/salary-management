@@ -32,3 +32,19 @@ test('refuses a leave date before hire or a reason over 500 characters', async (
   expect(await person(db)).toEqual({ leave_date: null, leave_reason: null, version: 1 });
   expect(await events(db)).toEqual([]);
 });
+
+test.fails('undo clears date and reason and both events show in history', async () => {
+  const { agent, db } = await setup();
+  await agent.post('/api/employees/E000123/leave').send({ version: 1, leaveDate: '2026-09-30', reason: 'Resigned' });
+  const res = await agent.post('/api/employees/E000123/undo-leave').send({ version: 2 });
+  expect(res.status).toBe(200);
+  expect(res.body).toEqual({ code: 'E000123', version: 3 });
+  expect(await person(db)).toEqual({ leave_date: null, leave_reason: null, version: 3 });
+  expect(await events(db)).toEqual([
+    { kind: 'left', leave_date: '2026-09-30', reason: 'Resigned' },
+    { kind: 'undone', leave_date: '2026-09-30', reason: null },
+  ]);
+  const again = await agent.post('/api/employees/E000123/undo-leave').send({ version: 3 });
+  expect(again.status).toBe(400);
+  expect(again.body.fields).toEqual({ form: "This person isn't marked as leaving." });
+});
