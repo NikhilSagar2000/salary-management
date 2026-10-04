@@ -222,6 +222,25 @@ Then started phase 5.
 | 2026-10-04 | Phase 3 + 4 committed | 3d6a8e4 |
 | 2026-10-04 | LIST-9 clarified: stats count people as STATS-2 says (caught in review before the stop) | d4b6938 |
 | 2026-10-04 | Plan approved (Q37–Q40); TIME-1 added; phase 5 starts | 9fb5c05 |
+| 2026-10-04 | Task 1: Workspace, Postgres and test harness | 9fb5c05..666d9d9 |
+| 2026-10-04 | Task 2: Reference data, shared validation, formatting | 666d9d9..4d26c93 |
+| 2026-10-04 | Task 3: Sign-in | 4d26c93..8553d82 |
+| 2026-10-04 | Task 4: Employee tables and history guards | 8553d82..c02694c |
+| 2026-10-04 | Task 5: Create employee | c02694c..723178b |
+| 2026-10-04 | Task 6: Edit personal details, stale saves | 723178b..9aeba1d |
+| 2026-10-04 | Task 7: Job changes | 9aeba1d..c521831 |
+| 2026-10-04 | Task 8: Cancel scheduled changes | cf6db20..6b0fbc0 |
+| 2026-10-04 | Task 9: Leavers | 6b0fbc0..14ab1fd |
+| 2026-10-04 | Task 10: Employee detail | 14ab1fd..f2ec394 |
+| 2026-10-04 | Task 11: Employee list | f2ec394..9af9155 |
+| 2026-10-04 | Task 12: Pay statistics | 9af9155..7d10431 |
+| 2026-10-04 | Task 13: Seed | 7d10431..0c7a545 |
+| 2026-10-04 | Task 14: CSV export | 0c7a545..d92368e |
+| 2026-10-04 | Task 15: CSV import | d92368e..88e8207 |
+| 2026-10-04 | Task 16: Assistant tools | 88e8207..8d0f613 |
+| 2026-10-04 | Task 17: Model client and answer loop | 8d0f613..2d7c754 |
+| 2026-10-04 | Task 18: Chats API and streaming | 2d7c754..403e4ae |
+| 2026-10-04 | Task 19: List performance (p95 ~100 ms) | 403e4ae..88e63df |
 
 ### Build log
 
@@ -443,6 +462,7 @@ is done (hashes copied from `git log`).
 - Task 18 · red: `GET /api/assistant/status` reports free requests left; the OpenRouter key never reaches the browser (AST-16, AST-17).
 - Task 18 · green: `GET /api/assistant/status` returns `{ freeRequestsLeft }`, asked server-side with the server's key; no response carries the key (AST-16, AST-17).
 - Task 19: `npm run measure:list` times 200 list requests over HTTP on the seeded database and fails above 300 ms at p95; measured p95 99–104 ms (LIST-11, section 7).
+- Phase 5 checkpoint: backend complete (Tasks 1–19). Timeline rows added per task; D65 (UI look and exclusions), D66 (serving the web app), D67 (unknown fields ignored).
 
 ---
 
@@ -517,6 +537,9 @@ accepted when Nikhil approved the plan (P4).
 | D62 | Seed organisation mix and history | SEED-9 "looks real" | – | Departments: Engineering 40%, Sales 15%, Customer Support 12%, Marketing 7%, Operations 7%, Product 6%, Finance 5%, Design 4%, HR 4%. Levels L1–L7: 12/22/26/20/12/6/2% within each role's range. Gender 42% female, 56% male, 2% non-binary. Hire dates 2012–2026 skewed to recent years; raise every 1 April (US/GB 3–5%, DE 2–4%, JP 1–3%, IN 7–11%, BR 5–9%); promotion every 2–4 years (+8–15%); about 12% leavers, about 1% relocations | Plausible tech-company shape; all **my estimates**, for Nikhil to adjust | C |
 | D63 | CSV parsing library | Import must handle Excel CSV quoting | Hand-written parser · `csv-parse` | `csv-parse` (RFC 4180, BOM, quoted commas and line breaks, CRLF) | Quoting edge cases are where hand-written CSV parsers break; one well-tested dependency | C |
 | D64 | CSV parsing (replaces D63) | `csv-parse` miscounts lines inside quoted CRLF fields (a quoted CRLF counts as two lines), so problems pointed one line too far | Patch line numbers around `csv-parse` · own parser | A ~35-line RFC 4180 parser in `api/src/csv/import.ts` that tracks each record's start line; `csv-parse` removed | One source of truth for both cells and line numbers; no dependency | C |
+| D65 | UI look (refines D24) | Q24 "calm, data-dense, light + dark" | – | System fonts, Mantine lightly restyled, one accent colour, tables first. Not used: cream backgrounds, hero/marketing layouts, numbered section labels, italic accent words, monospace labels, pill buttons, gradients, decorative illustrations, emoji | A tool for scanning numbers, not a landing page; **for Nikhil to adjust** | C |
+| D66 | Serving the web app | D33 one service | – | The API serves the built web app from Task 27 (needed by the end-to-end server); dev uses Vite on 4731 with a proxy to 4732 | Same origin in production; nothing to serve before the UI exists | C |
+| D67 | Unknown fields in write requests | Strict vs lenient schemas | Refuse · ignore | Ignored; identity fields (code, hire date) are refused explicitly | The only client is our UI; a strict refusal message would be technical | C |
 
 ---
 
