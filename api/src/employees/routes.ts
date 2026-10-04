@@ -55,7 +55,7 @@ export function employeeRoutes({ db }: { db: pg.Pool }) {
     const version = Number(req.body?.version);
     const changeId = Number(req.params.id);
     if (!Number.isInteger(version) || !Number.isInteger(changeId)) return sendFieldErrors(res, { form: MSG.noChange });
-    const next = await cancelChange(db, req.params.code, changeId, version);
+    const next = await cancelChange(db, req.params.code, changeId, version, res.locals.today);
     if (next === null) return sendStaleOrMissing(res, db, req.params.code);
     res.json({ code: req.params.code, version: next });
   });

@@ -125,7 +125,7 @@ test('a cancelled scheduled change stays in history and stops applying', async (
   expect(rows).toEqual([{ salary: 150000, cancelled: true }]);
 });
 
-test.fails('refuses to cancel a change dated today or earlier', async () => {
+test('refuses to cancel a change dated today or earlier', async () => {
   const { app, db } = await testApp({ now: '2026-10-01T20:00:00Z' }); // 1 Oct in UTC, 2 Oct in Tokyo
   const agent = await signIn(app);
   await agent.post('/api/employees').send(newEmployee);
