@@ -27,7 +27,10 @@ export function ChatView({ id, listTitle, onChanged, onDeleted }: { id: number; 
   const count = chat?.messages.length ?? 0;
   const last = chat?.messages.at(-1);
   // A new question (or opening the chat) scrolls to the newest message.
-  useEffect(() => end.current?.scrollIntoView({ block: 'end' }), [count]);
+  // Braces matter: Chromium's scrollIntoView returns a promise, which React would call as a clean-up.
+  useEffect(() => {
+    end.current?.scrollIntoView({ block: 'end' });
+  }, [count]);
   // A growing answer stays in view, unless HR has scrolled up to read something else.
   useEffect(() => {
     if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 400) end.current?.scrollIntoView({ block: 'end' });

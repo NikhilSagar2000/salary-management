@@ -604,6 +604,7 @@ is done (hashes copied from `git log`).
 - Phase 6 QA fix 8 · green: the job-change dialog's levels come from the role (levelChoices), and changing the role clears a level that no longer fits.
 - Phase 6 QA fix 9 · red (found by QA, S11): sending a question scrolls the chat to it (the new question and answer were hidden behind the question box).
 - Phase 6 QA fix 9 · green: the chat scrolls to the newest message when a question is sent or the chat opens, and keeps a streaming answer in view while HR is near the bottom; the end marker keeps clear of the sticky question box.
+- Fix (found by the end-to-end run): leaving a chat crashed the app — the new scroll effect returned scrollIntoView's result, which in Chromium is a promise, and React called it as a clean-up ("l is not a function"). The effect now returns nothing; jsdom's scrollIntoView returns nothing, so the unit tests couldn't see it. The two assistant end-to-end tests that navigate away from a chat failed and now pass.
 
 ---
 
