@@ -149,7 +149,11 @@ async function checkDuplicates(db: pg.Pool | pg.PoolClient, rows: ImportRow[]): 
   return problems;
 }
 
-/** CSV-5: a manager is an employee in the database or a row in this file, employed on the row's hire date, and not the person. */
+/**
+ * CSV-5: a manager is an employee in the database or a row in this file, employed on the row's hire date, not the person,
+ * and not part of a reporting loop (EMP-10). Loops can only run through this file's rows: people already saved can't
+ * report to someone new.
+ */
 async function checkManagers(db: pg.Pool | pg.PoolClient, rows: ImportRow[]): Promise<Problem[]> {
   const codes = [...new Set(rows.map((r) => r.managerCode).filter((c): c is string => c !== null))];
   const { rows: found } = await db.query(
@@ -161,6 +165,15 @@ async function checkManagers(db: pg.Pool | pg.PoolClient, rows: ImportRow[]): Pr
     rows.map((r) => [r.code, { name: `${r.firstName} ${r.lastName}`, hireDate: r.hireDate, leaveDate: null }]),
   );
   for (const m of found) managers.set(m.code, { name: `${m.first_name} ${m.last_name}`, hireDate: m.hire_date, leaveDate: m.leave_date });
+  const managerOf = new Map(rows.map((r) => [r.code, r.managerCode]));
+  const inLoop = (start: string) => {
+    const seen = new Set<string>();
+    for (let next = managerOf.get(start); next && managerOf.has(next) && !seen.has(next); next = managerOf.get(next)) {
+      if (next === start) return true;
+      seen.add(next);
+    }
+    return false;
+  };
   const problems: Problem[] = [];
   for (const r of rows) {
     if (r.managerCode === null) continue;
@@ -169,6 +182,7 @@ async function checkManagers(db: pg.Pool | pg.PoolClient, rows: ImportRow[]): Pr
     if (r.managerCode === r.code) problem(MSG.ownManager);
     else if (!m) problem(MSG.noEmployee(r.managerCode));
     else if (m.hireDate > r.hireDate || (m.leaveDate && m.leaveDate <= r.hireDate)) problem(MSG.managerNotEmployed(m.name, formatDate(r.hireDate)));
+    else if (inLoop(r.code)) problem(MSG.managerLoop);
   }
   return problems;
 }

@@ -200,7 +200,7 @@ test('reports an empty file, missing columns or an unreadable file plainly', asy
   );
 });
 
-test.fails('rows that manage each other in a circle are refused, on every row in the circle (CSV-5, EMP-10)', async () => {
+test('rows that manage each other in a circle are refused, on every row in the circle (CSV-5, EMP-10)', async () => {
   const { preview, commit, db } = await setup();
   const csv = [`${HEADER},manager_code`, row(1, ',E000002'), row(2, ',E000003'), row(3, ',E000001'), row(4, ',E000001')].join('\n');
   const loop = { column: 'manager_code', message: 'That would make a reporting loop.' };

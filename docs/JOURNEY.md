@@ -540,6 +540,7 @@ is done (hashes copied from `git log`).
 - Final review fix 6 · red: undoing leaving appears in history dated the day it was undone, in HR's timezone (LEAVE-2).
 - Final review fix 6 · green: the undo event is stamped with the app clock's time and shown on its date in HR's timezone; the leave event keeps its leave date (LEAVE-2).
 - Final review fix 2 · red: rows in an import file that manage each other in a circle are refused, with a problem on every row in the circle, and nothing is saved (CSV-5, EMP-10).
+- Final review fix 2 · green: the import follows each row's manager chain through the file and refuses a row that leads back to itself ("That would make a reporting loop."); a row that only points into a circle is fine on its own (CSV-5, EMP-10).
 
 ---
 
