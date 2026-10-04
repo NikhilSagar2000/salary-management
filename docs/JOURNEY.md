@@ -492,6 +492,7 @@ is done (hashes copied from `git log`).
 - Task 22 · green: employee page with name, status and read-only facts (code, hire date, email, gender, leave date) (EMP-5).
 - Task 22 · red: the employee page shows current job, manager (flagged if left), pay against peers, direct reports and the history newest first (EMP-14).
 - Task 22 · green: the employee page shows the current job, manager (flagged when they have left), pay against peers ("12% above the median of 48 peers"), direct reports and the history newest first with from → to values and Hired/Scheduled/Cancelled/Won't apply markers (EMP-14).
+- Task 22 · red: Edit details shows each field's message, linked to the field, and focuses the first invalid one, for client and server errors (EMP-3, A11Y-3).
 
 ---
 

@@ -1,4 +1,5 @@
 import { screen, within } from '@testing-library/react';
+import { userEvent } from '@testing-library/user-event';
 import { expect, test } from 'vitest';
 import { fakeApi } from '../test/fakeApi.ts';
 import { detailResponse } from '../test/fixtures.ts';
@@ -54,4 +55,34 @@ test("shows peers' position, manager flag, reports and the history timeline", as
   expect(items[2]).toHaveTextContent('Promotion to L4');
   expect(items[3]).toHaveTextContent('Hired');
   expect(items[3]).toHaveTextContent('Country: Brazil');
+});
+
+test.fails('invalid fields show their messages and focus the first', async () => {
+  const calls = open(detailResponse(), {
+    'PATCH /api/employees/E000123': () => ({ status: 400, body: { error: 'Some fields need fixing.', fields: { workEmail: 'That work email is already used.' } } }),
+  });
+  await userEvent.click(await screen.findByRole('button', { name: 'Edit details' }));
+  const dialog = await screen.findByRole('dialog', { name: 'Edit details' });
+  const first = within(dialog).getByLabelText('First name');
+  expect(first).toHaveValue('Ana');
+  await userEvent.clear(first);
+  await userEvent.clear(within(dialog).getByLabelText('Work email'));
+  await userEvent.type(within(dialog).getByLabelText('Work email'), 'not an email');
+  await userEvent.click(within(dialog).getByRole('button', { name: 'Save' }));
+
+  expect(within(dialog).getByText('Enter a first name.')).toBeInTheDocument();
+  expect(within(dialog).getByText('Enter a work email, like name@acme.example.')).toBeInTheDocument();
+  expect(first).toHaveFocus();
+  expect(first).toHaveAccessibleDescription('Enter a first name.');
+  expect(calls.some((c) => c.method === 'PATCH')).toBe(false); // checked before sending
+
+  await userEvent.type(first, 'Anna');
+  await userEvent.clear(within(dialog).getByLabelText('Work email'));
+  await userEvent.type(within(dialog).getByLabelText('Work email'), 'taken@acme.example');
+  await userEvent.click(within(dialog).getByRole('button', { name: 'Save' }));
+  expect(await within(dialog).findByText('That work email is already used.')).toBeInTheDocument();
+  expect(within(dialog).getByLabelText('Work email')).toHaveFocus();
+  expect(calls.find((c) => c.method === 'PATCH')!.body).toEqual({
+    version: 4, firstName: 'Anna', lastName: 'Silva', gender: 'female', workEmail: 'taken@acme.example',
+  });
 });
