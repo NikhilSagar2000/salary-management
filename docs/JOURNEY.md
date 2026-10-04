@@ -355,6 +355,7 @@ is done (hashes copied from `git log`).
 - Task 12 · red: pay overview grid for one country (STATS-3).
 - Task 12 · green: `GET /api/pay-overview?country=` returns department × level cells (median, min, max, headcount) for people employed today, in department then level order (STATS-3).
 - Task 12 · test: someone who moved from the US to Germany counts only in EUR stats and the German overview (STATS-4). Passed first run (stats read the current state); a mutation making the state use the earliest country failed it.
+- Task 13 · data: seed name lists per country and gender (`api/src/seed/names.ts`; romaji for Japan; gender-neutral lists for non-binary people) and pay data copied from the research (`api/src/seed/bands.ts`); D59–D62 record the seed model.
 
 ---
 
@@ -423,6 +424,10 @@ accepted when Nikhil approved the plan (P4).
 | D56 | Step-plan detail | writing-plans wants code for every step up front | Just before each task · all now | Code-level steps written just before each task, in `tasks/todo.md` under that task | Steps match the code that exists by then | N (Q39) |
 | D57 | Correction to D49 | D49 says "22 roles" | – | The SPEC table has **19** roles across 9 departments; the table was always right, the count in D49 (and in my stop message to Nikhil) was wrong | Found while typing the table into `shared/src/reference.ts` | C |
 | D58 | Session mechanism (refines D38) | D38 said "signed httpOnly cookie" | Signed cookie · random token in DB | Random 32-byte token in an httpOnly cookie; Postgres stores its SHA-256 and expiry; no `SESSION_SECRET` | Sign-out really ends the session (AUTH-4) and there is no secret to leak or rotate | C |
+| D59 | Seed pay model | SEED-6, research in `docs/research/pay-bands.md` | – | Band = researched L3 median × the country's level multiplier ("use" rows; separate engineering/other rows where given); Engineering Manager figures are L5 values, so scaled by m(L)/m(L5). Japan uses the researched MHLW ladder as is (flatter than a Tokyo tech firm; no sourced alternative) | Every number traces to the research file | C |
+| D60 | Seed pay spread | Market p25/p75 would push ~0.5–12% of people past SEED-8's limits | – | Half the market log-spread (one company is narrower than the market, per the research note), truncated to 0.7–1.4× band, so only the ~30 listed outliers pass 1.8× / 0.55× | Lets SEED-8 hold exactly | C |
+| D61 | Seed same-job gender gap | Q29 "small gap, varies by country" | – | Women and non-binary staff × (1 − gap): US 1% (Payscale), DE 6% (Destatis adjusted), JP 12% (midpoint of the research's 10–15%); GB 4%, BR 6%, IN 8% are **my estimates** (no official adjusted figure) | Research says use estimates where none exist | C |
+| D62 | Seed organisation mix and history | SEED-9 "looks real" | – | Departments: Engineering 40%, Sales 15%, Customer Support 12%, Marketing 7%, Operations 7%, Product 6%, Finance 5%, Design 4%, HR 4%. Levels L1–L7: 12/22/26/20/12/6/2% within each role's range. Gender 42% female, 56% male, 2% non-binary. Hire dates 2012–2026 skewed to recent years; raise every 1 April (US/GB 3–5%, DE 2–4%, JP 1–3%, IN 7–11%, BR 5–9%); promotion every 2–4 years (+8–15%); about 12% leavers, about 1% relocations | Plausible tech-company shape; all **my estimates**, for Nikhil to adjust | C |
 
 ---
 

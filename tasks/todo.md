@@ -612,3 +612,28 @@ level, median, min, max, headcount }] }` for people active or leaving today.
 - [x] Step 5: "overview gives department × level cells for one country" (STATS-3).
 - [x] Step 6: "a relocated person counts only in their current country" (STATS-4).
 - [x] Task check: `npm test`.
+
+### Task 13: Seed
+
+Files: `api/src/seed/{random,names,bands,generate,write,cli}.ts`, `api/test/seed.test.ts`.
+`generateSeed()` is a pure function of a fixed PRNG seed (mulberry32) → `{ employees, changes,
+leaveEvents, outliers }`; `writeSeed(db, seed)` inserts it in batches. Dates are capped at the
+anchor 2026-09-30 (D42). Pay: band = researched L3 × level multiplier (Engineering Manager
+÷ m(L5)); individual = band × gender factor × truncated log-normal noise; current salary
+first, history back-computed. Managers: same country and department, strictly higher level,
+employed on every date they manage (reassigned when they leave or a report catches up).
+Tests run `generateSeed()` once per file and write it to the test database.
+
+- [ ] Step 1: "exactly 10,000 with the country split" (SEED-1).
+- [ ] Step 2: "two runs give the same checksum" (SEED-2).
+- [ ] Step 3: "every full name differs and fits country and gender" (SEED-3).
+- [ ] Step 4: "codes E000001–E010000, emails unique" (SEED-4).
+- [ ] Step 5: "no date after 2026-09-30, hires from 2012" (SEED-5).
+- [ ] Step 6: "group medians within ±15% of the researched bands" (SEED-6).
+- [ ] Step 7: "women's median below men's by the country's gap" (SEED-7).
+- [ ] Step 8: "about 30 listed outliers and nobody else beyond the limits" (SEED-8).
+- [ ] Step 9: "every person starts with a hire change; raises, promotions, relocations with
+  new-currency salaries and leavers exist" (SEED-9).
+- [ ] Step 10: "managers employed, more senior, no loops" (SEED-10).
+- [ ] `npm run seed` loads the dev database; seed time measured for JOURNEY section 7.
+- [ ] Task check: `npm test`.
