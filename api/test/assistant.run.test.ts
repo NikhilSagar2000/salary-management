@@ -29,3 +29,19 @@ test('streams a step per tool call, then tokens, then sources, then done', async
   expect(answer.text).toBe('The median is USD 110,000.');
   expect(answer.basedOnData).toBe(true);
 });
+
+test.fails('stops tool calls after 6 rounds and asks for an answer', async () => {
+  const lookup = (n: number) => [{ type: 'tool_call' as const, id: `c${n}`, name: 'get_employee', args: { code: 'E000001' } }, { type: 'done' as const }];
+  const { events, requests, answer } = await ask([
+    ...Array.from({ length: 6 }, (_, i) => lookup(i)),
+    [{ type: 'token', text: 'Here is what I found.' }, { type: 'done' }],
+  ]);
+  expect(events.filter((e) => e.type === 'step')).toHaveLength(6);
+  expect(requests).toHaveLength(7);
+  expect(requests.slice(0, 6).every((r) => r.tools.length === 4)).toBe(true);
+  expect(requests[6]!.tools).toEqual([]);
+  expect(requests[6]!.messages.at(-1)).toEqual({
+    role: 'user', content: 'You have used all your lookups. Answer now from what you found, and say plainly what you could not check.',
+  });
+  expect(answer.text).toBe('Here is what I found.');
+});
