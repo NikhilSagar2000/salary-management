@@ -476,6 +476,7 @@ is done (hashes copied from `git log`).
 - Task 20 · green: every API call sends `X-Timezone` with the browser's IANA zone (TIME-1).
 - Task 20 · red: Sign out ends the session and returns to sign-in (AUTH-4 in the UI).
 - Task 20 · green: Sign out in the header ends the session and returns to sign-in. Web build checked (`vite build`).
+- Task 21 · red: on the list, salary controls are disabled with the reason unless one country is chosen (LIST-5).
 
 ---
 

@@ -753,3 +753,19 @@ turns errors into plain messages, sends a signed-out user to `/signin?next=…`)
 - [x] Step 4: "a failed request shows a plain message" (UI-4).
 - [x] Step 5: "every API request sends the browser's timezone" (TIME-1).
 - [x] Task check: `npm test`; `npm run build -w web`.
+
+### Task 21: Employee list page
+
+Files: `web/src/pages/EmployeeList.tsx`, `web/src/pages/EmployeeList.test.tsx`, `web/src/App.tsx`.
+The page's URL query is the API query (same parameter names), so list state lives in the URL.
+Search (debounced), multi-select filters, salary range enabled only for one country, sortable
+column headers (`aria-sort`), pagination and page size, the stats line per currency, empty
+state, Export link with the current filters, Add employee. Phone: cards instead of the table.
+
+- [ ] Step 1: "salary controls are disabled with the note unless one country is chosen" (LIST-5).
+- [ ] Step 2: "search, filters, sort and page are read from and written to the URL" (LIST-6).
+- [ ] Step 3: "rows show the listed columns" (LIST-8).
+- [ ] Step 4: "stats line per currency above the list" (LIST-9).
+- [ ] Step 5: "no matches shows the empty state and no stats" (review focus 5).
+- [ ] Step 6: "export downloads the current filter" (CSV-1).
+- [ ] Task check: `npm test`.
