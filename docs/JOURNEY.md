@@ -307,6 +307,7 @@ is done (hashes copied from `git log`).
 - Task 8 · green: `POST /api/employees/:code/changes/:id/cancel` marks a change cancelled (kept in history) and re-checks the timeline (EMP-11).
 - Task 8 · red: only scheduled changes can be cancelled, "today" from `X-Timezone` (EMP-11, TIME-1).
 - Task 8 · green: every request gets "today" in its `X-Timezone` (UTC fallback); only changes dated after that day can be cancelled (EMP-11, TIME-1).
+- Task 8 · red: the hire change can't be cancelled.
 
 ---
 

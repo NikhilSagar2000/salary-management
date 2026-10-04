@@ -143,3 +143,13 @@ test('refuses to cancel a change dated today or earlier', async () => {
   expect((await cancel(tomorrow, 3, 'Asia/Tokyo')).body.fields).toEqual({ form: 'Only scheduled changes can be cancelled. Fix a past change by adding a new one.' });
   expect((await cancel(tomorrow, 3, 'Europe/London')).status).toBe(200);
 });
+
+test.fails("the hire change can't be cancelled", async () => {
+  const { app, db } = await testApp();
+  const agent = await signIn(app);
+  await agent.post('/api/employees').send({ ...newEmployee, hireDate: '2026-12-01' }); // starting soon
+  const id = (await db.query('SELECT id FROM job_changes')).rows[0].id;
+  const res = await agent.post(`/api/employees/E000123/changes/${id}/cancel`).send({ version: 1 });
+  expect(res.status).toBe(400);
+  expect(res.body.fields).toEqual({ form: "The hire record can't be cancelled." });
+});
