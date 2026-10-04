@@ -617,6 +617,7 @@ is done (hashes copied from `git log`).
 - Fix (found by the end-to-end run): leaving a chat crashed the app — the new scroll effect returned scrollIntoView's result, which in Chromium is a promise, and React called it as a clean-up ("l is not a function"). The effect now returns nothing; jsdom's scrollIntoView returns nothing, so the unit tests couldn't see it. The two assistant end-to-end tests that navigate away from a chat failed and now pass.
 - Phase 6 QA fixes 10–12 · red (found by QA): Stop doesn't send what is waiting in the question box (AST-12); at 375 px long values on the employee page stay inside their space (UI-3); at 375 px the page buttons fit on one line.
 - Phase 6 QA fixes 10–12 · green: Stop and Send are separate keyed buttons, so clicking Stop no longer submits the waiting question; long fact values (emails) wrap inside their column; the list shows fewer page buttons on a phone so they stay on one line.
+- Test fix: the keyboard add-employee test failed in 2 of 5 full runs with Role left empty (it passes alone). The arrow-key helper now reads only the focused field's own list, and the test checks each choice right after making it, so a repeat points at the exact step. Cause unconfirmed (likely Enter landing while the searchable Role list re-renders after the department change); 3 later runs green. Nikhil's "please continue" logged as P5.
 
 ---
 

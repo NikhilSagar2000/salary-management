@@ -47,6 +47,7 @@ test('keyboard: add an employee', async ({ page }) => {
   for (const [label, option] of [['Country', 'Germany'], ['Department', 'Engineering'], ['Role', 'Software Engineer'], ['Level', 'L3']]) {
     await tabTo(page, page.getByRole('combobox', { name: label }));
     await chooseWithKeys(page, option!);
+    await expect(page.getByRole('combobox', { name: label })).toHaveValue(option!);
   }
   await tabTo(page, page.getByLabel('Salary'));
   await page.keyboard.type('72000');

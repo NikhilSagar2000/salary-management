@@ -17,9 +17,11 @@ export async function tabTo(page: Page, target: Locator, max = 120) {
 
 /** With a Mantine select focused: opens it and moves with the arrow keys to `option`, then picks it with Enter. */
 export async function chooseWithKeys(page: Page, option: string) {
+  // Only the focused field's own list: a list that is still fading out can hold a highlighted option too.
+  const list = await page.evaluate(() => document.activeElement?.getAttribute('aria-controls'));
   await page.keyboard.press('ArrowDown');
   for (let i = 0; i < 40; i++) {
-    const highlighted = page.locator('[data-combobox-selected]');
+    const highlighted = page.locator(list ? `[id="${list}"] [data-combobox-selected]` : '[data-combobox-selected]');
     if ((await highlighted.count()) && (await highlighted.first().textContent())?.trim() === option) {
       await page.keyboard.press('Enter');
       return;
