@@ -154,6 +154,8 @@ Chats
 Answering
 - **AST-3** Sending a question streams the answer (server-sent events): progress steps per
   tool call (e.g. "Looking up pay in US · Engineering…"), then the words, then the sources.
+  The steps show only while the answer is worked out; they go away when it finishes, stops or
+  fails (P10, D73).
 - **AST-4** The model gets data only through these read-only tools:
   - `query_employees`: filters on any employee field (including leavers, hire/leave date
     ranges, salary range only with one country), sort, up to 200 rows per call, plus total.

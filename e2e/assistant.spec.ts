@@ -11,10 +11,10 @@ async function ask(page: Page, question: string) {
 test('an answer streams with sources from the fake model', async ({ page }) => {
   await ask(page, 'Who are the engineers in Brazil?');
   const answer = page.getByRole('article', { name: 'Answer' }).last();
-  await expect(answer).toContainText('Looking up people: Brazil · Engineering…');
   await expect(answer).toContainText('Here are the engineers in Brazil.');
   await expect(answer.locator('strong')).toHaveText('Brazil');
   await expect(page.getByRole('status')).toHaveText('Answer finished.');
+  await expect(answer).not.toContainText('Looking up people'); // steps show only while it works (D73)
   await expect(page.getByRole('heading', { name: 'Who are the engineers in Brazil?' })).toBeVisible();
 
   const basedOn = answer.getByRole('region', { name: 'Based on' });

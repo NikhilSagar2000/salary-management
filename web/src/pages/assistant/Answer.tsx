@@ -23,11 +23,14 @@ export function Question({ text }: { text: string }) {
   );
 }
 
-/** One answer. It is not a live region: the page announces once when it finishes (A11Y-4). */
+/**
+ * One answer. It is not a live region: the page announces once when it finishes (A11Y-4). Lookup steps show only while it
+ * is worked out (D73); saved answers never keep them.
+ */
 export function Answer({ message: m }: { message: Message }) {
   return (
     <Box component="article" aria-label="Answer">
-      {m.steps && m.steps.length > 0 && (
+      {m.status === 'streaming' && m.steps && m.steps.length > 0 && (
         <List size="xs" c="dimmed" mb="xs">{m.steps.map((s, i) => <List.Item key={i}>{s}</List.Item>)}</List>
       )}
       {m.status === 'error' ? <Alert color="red" variant="light">{m.content}</Alert> : <ModelText text={m.content} />}

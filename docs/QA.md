@@ -106,7 +106,7 @@ JPY/INR amounts, loading, empty and error states, reload, and Back.
 | STATS-4 | browser, SQL | A relocated person | pass | E000029 moved IN → US: listed and counted in US only |
 | AST-1 | browser | New chat, list order, rename (empty, 81 characters, valid), delete with confirm | pass | New chat; list newest first; title from the first question cut to 60 characters; rename refuses empty and 81 characters ("A chat name needs 1 to 80 characters."), saves a valid name; delete asks first, Cancel keeps it, Delete chat removes it |
 | AST-2 | browser | Reload a chat with answers | pass | Reload and reopen: questions, answers, sources, error messages and the Stopped answer as saved |
-| AST-3 | browser | Ask | pass | Step "Looking up people: Brazil · Engineering…", then the words, then Based on |
+| AST-3 | browser | Ask | pass | Step "Looking up people: Brazil · Engineering…", then the words, then Based on. Afterwards (P10, D73) the steps go away when the answer finishes (test: "lookup steps show while the answer is worked out, then go away") |
 | AST-4 | tests | `assistant.tools.test.ts` (each tool's filters, caps and totals) | pass | Automated tests pass (see Steps) |
 | AST-5 | tests | `assistant.tools.test.ts` (bad arguments, unknown tool, read-only transaction, absurd offset) | pass | Automated tests pass (see Steps) |
 | AST-6 | tests | `assistant.run.test.ts` (six-round cap) | pass | Automated tests pass (see Steps) |

@@ -303,7 +303,7 @@ is written just before the task starts, from the interfaces that exist at that p
 - [x] **Task 26: Assistant page.** Tests: `Assistant.test.tsx` › "chat list, rename, and
   delete after confirming" (AST-1) · "model HTML shows as text, never runs" (AST-11) · "Stop
   ends the stream and shows Stopped" (AST-12) · "the chat shows no free-request count"
-  (AST-16 removed, D72) · "announces once when the answer finishes" (A11Y-4) · "sources link to people and
+  (AST-16 removed, D72) · "lookup steps show while the answer is worked out, then go away" (AST-3, D73) · "announces once when the answer finishes" (A11Y-4) · "sources link to people and
   filtered lists" (AST-8).
 
 ### End to end and CI
