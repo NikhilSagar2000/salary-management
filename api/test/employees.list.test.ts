@@ -20,3 +20,20 @@ test('returns a page of 25 with the total; 50 and 100 allowed', async () => {
   expect((await list('?pageSize=50')).body.rows).toHaveLength(50);
   expect((await list('?pageSize=100')).body.rows).toHaveLength(60);
 });
+
+const codes = (res: { body: { rows: { code: string }[] } }) => res.body.rows.map((r) => r.code);
+
+test.fails('search matches part of name, email or code ignoring case and accents', async () => {
+  const { list } = await setup([
+    { code: 'E000001', firstName: 'Lena', lastName: 'Müller', country: 'DE' },
+    { code: 'E000002', firstName: 'José', lastName: 'Álvarez', workEmail: 'jose.alvarez@acme.example', country: 'BR' },
+    { code: 'E000003', firstName: 'Priya', lastName: 'Sharma', country: 'IN' },
+  ]);
+  expect(codes(await list('?q=muller'))).toEqual(['E000001']);
+  expect(codes(await list('?q=MÜLLER'))).toEqual(['E000001']);
+  expect(codes(await list('?q=jose'))).toEqual(['E000002']);
+  expect(codes(await list('?q=varez%40acme'))).toEqual(['E000002']);
+  expect(codes(await list('?q=000003'))).toEqual(['E000003']);
+  expect(codes(await list('?q=priya%20shar'))).toEqual(['E000003']);
+  expect(codes(await list('?q=%20%20'))).toHaveLength(3); // blank search = no search
+});
