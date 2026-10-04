@@ -60,7 +60,7 @@ test('system prompt lists reference data and today\'s date and holds no secret',
   delete process.env.OPENROUTER_API_KEY;
 });
 
-test.fails('sources come from the tool calls: groups with filters and headcount, people capped at 20 with a list link', async () => {
+test('sources come from the tool calls: groups with filters and headcount, people capped at 20 with a list link', async () => {
   const { db } = await testApp();
   await insertPeople(db, Array.from({ length: 25 }, (_, i) => ({ code: `E${String(i + 1).padStart(6, '0')}`, firstName: `P${i + 1}`, lastName: 'Kim', country: 'JP' })));
   const { model } = scriptedModel([

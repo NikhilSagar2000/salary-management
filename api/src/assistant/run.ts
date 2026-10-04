@@ -66,6 +66,9 @@ export async function answerQuestion(opts: {
   return { text, sources, basedOnData: usedTools };
 }
 
+const SHOWN_PEOPLE = 20;
+
+/** AST-8: each group once; people once each, the first 20 shown and the rest counted (the group links open the full list). */
 function collectSources(found: Source[]): Sources {
   const groups = new Map<string, Extract<Source, { kind: 'group' }>>();
   const people = new Map<string, Extract<Source, { kind: 'person' }>>();
@@ -73,5 +76,6 @@ function collectSources(found: Source[]): Sources {
     if (s.kind === 'group') groups.set(`${s.label}|${s.query}`, s);
     else people.set(s.code, s);
   }
-  return { groups: [...groups.values()], people: [...people.values()], morePeople: 0 };
+  const all = [...people.values()];
+  return { groups: [...groups.values()], people: all.slice(0, SHOWN_PEOPLE), morePeople: Math.max(0, all.length - SHOWN_PEOPLE) };
 }
