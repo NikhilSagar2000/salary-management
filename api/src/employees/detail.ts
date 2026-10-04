@@ -83,11 +83,11 @@ async function timeline(db: Db, employeeId: number, today: string, timezone: str
       scheduled: c.effective_date > today, cancelled, cancelledOn: cancelled ? dateIn(c.cancelled_at, timezone) : null, wontApply, changes: diffs,
     };
   });
-  const { rows: events } = await db.query('SELECT id, kind, leave_date, reason FROM leave_events WHERE employee_id = $1 ORDER BY id', [employeeId]);
+  const { rows: events } = await db.query('SELECT id, kind, leave_date, reason, created_at FROM leave_events WHERE employee_id = $1 ORDER BY id', [employeeId]);
   const leaves = events.map((ev) =>
     ev.kind === 'left'
       ? { type: 'left' as const, date: ev.leave_date as string, reason: ev.reason }
-      : { type: 'undone' as const, date: ev.leave_date as string },
+      : { type: 'undone' as const, date: dateIn(ev.created_at, timezone) }, // LEAVE-2: the day it was undone
   );
   // Stable sort by date keeps changes before leave events on the same day.
   return [...entries, ...leaves].sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));

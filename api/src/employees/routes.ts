@@ -111,7 +111,7 @@ export function employeeRoutes({ db, clock }: { db: pg.Pool; clock: Clock }) {
   router.post('/api/employees/:code/undo-leave', async (req, res) => {
     const version = Number(req.body?.version);
     if (!Number.isInteger(version)) return sendFieldErrors(res, { version: MSG.stale });
-    const next = await undoLeaving(db, req.params.code, version);
+    const next = await undoLeaving(db, req.params.code, version, clock.now());
     if (next === null) return sendStaleOrMissing(res, db, req.params.code);
     res.json({ code: req.params.code, version: next });
   });

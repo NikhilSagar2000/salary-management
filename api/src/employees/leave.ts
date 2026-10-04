@@ -20,7 +20,7 @@ export async function markLeaving(db: pg.Pool, code: string, l: Leave): Promise<
 }
 
 /** Undoes leaving if `version` is current; returns the new version, or null if nothing matched. */
-export async function undoLeaving(db: pg.Pool, code: string, version: number): Promise<number | null> {
+export async function undoLeaving(db: pg.Pool, code: string, version: number, now: Date): Promise<number | null> {
   return withTx(db, async (tx) => {
     const { rows } = await tx.query(
       `UPDATE employees e SET leave_date = NULL, leave_reason = NULL, version = e.version + 1, updated_at = now()
@@ -30,7 +30,7 @@ export async function undoLeaving(db: pg.Pool, code: string, version: number): P
     );
     if (!rows[0]) return null;
     if (!rows[0].leave_date) throw new FieldProblem({ form: MSG.notLeaving });
-    await tx.query("INSERT INTO leave_events (employee_id, kind, leave_date) VALUES ($1, 'undone', $2)", [rows[0].id, rows[0].leave_date]);
+    await tx.query("INSERT INTO leave_events (employee_id, kind, leave_date, created_at) VALUES ($1, 'undone', $2, $3)", [rows[0].id, rows[0].leave_date, now]);
     return rows[0].version as number;
   });
 }

@@ -105,7 +105,7 @@ test("a cancelled change says when it was cancelled, as a date in HR's timezone 
   expect(await cancelledOn('Asia/Tokyo')).toBe('2026-10-02');
 });
 
-test.fails("undoing leaving is dated the day it was undone, in HR's timezone (LEAVE-2)", async () => {
+test("undoing leaving is dated the day it was undone, in HR's timezone (LEAVE-2)", async () => {
   const { app } = await testApp({ now: '2026-10-01T20:00:00Z' }); // already 2 Oct in Tokyo
   const agent = await signIn(app);
   await agent.post('/api/employees').send(newEmployee);

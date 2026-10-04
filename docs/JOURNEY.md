@@ -538,6 +538,7 @@ is done (hashes copied from `git log`).
 - Final review fix 1 · red: a cancelled change says when it was cancelled, as a date in HR's timezone, and the page shows "Cancelled on <date>" (EMP-11).
 - Final review fix 1 · green: cancelling stamps the change with the app clock's time; the employee page returns cancelledOn as the date in the requesting browser's timezone and shows "Cancelled on <date>" (EMP-11). The timezone now rides on res.locals beside today.
 - Final review fix 6 · red: undoing leaving appears in history dated the day it was undone, in HR's timezone (LEAVE-2).
+- Final review fix 6 · green: the undo event is stamped with the app clock's time and shown on its date in HR's timezone; the leave event keeps its leave date (LEAVE-2).
 
 ---
 
