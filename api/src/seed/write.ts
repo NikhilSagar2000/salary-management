@@ -41,4 +41,6 @@ export async function writeSeed(db: pg.Pool, seed: Seed): Promise<void> {
       );
     }
   });
+  // Fresh planner statistics after a bulk load, so the first queries get sensible plans.
+  await db.query('ANALYZE employees, job_changes, leave_events');
 }

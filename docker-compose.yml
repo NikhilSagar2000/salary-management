@@ -3,6 +3,8 @@ name: acme-salary
 services:
   db:
     image: postgres:17-alpine
+    # Log the plan of any statement slower than 20 s (diagnostics for slow test runs).
+    command: ["postgres", "-c", "shared_preload_libraries=auto_explain", "-c", "auto_explain.log_min_duration=20s"]
     environment:
       POSTGRES_USER: acme
       POSTGRES_PASSWORD: acme

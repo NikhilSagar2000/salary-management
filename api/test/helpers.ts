@@ -18,7 +18,9 @@ afterAll(async () => {
 });
 
 export function testPool() {
+  // A runaway query fails with its SQL after 60 s instead of stalling the whole suite behind its locks.
   const pool = createPool(testDbUrl());
+  pool.on('connect', (client) => void client.query("SET statement_timeout = '60s'"));
   pools.push(pool);
   return pool;
 }

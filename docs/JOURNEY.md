@@ -469,6 +469,7 @@ is done (hashes copied from `git log`).
 - Task 20 · green: app shell with routes, a session guard that sends signed-out visits to `/signin?next=…` and back afterwards, the sign-in page, a sidebar layout with a skip link, and an `api()` client that turns failures into plain messages (AUTH-5).
 - Task 20 · red: the theme follows the device and a remembered toggle overrides it (UI-1).
 - Task 20 · green: a theme toggle in the header; the theme starts from the device setting and the choice is remembered (UI-1).
+- Fix: test connections time out after 60 s, Postgres logs plans of statements over 20 s (`auto_explain`), and the seed ANALYZEs after writing — after a run hung behind one 622 s query (cause unconfirmed; section 9).
 
 ---
 
@@ -645,6 +646,12 @@ Where the AI was wrong or could have been, and how it was caught:
   (real once, but not the repeat cause). The stall length was the clue: 926,876 ms and
   927,955 ms, matching `pmset -g log` entries "Entering Sleep state due to 'Maintenance Sleep'
   … 925/926 secs". The laptop was asleep on battery. Test commands now run under `caffeinate -i`.
+- *Update (Task 20):* a later full run hung with no host sleep. One seed-test query ran on
+  the database CPU for 622 s and every later test queued behind its locks. A stale
+  planner-statistics theory was tested twice and **not** reproduced, so the cause is still
+  **unconfirmed**, and host sleep may not explain every earlier stall either. Mitigations:
+  test connections time out after 60 s with the SQL in the error, Postgres logs plans of
+  statements over 20 s, and the seed runs ANALYZE after its bulk load.
 - I wrote "22 roles" in D49 and in the stop message; the table has 19. Caught while
   typing the table into code in Task 2; corrected in D57.
 
