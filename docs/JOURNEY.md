@@ -319,6 +319,7 @@ is done (hashes copied from `git log`).
 - Task 9 · green: `POST /api/employees/:code/undo-leave` clears date and reason and records an "undone" event; undoing someone not leaving gets a plain message (LEAVE-2).
 - Task 9 · red: after leaving, only undo is allowed (LEAVE-3).
 - Task 9 · green: writes to someone who has left (leave date on or before today, browser timezone) get 409 "This person has left. Undo leaving first to make changes."; undo still works (LEAVE-3). The Task 7 after-leave-date test now uses a notice-period leave date, the case EMP-7 is about.
+- Task 9 · test: DELETE on employee URLs answers 404 (LEAVE-4) and scheduled changes after the leave date stop applying, returning on undo (LEAVE-5). Both passed first run (JSON 404 from Task 8; the leave-date filter in `employee_state` from Task 7); mutations (a DELETE route; state ignoring the leave date) made each fail.
 
 ---
 

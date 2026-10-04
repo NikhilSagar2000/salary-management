@@ -71,3 +71,22 @@ test('refuses every write except undo after leaving', async () => {
   expect(await person(db)).toEqual({ leave_date: '2026-09-30', leave_reason: null, version: 5 });
   expect((await agent.post('/api/employees/E000123/undo-leave').send({ version: 5 })).status).toBe(200);
 });
+
+test('DELETE on an employee URL answers 404', async () => {
+  const { agent, db } = await setup();
+  for (const path of ['/api/employees/E000123', '/api/employees/E000123/changes/1']) {
+    const res = await agent.delete(path);
+    expect(res.status, path).toBe(404);
+  }
+  expect((await db.query('SELECT count(*) AS n FROM employees')).rows[0].n).toBe(1);
+});
+
+test('scheduled changes after the leave date stop applying and return on undo', async () => {
+  const { agent, db } = await setup();
+  await agent.post('/api/employees/E000123/changes').send({ version: 1, effectiveDate: '2027-01-01', salary: 150000 });
+  await agent.post('/api/employees/E000123/leave').send({ version: 2, leaveDate: '2026-12-31' });
+  const salaryOn = async (d: string) => (await db.query('SELECT salary FROM employee_state($1)', [d])).rows[0]?.salary;
+  expect(await salaryOn('2027-02-01')).toBe(133000);
+  await agent.post('/api/employees/E000123/undo-leave').send({ version: 3 });
+  expect(await salaryOn('2027-02-01')).toBe(150000);
+});
