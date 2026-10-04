@@ -135,9 +135,10 @@ export function ChatView({ id, listTitle, onChanged, onDeleted }: { id: number; 
             }} />
           <Group justify="space-between">
             <Text size="xs" c="dimmed">{left !== null && `${left} free model ${left === 1 ? 'request' : 'requests'} left today`}</Text>
+            {/* Separate keyed buttons: reusing one element would turn Stop into a submit mid-click and send the waiting question. */}
             {streaming
-              ? <Button variant="light" color="red" onClick={() => stop.current?.abort()}>Stop</Button>
-              : <Button type="submit" disabled={!question.trim()}>Send</Button>}
+              ? <Button key="stop" type="button" variant="light" color="red" onClick={() => stop.current?.abort()}>Stop</Button>
+              : <Button key="send" type="submit" disabled={!question.trim()}>Send</Button>}
           </Group>
         </Stack>
       </Paper>

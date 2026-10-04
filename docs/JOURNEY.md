@@ -220,6 +220,16 @@ tests and 22 end-to-end tests pass) and asked:
 **My reply:** fixing the nine test-first before phase 6 (D68); no remote or push until the
 deploy approval (D69).
 
+### P5 (2026-10-05, during phase 6)
+
+Context: I had asked to run the full end-to-end suite three times in a row (about 5 minutes) to
+chase a flaky keyboard test; Nikhil rejected that tool call, then wrote:
+
+> please continue
+
+**My reply:** resumed phase 6 where it stopped, running the end-to-end suite once at a time
+instead of three runs in one go.
+
 ---
 
 ## 3. Timeline
@@ -606,6 +616,7 @@ is done (hashes copied from `git log`).
 - Phase 6 QA fix 9 · green: the chat scrolls to the newest message when a question is sent or the chat opens, and keeps a streaming answer in view while HR is near the bottom; the end marker keeps clear of the sticky question box.
 - Fix (found by the end-to-end run): leaving a chat crashed the app — the new scroll effect returned scrollIntoView's result, which in Chromium is a promise, and React called it as a clean-up ("l is not a function"). The effect now returns nothing; jsdom's scrollIntoView returns nothing, so the unit tests couldn't see it. The two assistant end-to-end tests that navigate away from a chat failed and now pass.
 - Phase 6 QA fixes 10–12 · red (found by QA): Stop doesn't send what is waiting in the question box (AST-12); at 375 px long values on the employee page stay inside their space (UI-3); at 375 px the page buttons fit on one line.
+- Phase 6 QA fixes 10–12 · green: Stop and Send are separate keyed buttons, so clicking Stop no longer submits the waiting question; long fact values (emails) wrap inside their column; the list shows fewer page buttons on a phone so they stay on one line.
 
 ---
 

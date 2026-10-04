@@ -158,9 +158,10 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 
 function Fact({ label, value }: { label: string; value: string }) {
   return (
-    <li>
+    <li style={{ minWidth: 0 }}>
       <Text size="xs" c="dimmed">{label}</Text>
-      <Text size="sm">{value}</Text>
+      {/* Long emails break rather than run into the next column on a phone. */}
+      <Text size="sm" style={{ overflowWrap: 'anywhere' }}>{value}</Text>
     </li>
   );
 }

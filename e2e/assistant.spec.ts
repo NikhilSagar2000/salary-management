@@ -48,7 +48,6 @@ test('the browser never calls openrouter.ai', async ({ page }) => {
 });
 
 test("Stop doesn't send what is waiting in the question box (AST-12)", async ({ page }) => {
-  test.fail(); // expected to fail until Stop and Send are separate buttons
   const sent: string[] = [];
   page.on('request', (r) => r.method() === 'POST' && r.url().endsWith('/messages') && sent.push(r.url()));
   await ask(page, 'Give me a long answer [slow]');

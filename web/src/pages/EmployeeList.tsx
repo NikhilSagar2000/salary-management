@@ -176,7 +176,8 @@ export function EmployeeList() {
             <Group gap="sm">
               <Select aria-label="Rows per page" w={110} data={['25', '50', '100']} value={String(data.pageSize)} allowDeselect={false}
                 onChange={(v) => update({ pageSize: v === '25' ? null : v })} />
-              <Pagination total={Math.max(1, Math.ceil(data.total / data.pageSize))} value={data.page}
+              {/* Fewer page buttons on a phone, so they stay on one line. */}
+              <Pagination total={Math.max(1, Math.ceil(data.total / data.pageSize))} value={data.page} siblings={phone ? 0 : 1}
                 onChange={(p) => update({ page: p === 1 ? null : String(p) })} />
             </Group>
           </Group>
