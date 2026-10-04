@@ -64,3 +64,17 @@ test('filters combine with AND across fields and OR within one', async () => {
   expect(await sorted('?role=Account%20Executive')).toEqual(['E000002']);
   expect(await sorted('?gender=non_binary&country=GB,US')).toEqual(['E000004']);
 });
+
+test.fails('default status filter hides people who have left', async () => {
+  const { list } = await setup([
+    { code: 'E000001' }, // active
+    { code: 'E000002', hireDate: '2026-12-01' }, // starting
+    { code: 'E000003', leaveDate: '2026-12-31' }, // leaving
+    { code: 'E000004', leaveDate: '2026-09-15' }, // left
+  ]);
+  const sorted = async (q: string) => codes(await list(q)).sort();
+  expect(await sorted('')).toEqual(['E000001', 'E000002', 'E000003']);
+  expect(await sorted('?status=left')).toEqual(['E000004']);
+  expect(await sorted('?status=active,left')).toEqual(['E000001', 'E000004']);
+  expect(await sorted('?status=starting')).toEqual(['E000002']);
+});
