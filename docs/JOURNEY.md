@@ -253,7 +253,9 @@ Then started phase 5.
 | 2026-10-04 | Task 27: API serves the web build; Playwright flows against a fake OpenRouter | b82dce7..19c0e7a |
 | 2026-10-05 | Task 28: Accessibility (axe fixes: contrast, button names; keyboard flows) | 979df51..3e609e7 |
 | 2026-10-05 | Task 29: CI workflow, checked locally on a fresh Postgres | d8ca412..a5a7ebd |
-| 2026-10-05 | Final whole-branch review (S2) | this commit (hash in next entry) |
+| 2026-10-05 | Final whole-branch review (S2) | 2b392b7 |
+| 2026-10-05 | Six review fixes, test-first (EMP-11, CSV-5 loops, migrate on start, export timezone, source links, LEAVE-2) | 2b392b7..4ae6cc6 |
+| 2026-10-05 | Phase 5 complete: report to Nikhil | this commit (hash in next entry) |
 
 ### Build log
 
@@ -547,6 +549,7 @@ is done (hashes copied from `git log`).
 - Final review fix 4 · green: the export link adds tz=<browser timezone>; the API reads the X-Timezone header, or ?tz= when there is no header, through the same validation (unknown zones fall back to UTC) (TIME-1).
 - Final review fix 5 · red: a "Based on" group links to the employee list only when the list can show exactly those people; groups with hire or leave dates, a manager, named people, a past date or change history are named without a link (AST-8).
 - Final review fix 5 · green: listQueryOf returns null for filters the list doesn't have (named people, hire or leave dates, manager); change-history groups, raise-% groups, past-date groups and hire-year or manager groupings carry no list link; the page names such a group (with its headcount) as plain text, and "and N more" is a link only when the first group has one (AST-8).
+- Phase 5 complete: tasks 1–29 and the final review's six fixes; 164 unit and API tests and 22 end-to-end tests pass; the build ledger (rulings, investigations) is copied into tasks/todo.md under "Phase 5 review" with the deferred minors.
 
 ---
 

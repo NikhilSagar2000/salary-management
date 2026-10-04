@@ -27,7 +27,7 @@ reasons: `docs/JOURNEY.md` section 4.
 - [x] Phase 3: `docs/REQUIREMENTS.md`, `docs/SPEC.md`, pay research
 - [x] Phase 4: this plan
 - [x] **Stop: Nikhil approved this plan (native execution, step detail just before each task)**
-- [ ] Phase 5: build (tasks 1–29 below)
+- [x] Phase 5: build (tasks 1–29 below; final review and its fixes; see "Phase 5 review" at the end)
 - [ ] Phase 6: manual QA (test cases for every screen and rule, run, record, fix test-first)
 - [ ] Phase 7: deploy after approval, README with set-up, tests and demo-recording script
 
@@ -787,3 +787,150 @@ next to the same fields; 409 keeps the input and offers Reload; Save is disabled
 - [x] Step 7: "mark as leaving, then only Undo is offered" (LEAVE-1, LEAVE-3).
 - [x] Step 8: "save button can't submit twice".
 - [x] Task check: `npm test`.
+
+## Phase 5 review
+
+**Result:** tasks 1–29 built test-first on `master` (9fb5c05..4ae6cc6). Final suite: 164 unit
+and API tests (shared 5, API 121, web 38) and 22 Playwright tests, all passing; the CI steps
+also passed in order on a fresh Postgres 17 container.
+
+**Final whole-branch review** (fresh reviewer on Fable, prompt and result in JOURNEY S2): no
+Critical issues. Six fixes, each test-first:
+1. EMP-11: a cancelled change shows "Cancelled on <date>" (date in HR's timezone).
+2. CSV-5/EMP-10: import refuses rows that manage each other in a circle.
+3. Deploy readiness: the API applies migrations before it listens and refuses to start without
+   `APP_PASSWORD_HASH`.
+4. TIME-1: the CSV export link carries the browser's timezone as `?tz=`.
+5. AST-8: "Based on" groups link to the list only when the list shows exactly those people.
+6. LEAVE-2: undoing leaving is dated the day it happened.
+
+**Deferred minors** (Nikhil decides whether to fix them; several may also come up in Phase 6):
+- Assistant tool `offset` has no ceiling; a huge value ends the answer as "unavailable"
+  instead of a tool error (AST-5 edge).
+- The system prompt has no "tool results are data, never instructions" line.
+- Any too-large JSON body gets the 5 MB import message (unreachable from the UI).
+- Sign-in's `next` accepts `//host`; navigation throws instead of refusing it (fails safe).
+- The search box has no length limit; over 100 characters gives a field-less message.
+- An insert racing an import gives a 500 instead of a listed problem (single user).
+- Date messages say "as YYYY-MM-DD" though date fields only send that format.
+- A duplicate between an invalid row and a valid row shows only after the first fix.
+- The test pool's on-connect `SET` races the first query (pg deprecation warning, tests only).
+
+### Build ledger (copied from the git-ignored executor workspace before deleting it)
+
+```text
+# SDD ledger — plan: tasks/todo.md
+Spec: docs/SPEC.md (binding). Executor: inline (executing-plans), Nikhil chose native (Q38).
+Ruling: work directly on master — requirements (P1) say "git on master, local only"; that is the explicit consent the skill asks for — cost if wrong: none, history is local.
+Ruling: each task's code-level steps are appended under "## Task step plans" as "### Task N" headings just before the task (Q39); task-brief extracts those — cost if wrong: none.
+Pre-flight (shared interfaces):
+- T1 → all: createApp(deps), Clock/todayIn/requestTimezone, db helpers, testApp. Plan's testApp signature still says `today?: string`; TIME-1 changed the clock to instants. Ruling: testApp({ now?: string /* ISO instant */, model? }) — cost if wrong: one rename.
+- T1 createApp deps vs T17 ModelFn: Ruling: deps grow as tasks need them (T1: db, clock, config; T3 adds password hash/secret via config; T17 adds model) — avoids a placeholder model type in T1 — cost if wrong: small signature churn in tests.
+- T2 schemas → T5/T6/T7/T15/T16: shared Zod schemas are the single validation source; no conflict found.
+- T7 state.ts → T10/T11/T12/T16: "state on a date" SQL lives once in employees/state.ts; no conflict.
+- T13 seed → T19/T27: seed CLI writes to DATABASE_URL given; e2e seeds its own test DB; no conflict.
+Ruling: a red commit may include a compile-only stub (a function that throws "not implemented") when the test imports a module that doesn't exist yet; otherwise the file fails to load and the expected-to-fail marker can't apply — cost if wrong: none, the stub has no behaviour.
+Ruling: TIME-1's request-level check moves to Task 11 (status of a person hired "today" follows X-Timezone); Task 1 tests the clock functions — avoids exposing "today" on /health just for a test — cost if wrong: TIME-1 wiring untested until Task 11.
+Ruling: Vitest runs test files one at a time (fileParallelism: false) against one test database — simplest isolation; ceiling: slower suite, per-file schemas if it gets slow.
+Ruling: Docker already had a `salary-management_pgdata` volume (created 2026-10-01, unknown owner, not readable with the default users). Left it untouched; compose project renamed `acme-salary` so this app gets its own volume — cost if wrong: none; Nikhil told in the report.
+Ruling: JOURNEY "same commit" rule — each commit appends one Build-log line in docs/JOURNEY.md section 3; each task's hash range is added by the first commit after the task ends — cost if wrong: a little doc churn.
+Task 1: complete (commits 9fb5c05..666d9d9, tests: npm test →    Duration  403ms (import 46%, tests 34%, transform 14%, setup 4%, worker 2%))
+Task 2: complete (commits 666d9d9..4d26c93, tests: npm test →    Duration  334ms (import 45%, tests 35%, transform 14%, setup 4%, worker 2%))
+Task 3: Ruling: sessions are random 32-byte tokens stored as SHA-256 in Postgres; no SESSION_SECRET (plan/AUTH-6 mention it) — a DB-checked random token needs no signature, and sign-out works by deleting the row — cost if wrong: none.
+Task 3: Ruling: negative-property tests (nothing leaks) can't start red; they get a mutation check (introduce the leak, watch the test fail, revert) and a single test(...) commit — cost if wrong: one commit pair fewer.
+Task 3: Ruling: the wrong-password branch was written in the sign-in green step (password checking needs both branches), so its test passed first time; proven by mutation (accept every password → test fails), single test(...) commit — cost if wrong: none.
+Task 3: complete (commits 4d26c93..8553d82, tests: npm test →    Duration  1.11s (tests 83%, import 11%, transform 4%, setup 1%, worker 1%))
+Ruling: migrations are edited in place until the first deploy (only the local dev/test databases have run them; the test DB is reset when that happens); after deploy, changes go in new files only — cost if wrong: a dev DB needs `DROP SCHEMA public CASCADE` + migrate.
+Task 4: complete (commits 8553d82..c02694c, tests: npm test →    Duration  1.39s (tests 81%, import 14%, transform 4%, setup 1%, worker 1%))
+Task 5: Ruling: Postgres bigint is parsed to JS number (salaries ≤ 1e10 < 2^53; counts) — plan Global constraints already said "parsed to JS number" — cost if wrong: none at these sizes.
+Task 5: complete (commits c02694c..723178b, tests: npm test →    Duration  1.94s (tests 75%, import 19%, transform 4%, setup 1%, worker 1%))
+Task 6: complete (commits 723178b..9aeba1d, tests: npm test →              at least ~362ms faster with isolate: false — reuses workers across files instead of one per file)
+Task 7: Ruling: the Q35 out-of-order test passed on first run (the changed-fields-only design from step 1 already gives it); proven by mutation — replacing employee_state with full-snapshot semantics fails it — single test(...) commit — cost if wrong: none.
+Task 7: Ruling: job-change concurrency case passed first run (addChange checks version since step 1); mutation (drop the version condition) made it fail — single test(...) commit. Also fixed a TS parameter property in FieldProblem that Node type stripping rejects (typecheck caught it; vitest did not) — cost if wrong: none.
+Task 7: complete (commits 9aeba1d..c521831, tests: npm test →              at least ~402ms faster with isolate: false — reuses workers across files instead of one per file)
+Task 8: Ruling: TIME-1 request-level test lands in Task 8 (cancel is the first route using "today"), superseding the earlier move to Task 11 — cost if wrong: none.
+Task 8: Ruling: cancel concurrency case passed first run (cancelChange checks version); mutation (ignore version) failed it; concurrency test now has optional `prepare` and reads the live version — single test(...) commit.
+Task 8: complete (commits cf6db20..6b0fbc0, tests: npm test →              at least ~407ms faster with isolate: false — reuses workers across files instead of one per file)
+Task 9: Ruling: Task 7 test "refuses a change … after leaving" used a past leave date, which LEAVE-3 now (correctly) answers with 409 has-left; moved it to a future leave date (notice period), which is the case EMP-7 covers — cost if wrong: none, both rules are tested.
+Task 9: Ruling: leave/undo concurrency cases passed first run (both write with a version check); mutation (ignore version) failed both — single test(...) commit.
+Task 9: complete (commits 6b0fbc0..14ab1fd, tests: npm test →              at least ~443ms faster with isolate: false — reuses workers across files instead of one per file)
+Task 10: complete (commits 14ab1fd..f2ec394, tests: npm test →              at least ~544ms faster with isolate: false — reuses workers across files instead of one per file)
+Task 11: Ruling: "sort by name" = last name, then first name, ties by code (HR convention; display stays "First Last") — cost if wrong: one ORDER BY.
+Task 11: Ruling: wildcard escaping was written with search (step 2), so the punctuation test passed first run; mutation (no escaping) made the "%" case fail — single test(...) commit.
+Task 11: Ruling: empty-result test passed first run (a query with no matches naturally returns []); mutation (throw on empty) made it fail — single test(...) commit.
+Task 11: complete (commits f2ec394..9af9155, tests: npm test →              at least ~526ms faster with isolate: false — reuses workers across files instead of one per file)
+Task 12: Ruling: median rounding test passed first run (PAY_STATS was written in Task 10); mutation (double-precision round, which rounds half to even) failed it — single test(...) commit.
+Task 12: Ruling: relocation stats test passed first run (stats read current state); mutation (state takes the earliest country/salary) failed it — single test(...) commit.
+Task 12: complete (commits 9af9155..7d10431, tests: npm test →              at least ~579ms faster with isolate: false — reuses workers across files instead of one per file)
+Task 13: Ruling: seed attribute generation (names, emails, dates, banded pay) is one coherent function written in step 1 (the DB write needs valid rows); later seed tests that pass on first run are mutation-checked and committed as single test(...) commits — cost if wrong: fewer red commits in the seed history.
+Task 13: complete (commits 7d10431..0c7a545, tests: npm test →              at least ~648ms faster with isolate: false — reuses workers across files instead of one per file)
+Task 14: Ruling: name-quoting test passed first run (quoting came with step 1); mutation (no quoting) failed it — single test(...) commit.
+Task 14: complete (commits 0c7a545..d92368e, tests: npm test →              at least ~680ms faster with isolate: false — reuses workers across files instead of one per file)
+Task 15: Ruling: replaced csv-parse with a ~35-line RFC 4180 parser (D64) — csv-parse counts a quoted CRLF as two lines, so problem line numbers drifted — cost if wrong: a hand-written parser to maintain (covered by the quirks test).
+Task 15: Incident: a chained command ran `npm test; … git commit`, and an earlier test run left in the background kept DB sessions (orphaned after pkill) holding locks, so suites hung or failed. Commit 2cbd604 was re-verified alone: 82 passed + 1 expected fail, so it stands. Rule from now: chain with && only, never two suites at once, check `pgrep -f "vitest run"` and orphaned sessions before a run.
+Task 15: Investigation (systematic-debugging): "hanging"/slow test runs (two runs of the seed checksum test at 926,876 and 927,955 ms; a create test at 25 s; docker exec stalling; Postgres showing no active work) — root cause: the Mac was in repeated 'Maintenance Sleep' of 925–926 s on battery (pmset log), so runs froze mid-query. Not a code bug; the earlier "2 failed" were sleep-induced timeouts. Ruling: run test commands under `caffeinate -i` (prevents idle sleep only during the command) — cost if wrong: none. Hypotheses tried and dropped on evidence: stale planner statistics (plans were cheap with or without ANALYZE), lock contention from parallel runs (real once, but not the repeat cause).
+Task 15: complete (commits d92368e..88e8207, tests: caffeinate -i npm test →              at least ~1.04s faster with isolate: false — reuses workers across files instead of one per file)
+Task 16: complete (commits 88e8207..8d0f613, tests: caffeinate -i npm test →              at least ~1.92s faster with isolate: false — reuses workers across files instead of one per file)
+Task 17: Ruling: system prompt test passed first run once fixed (prompt written in step 1); mutation (drop the period after today's date) failed it — single test(...) commit.
+Task 17: complete (commits 8d0f613..2d7c754, tests: caffeinate -i npm test →              at least ~994ms faster with isolate: false — reuses workers across files instead of one per file)
+Task 18: complete (commits 2d7c754..403e4ae, tests: caffeinate -i npm test →              at least ~1.04s faster with isolate: false — reuses workers across files instead of one per file)
+Task 19: Ruling: the measurement script lives in api/src (it imports the app) rather than scripts/ — cost if wrong: none. Measured p95 99–104 ms over 3 runs (limit 300 ms).
+Task 19: complete (commits 403e4ae..88e63df, check: npm run measure:list → p95 99/102/104 ms ≤ 300 ms)
+Ruling: the API serves the built web app (D33, same origin) from Task 27, where the end-to-end server on 4733 first needs it; dev uses Vite's proxy on 4731 — cost if wrong: Render deploy waits for Task 27.
+Ruling: write schemas stay lenient about unknown keys (ignored, not refused); the API refuses the identity fields explicitly and the only client is our UI — cost if wrong: an API caller's stray field is silently ignored.
+Ruling (UI, Tasks 20–26): calm, data-dense app UI per Q24 — system font stack, Mantine defaults restyled lightly; one accent colour; tables first. Excluded: cream/off-white page backgrounds, hero sections or marketing layouts, numbered "01/02" section labels, italic accent words in headings, monospace labels, pill-shaped buttons, gradients, decorative illustrations, emoji. Cost if wrong: restyling later.
+Ruling (UI): design-taste-frontend §13 says dashboards/data tables are out of its scope and the stack mandates Mantine; applying only its general rules (one accent = teal, one radius scale = Mantine "sm", contrast, light+dark, loading/empty/error states, no em-dash or emoji, Tabler icons). Design read: internal HR data tool, calm data-dense, Mantine. Dials: variance 3, motion 2, density 7. Cost if wrong: restyle.
+Task 20: Ruling: seed tests get a 60 s per-test timeout — the checksum test reseeds 10,000 people (3 s idle, 7 s when the laptop is throttled) and a timeout left the tables half-written, failing the later seed tests — cost if wrong: none.
+Task 20: Investigation 2: a full run hung again with no host sleep. Evidence: the seed test's first query ("country split") active on CPU for 622 s with no wait event, every later session queued behind its locks and the next TRUNCATE. Stale-statistics hypothesis tested twice and NOT reproduced (plans stay cheap even with tiny-table stats). Root cause unconfirmed. Ruling: mitigations + diagnostics — test connections get statement_timeout 60 s (a runaway fails with its SQL instead of stalling everything), Postgres logs plans of statements over 20 s (auto_explain), writeSeed ANALYZEs after its bulk load. Correction to the earlier ruling: the first 926 s stalls matched host sleep, but sleep may not explain all of them — cost if wrong: an unexplained slow query may recur, now visible in logs.
+Task 20: complete (commits a65d523..e221b2d, tests: caffeinate -i npm test →    Duration  4.94s (import 32%, tests 29%, environment 25%, transform 9%, setup 4%))
+Task 21: Ruling: web tests get a 15 s timeout (Mantine in jsdom with simulated typing is slow); URL-state test passed first run (built in step 1), mutation (sort never descending) failed it — single test(...) commit.
+Task 21: Ruling: export-link test passed first run (built in step 1); mutation (keep the page parameter) failed it — single test(...) commit.
+Task 21: complete (commits e221b2d..9abe0df, tests: caffeinate -i npm test →    Duration  4.11s (tests 54%, environment 19%, import 18%, setup 4%, transform 4%))
+Task 22: Ruling: added steps for the job-change form and the leave form (the plan listed their rules but no UI test; A11Y-2 keyboard flows need them) — cost if wrong: none.
+Task 22: Ruling: double-submit test passed first run (guard + loading button since step 3); mutation (remove both) failed it — single test(...) commit.
+Task 22: complete (commits 9abe0df..47a91e0, tests: caffeinate -i npm test →    Duration  4.59s (tests 65%, environment 15%, import 13%, transform 4%, setup 3%))
+Task 21/22 follow-up (visual check): phone filter drawer (LIST-10) red eb84ff5 → green 4eecdf5; skip link fully hidden until focused.
+Task 23: Ruling: Person fields ordered names → email → code + hire date (the two fixed fields together); the test's focus expectation (First name first) set the order — cost if wrong: a layout swap.
+Task 23: Ruling: last code-error check loosened from exact to 'contains' (the code field also has help text) — cost if wrong: none.
+Task 23: complete (commits 4eecdf5..3eb1db7, tests: caffeinate -i npm test →    Duration  5.32s (tests 64%, environment 16%, import 14%, transform 3%, setup 3%))
+Task 24: Ruling: the department × level table shows from 1200 px (lg) up; narrower screens get one block per department — seven level columns with INR/JPY amounts don't fit beside the nav below that, and UI-3 forbids sideways scrolling — cost if wrong: tablets see blocks instead of the grid.
+Task 24: complete (commits 8d7eaaa..4893829, tests: caffeinate -i npm test →    Duration  5.66s (tests 60%, environment 16%, import 16%, transform 4%, setup 3%))
+Task 25: Ruling: the preview table shows the first 100 rows with a 'Showing the first 100 of N' note — rendering 10,000 rows at once is slow on a phone; every problem is still listed — cost if wrong: HR scrolls a CSV to check rows 101+.
+Task 25: Ruling: the file picker is a native labelled input (not Mantine FileInput, whose button can't be driven by userEvent.upload or linked to its label) — cost if wrong: plainer look.
+Task 25: complete (commits 5342b43..9a1b3f9, tests: caffeinate -i npm test →    Duration  6.28s (tests 57%, import 18%, environment 17%, transform 5%, setup 3%))
+Task 26: Ruling: the planned HTML-to-text remark plugin was dropped — react-markdown 10 already shows raw HTML as text (test passed without it); image blocking stays (removing it fails the test) — cost if wrong: none, the test pins the behaviour.
+Task 26: Ruling: added test 'the first question names the chat' (bug found in the visual check) — red 051892f, green after — cost if wrong: none.
+Task 26: Found: the dev database lacked 007_chats.sql; the API doesn't migrate on start, so deploy must run `npm run migrate` before start (Phase 7). Ran it on the local dev DB.
+Task 26: Found (deferred to final review): API tests print pg's "client.query() when the client is already executing a query" deprecation (17 times); pre-existing, source not yet traced.
+Task 26: complete (commits 3c5cc59..ff057e3, tests: caffeinate -i npm test →    Duration  4.74s (tests 51%, import 21%, environment 19%, transform 5%, setup 4%))
+Task 27: Ruling: end-to-end database is a separate acme_e2e, dropped and recreated from the seed on every run (name must end in _e2e or the script refuses) — acme_test is truncated by Vitest and would race — cost if wrong: none, local only.
+Task 27: Ruling: the fake OpenRouter listens on a random local port inside the end-to-end server process (no fifth fixed port) — cost if wrong: none.
+Task 27: Ruling: specs passed first run once test mechanics were fixed (exact 'Password' label, exact 'Employees' list, a pick() helper for Mantine multi-selects, polling instead of networkidle, the import file's duplicate email that CSV-6 rightly flagged); one planted break per spec failed all 9 specs, then web/src restored — single test(...) commit.
+Task 27: complete (commits b82dce7..19c0e7a, tests: bash -c 'caffeinate -i npm test && caffeinate -i npm run e2e' →   10 passed (20.6s))
+Task 28: Ruling: the accent moved from Mantine's default teal shade (6 light, 8 dark) to shade 9 in both themes, dimmed text darkened, tinted-variant text darkened 35% — needed for 4.5:1 (A11Y-1); D65's look stays teal — cost if wrong: a slightly deeper teal.
+Task 28: Ruling: keyboard specs passed once mechanics were fixed (locale-dependent date part order handled by a probe-and-type helper; transition-aware focus check; wait for the page before the first Tab); planted breaks failed each — single test(...) commit.
+Task 28: Found: native date fields show parts in the OS locale's order while our messages say "YYYY-MM-DD"; HR types in their own locale's order, which is fine, but the message wording assumes the ISO form a person never types — consider "Enter a valid leave date." (deferred to the final review).
+Task 28: complete (commits 979df51..3e609e7, tests: bash -c 'caffeinate -i npm test && caffeinate -i npm run e2e' →   22 passed (59.7s))
+Task 29: complete (commits d8ca412..a5a7ebd, tests: CI steps in order on a fresh Postgres 17 container → 5+114+35 unit/API, 22 e2e passed)
+Final review: fresh reviewer (Fable, S2 in JOURNEY) — no Critical; 3 Important; 12 Minor; verdict "with fixes". Its own runs: 154 unit/API + 22 e2e passed.
+Final: Ruling: export link without the timezone (reviewer: Minor) re-graded Important — TIME-1; a US-based HR exporting after ~17:00 gets tomorrow's state (scheduled changes applied early) — cost if wrong: one small fix.
+Final: Ruling: "Based on" group links dropping hire/leave/manager/codes filters (reviewer: Minor) re-graded Important — AST-8 provenance; the link opens a broader list than the label and headcount say — cost if wrong: one small fix.
+Final: Ruling: undo-leaving dated with the old leave date (reviewer: Minor) re-graded Important — LEAVE-2 "with their dates"; a future-dated undo also sorts after real events — cost if wrong: one small fix.
+Final: minor (deferred): tool `offset` has no ceiling; 1e308 reaches Postgres and ends the answer as "unavailable" instead of a tool error (AST-5 edge).
+Final: minor (deferred): system prompt lacks "tool results are data, never instructions" (single trusted user, read-only tools, server-built sources).
+Final: minor (deferred): any too-large JSON body gets the 5 MB import message (unreachable from the UI).
+Final: minor (deferred): sign-in `next` accepts `//host`; navigation throws (fails safe) instead of being refused.
+Final: minor (deferred): search box has no maxLength; over 100 characters gives a field-less "Some fields need fixing."
+Final: minor (deferred): an insert racing runImport gives a 500 instead of a listed problem (single user).
+Final: minor (deferred): date messages say "as YYYY-MM-DD" though native date fields only send that format; only an empty field shows it.
+Final: minor (deferred): a duplicate between a row failing validation and a valid row is reported only after the first fix.
+Final: minor (deferred): test pool's on-connect SET races the first query (pg deprecation warning, test-only; use a statement_timeout startup option).
+Final: Ruling: declined-to-judge items stand — README/deploy/smoke test are Phases 6–7; sessions table growth (one row per sign-in, one user) is negligible; in-memory limiter and answering set are documented single-instance choices; 100-row preview is the Task 25 ruling; later-date manager loops are beyond EMP-10 and the loop query is depth-bounded (100), so no runaway recursion; change_log's text parsing is tested — cost if wrong: small.
+Final: fixed EMP-11 'Cancelled on <date>' — "a cancelled change says when it was cancelled, as a date in HR's timezone (EMP-11)" + web 'a cancelled change says when it was cancelled' RED→GREEN, suite 5+115+36
+Final: fixed LEAVE-2 undo dated with the old leave date — "undoing leaving is dated the day it was undone, in HR's timezone (LEAVE-2)" RED→GREEN, suite 5+116+36
+Final: fixed CSV import loop gap — 'rows that manage each other in a circle are refused, on every row in the circle (CSV-5, EMP-10)' RED→GREEN, suite 5+117+36
+Final: fixed migrate-on-start and silent empty password hash — 'the server applies migrations to an empty database before it listens' + 'the server refuses to start without a password hash, saying why' RED→GREEN, suite 5+119+36
+Final: fixed export without the timezone (re-graded Important) — "a plain download link can give the browser's timezone as ?tz= (TIME-1)" + web "the export link carries the browser's timezone" RED→GREEN, suite 5+120+37
+Final: fixed broader-than-labelled source links (re-graded Important) — 'a group links to the list only when the list can show exactly those people (AST-8)' + web 'a source group the list cannot show is named without a link' RED→GREEN, suite 5+121+38
+```
+
