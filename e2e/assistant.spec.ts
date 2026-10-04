@@ -59,3 +59,33 @@ test("Stop doesn't send what is waiting in the question box (AST-12)", async ({ 
   await expect(page.getByText('Wait for the current answer to finish, or stop it.')).toHaveCount(0);
   expect(sent).toHaveLength(1);
 });
+
+test.fail('the chat list and the messages scroll separately; the question box stays in view (AST-19)', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 640 });
+  for (let i = 0; i < 20; i++) await page.request.post('/api/chats');
+  const chat = await (await page.request.post('/api/chats')).json();
+  for (let i = 0; i < 3; i++) await page.request.post(`/api/chats/${chat.id}/messages`, { data: { question: 'Who are the engineers in Brazil?' } });
+  await page.goto(`/assistant/${chat.id}`);
+  const list = page.getByRole('navigation', { name: 'Chats' });
+  const messages = page.getByRole('region', { name: 'Messages' });
+  await expect(messages.getByRole('article', { name: 'Answer' })).toHaveCount(3);
+  const top = (l: typeof list) => l.evaluate((el) => el.scrollTop);
+
+  // The page itself doesn't scroll; the chat opens at its newest message.
+  expect(await page.evaluate(() => document.documentElement.scrollHeight <= window.innerHeight)).toBe(true);
+  await expect.poll(() => top(messages)).toBeGreaterThan(0);
+  const messagesAt = await top(messages);
+
+  await list.hover();
+  await page.mouse.wheel(0, 1500);
+  await expect.poll(() => top(list)).toBeGreaterThan(0);
+  expect(await top(messages)).toBe(messagesAt);
+
+  const listAt = await top(list);
+  await messages.hover();
+  await page.mouse.wheel(0, -3000);
+  await expect.poll(() => top(messages)).toBe(0);
+  expect(await top(list)).toBe(listAt);
+  await expect(page.getByLabel('Your question')).toBeInViewport();
+  await expect(page.getByRole('button', { name: 'New chat' })).toBeInViewport();
+});
