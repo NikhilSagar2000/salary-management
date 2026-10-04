@@ -146,7 +146,7 @@ is written just before the task starts, from the interfaces that exist at that p
 
 ### Backend
 
-- [ ] **Task 1: Workspace, database and test harness.** Files: root `package.json`,
+- [x] **Task 1: Workspace, database and test harness.** Files: root `package.json`,
   `docker-compose.yml`, `tsconfig.base.json`, `api/src/{app,main,clock,db,migrate}.ts`,
   `api/test/helpers.ts`, `api/test/setup.ts`.
   Tests: `infra.test.ts` › "health answers ok" · "migrations apply once and are recorded" ·
@@ -377,23 +377,23 @@ Files: `package.json`, `tsconfig.base.json`, `docker-compose.yml`, `db/init/01-t
 `api/package.json`, `api/tsconfig.json`, `api/vitest.config.ts`, `api/src/{app,main,clock,db,migrate}.ts`,
 `api/db/migrations/`, `api/test/{helpers,guard}.ts`, `api/test/setup.ts`.
 
-- [ ] Step 1 (chore): npm workspaces (`shared`, `api`; `web` joins in Task 20), Postgres 17 in
+- [x] Step 1 (chore): npm workspaces (`shared`, `api`; `web` joins in Task 20), Postgres 17 in
   Docker on 4734 with `acme` and `acme_test`, Vitest with `fileParallelism: false` (one shared
   test database), `.env` loaded with Node's `--env-file-if-exists`. API runs on Node 24's built-in
   TypeScript type stripping (no build step for the API).
   Run: `docker compose up -d db && npm test`. Expected: Vitest runs, "No test files found" is
   not an error (`passWithNoTests`).
-- [ ] Step 2: `infra.test.ts` › "health answers ok": `GET /api/health` → 200 `{ ok: true }`.
-- [ ] Step 3: `infra.test.ts` › "migrations apply once and are recorded": `migrate(db, dir)` on
+- [x] Step 2: `infra.test.ts` › "health answers ok": `GET /api/health` → 200 `{ ok: true }`.
+- [x] Step 3: `infra.test.ts` › "migrations apply once and are recorded": `migrate(db, dir)` on
   a temporary folder with two `.sql` files, run twice → first run returns both names, second
   returns `[]`, `schema_migrations` has 2 rows, the created table exists.
-- [ ] Step 4: `infra.test.ts` › "dates round-trip unchanged under any server timezone": with
+- [x] Step 4: `infra.test.ts` › "dates round-trip unchanged under any server timezone": with
   `process.env.TZ` set to `America/Los_Angeles`, then `Asia/Tokyo`, `select '2026-03-01'::date`
   returns the string `'2026-03-01'` (without the DATE parser it's a JS `Date`).
-- [ ] Step 5: `clock.test.ts` › "today follows the X-Timezone header, falling back to UTC for a
+- [x] Step 5: `clock.test.ts` › "today follows the X-Timezone header, falling back to UTC for a
   missing or unknown zone": at `2026-10-01T20:00:00Z`, `Asia/Tokyo` → `2026-10-02`,
   `America/Los_Angeles` → `2026-10-01`, `UTC` → `2026-10-01`, `Mars/Base` and missing → UTC date.
-- [ ] Step 6: `setup.test.ts` › "test set-up refuses OpenRouter's real base URL":
+- [x] Step 6: `setup.test.ts` › "test set-up refuses OpenRouter's real base URL":
   `assertFakeModel({ OPENROUTER_BASE_URL: 'https://openrouter.ai/api/v1' })` throws;
   a local URL or none passes. `test/setup.ts` calls it on `process.env`.
-- [ ] Task check: `npm test` → all pass; `npm run typecheck` → no errors.
+- [x] Task check: `npm test` → all pass; `npm run typecheck` → no errors.
