@@ -496,3 +496,28 @@ the update runs `WHERE code = $1 AND version = $2` and bumps `version`.
   second save with version 1 → 409 with the EMP-13 message; unknown code → 404
   "No employee with code E000999."
 - [x] Task check: `npm test`, `npm run typecheck`.
+
+### Task 7: Job changes
+
+Files: `api/db/migrations/004_state.sql` (`employee_state(as_of date)`: per employee, the latest
+non-cancelled value of each field dated on or before `as_of` and not after their leave date),
+`shared/src/schemas.ts` (`jobChangeSchema`), `api/src/employees/changes.ts`, routes,
+`api/test/history.test.ts`, `api/test/concurrency.test.ts`.
+`POST /api/employees/:code/changes` `{ version, effectiveDate, country?, department?, role?,
+level?, managerCode? (null = no manager), salary?, note? }` → 201 `{ code, version }`.
+In one transaction: bump `version` (stale → 409), insert the change (salary currency = the
+country in force on that date), then re-check every date from the change on (combination valid,
+salary currency matches country); the manager is checked on the change's date. Any problem
+rolls back and answers 400 with a plain message.
+
+- [ ] Step 1: "a change keeps the fields it doesn't touch".
+- [ ] Step 2: "a change dated before a scheduled one leaves the scheduled one's fields intact" (Q35).
+- [ ] Step 3: "refuses a change before hire, after leaving, or changing nothing" (EMP-7).
+- [ ] Step 4: "refuses a department, role and level combination not allowed on that date",
+  including one that breaks a later scheduled change (EMP-8).
+- [ ] Step 5: "a country change needs a salary in the new currency" (EMP-9).
+- [ ] Step 6: "refuses a relocation that would leave a later salary in the old currency" (EMP-9).
+- [ ] Step 7: "manager must exist, not be the person, be employed on the date, and not form a
+  loop" (EMP-10).
+- [ ] Step 8: `concurrency.test.ts` job-change case (EMP-13).
+- [ ] Task check: `npm test`, `npm run typecheck`.
