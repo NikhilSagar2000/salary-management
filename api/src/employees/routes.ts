@@ -1,8 +1,9 @@
-import { employeeCreateSchema, employeeDetailsSchema, MSG } from '@acme/shared';
+import { employeeCreateSchema, employeeDetailsSchema, jobChangeSchema, MSG } from '@acme/shared';
 import { Router } from 'express';
 import type pg from 'pg';
 import { fieldErrors, sendFieldErrors, sendStaleOrMissing } from '../http.ts';
 import { createEmployee, duplicateField, nextCode } from './create.ts';
+import { addChange } from './changes.ts';
 import { updateDetails } from './details.ts';
 
 export function employeeRoutes({ db }: { db: pg.Pool }) {
@@ -40,6 +41,14 @@ export function employeeRoutes({ db }: { db: pg.Pool }) {
       if (!fields) throw err;
       sendFieldErrors(res, fields);
     }
+  });
+
+  router.post('/api/employees/:code/changes', async (req, res) => {
+    const parsed = jobChangeSchema.safeParse(req.body);
+    if (!parsed.success) return fieldErrors(res, parsed.error.issues);
+    const version = await addChange(db, req.params.code, parsed.data);
+    if (version === null) return sendStaleOrMissing(res, db, req.params.code);
+    res.status(201).json({ code: req.params.code, version });
   });
 
   return router;

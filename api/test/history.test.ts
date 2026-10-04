@@ -18,7 +18,7 @@ async function setup() {
 const stateOn = async (db: pg.Pool, date: string) =>
   (await db.query('SELECT country, department, role, level, manager_id, salary, currency FROM employee_state($1)', [date])).rows[0];
 
-test.fails("a change keeps the fields it doesn't touch", async () => {
+test("a change keeps the fields it doesn't touch", async () => {
   const { db, change } = await setup();
   const res = await change({ effectiveDate: '2025-01-01', level: 4 });
   expect(res.status).toBe(201);

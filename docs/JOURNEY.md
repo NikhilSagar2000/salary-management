@@ -288,6 +288,7 @@ is done (hashes copied from `git log`).
 - Task 6 · red: stale version and unknown employee tests (EMP-13).
 - Task 6 · green: a write that matches no row answers 409 with the EMP-13 message when the employee exists (out-of-date version) and 404 "No employee with code …" otherwise.
 - Task 7 · red: "a change keeps the fields it doesn't touch".
+- Task 7 · green: `employee_state(as_of)` SQL function (latest non-cancelled value per field, not after the leave date) and `POST /api/employees/:code/changes` storing only the changed fields, salary currency from the country in force.
 
 ---
 

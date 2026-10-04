@@ -74,3 +74,16 @@ export const employeeDetailsSchema = z.object({
   workEmail: z.email({ error: MSG.workEmail }).optional(),
 });
 export type EmployeeDetails = z.infer<typeof employeeDetailsSchema>;
+
+/** A dated job change: only the fields given change (D47). */
+export const jobChangeSchema = z.object({
+  version: z.number().int().positive(),
+  effectiveDate: isoDate('effective date'),
+  country: z.enum(COUNTRIES, { error: MSG.country }).optional(),
+  department: z.enum(DEPARTMENTS, { error: MSG.department }).optional(),
+  role: z.enum(ROLE_NAMES, { error: MSG.role }).optional(),
+  level: z.number({ error: MSG.level }).int({ error: MSG.level }).min(1, { error: MSG.level }).max(7, { error: MSG.level }).optional(),
+  salary: salarySchema.optional(),
+  note: z.string().trim().max(500).optional(),
+});
+export type JobChange = z.infer<typeof jobChangeSchema>;
