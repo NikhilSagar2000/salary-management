@@ -162,3 +162,14 @@ test("no route edits a change's fields", async () => {
     expect(res.body).toEqual({ error: 'Not found.' });
   }
 });
+
+test.fails('a refusal that belongs to no field answers with its own message (UI-4)', async () => {
+  const { app, db } = await testApp();
+  const agent = await signIn(app);
+  await agent.post('/api/employees').send({ ...newEmployee, hireDate: '2026-12-01' });
+  const id = (await db.query('SELECT id FROM job_changes')).rows[0].id;
+  const cancel = await agent.post(`/api/employees/E000123/changes/${id}/cancel`).send({ version: 1 });
+  expect(cancel.body).toEqual({ error: "The hire record can't be cancelled.", fields: { form: "The hire record can't be cancelled." } });
+  const undo = await agent.post('/api/employees/E000123/undo-leave').send({ version: 1 });
+  expect(undo.body.error).toBe("This person isn't marked as leaving.");
+});
