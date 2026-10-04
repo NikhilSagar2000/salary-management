@@ -14,7 +14,7 @@ test('health answers ok', async () => {
   expect(res.body).toEqual({ ok: true });
 });
 
-test.fails('migrations apply once and are recorded', async () => {
+test('migrations apply once and are recorded', async () => {
   const admin = testPool();
   await admin.query('DROP SCHEMA IF EXISTS migrate_test CASCADE; CREATE SCHEMA migrate_test');
   const db = new pg.Pool({ connectionString: testDbUrl(), options: '-c search_path=migrate_test' });

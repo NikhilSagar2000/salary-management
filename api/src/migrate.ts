@@ -1,5 +1,34 @@
-import type pg from 'pg';
+import { readdir, readFile } from 'node:fs/promises';
+import { join } from 'node:path';
+import pg from 'pg';
 
-export async function migrate(_db: pg.Pool, _dir: string): Promise<string[]> {
-  throw new Error('not implemented');
+export const MIGRATIONS_DIR = new URL('../db/migrations', import.meta.url).pathname;
+
+/** Runs each not-yet-applied .sql file in `dir`, in name order, each in its own transaction. */
+export async function migrate(db: pg.Pool, dir = MIGRATIONS_DIR): Promise<string[]> {
+  await db.query('CREATE TABLE IF NOT EXISTS schema_migrations (name text PRIMARY KEY, applied_at timestamptz NOT NULL DEFAULT now())');
+  const done = new Set((await db.query('SELECT name FROM schema_migrations')).rows.map((r) => r.name));
+  const files = (await readdir(dir)).filter((f) => f.endsWith('.sql') && !done.has(f)).sort();
+  for (const file of files) {
+    const client = await db.connect();
+    try {
+      await client.query('BEGIN');
+      await client.query(await readFile(join(dir, file), 'utf8'));
+      await client.query('INSERT INTO schema_migrations (name) VALUES ($1)', [file]);
+      await client.query('COMMIT');
+    } catch (err) {
+      await client.query('ROLLBACK');
+      throw new Error(`Migration ${file} failed: ${(err as Error).message}`);
+    } finally {
+      client.release();
+    }
+  }
+  return files;
+}
+
+if (import.meta.main) {
+  const db = new pg.Pool({ connectionString: process.env.DATABASE_URL });
+  const applied = await migrate(db);
+  console.log(applied.length ? `Applied: ${applied.join(', ')}` : 'Nothing to apply');
+  await db.end();
 }

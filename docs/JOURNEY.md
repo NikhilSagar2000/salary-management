@@ -235,6 +235,7 @@ is done (hashes copied from `git log`).
 - Task 1 · red: health check test (`infra.test.ts` › "health answers ok").
 - Task 1 · green: `GET /api/health` answers `{ ok: true }`.
 - Task 1 · red: migration runner test (`infra.test.ts` › "migrations apply once and are recorded").
+- Task 1 · green: `migrate(db, dir)` applies each new `.sql` file once, in order, in its own transaction, and records it in `schema_migrations`; `npm run migrate` runs it on `DATABASE_URL`.
 
 ---
 
