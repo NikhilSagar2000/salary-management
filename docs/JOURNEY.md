@@ -600,6 +600,7 @@ is done (hashes copied from `git log`).
 - Phase 6 QA fix 6 · green: the API returns no peers for someone who has left (the assistant's get_employee tool gets the same); the page titles the job "Last job" and says why there is no comparison.
 - Phase 6 QA fix 7 · red (found by QA, EMP-3): a field loses its message as soon as HR changes it; the rest stay until fixed (messages used to linger until the next submit).
 - Phase 6 QA fix 7 · green: changing a field drops its message (all five forms); a submit still moves focus to the first invalid field, a clear never moves focus.
+- Phase 6 QA fix 8 · red (found by QA, EMP-8): in a job change, level choices follow the role as in Add employee, and a level that no longer fits clears.
 
 ---
 

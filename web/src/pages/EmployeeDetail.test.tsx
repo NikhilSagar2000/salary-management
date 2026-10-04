@@ -226,3 +226,14 @@ test("someone who has left shows their last job, without a comparison to today's
   expect(screen.queryByRole('region', { name: 'Current job' })).not.toBeInTheDocument();
   expect(screen.getByRole('region', { name: 'Pay against peers' })).toHaveTextContent('Not compared: peers are counted as of today, after this person left.');
 });
+
+test.fails('in a job change, level choices follow the role (EMP-8)', async () => {
+  open();
+  await userEvent.click(await screen.findByRole('button', { name: 'Change job or pay' }));
+  const dialog = await screen.findByRole('dialog', { name: 'Change job or pay' });
+  await userEvent.click(within(dialog).getByRole('combobox', { name: 'Role' }));
+  await userEvent.click(await screen.findByRole('option', { name: 'Engineering Manager' }));
+  expect(within(dialog).getByRole('combobox', { name: 'Level' })).toHaveValue(''); // L4 doesn't fit Engineering Manager
+  await userEvent.click(within(dialog).getByRole('combobox', { name: 'Level' }));
+  expect((await screen.findAllByRole('option')).map((o) => o.textContent)).toEqual(['L5', 'L6', 'L7']);
+});
