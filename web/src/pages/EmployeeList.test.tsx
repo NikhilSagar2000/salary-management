@@ -92,7 +92,7 @@ test('no matches shows the empty state and no stats', async () => {
   expect(screen.getByTestId('location')).toHaveTextContent(/^\/employees$/);
 });
 
-test.fails('the search box follows the URL when it changes elsewhere', async () => {
+test('the search box follows the URL when it changes elsewhere', async () => {
   signedInWith(listResponse({ rows: [], total: 0, stats: [] }));
   renderApp('/employees?q=zz');
   expect(await screen.findByLabelText('Search')).toHaveValue('zz');

@@ -8,7 +8,7 @@ import {
 } from '@mantine/core';
 import { useDebouncedCallback } from '@mantine/hooks';
 import { IconArrowDown, IconArrowUp, IconDownload, IconPlus } from '@tabler/icons-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import { api } from '../api.ts';
 
@@ -60,7 +60,19 @@ export function EmployeeList() {
   const setList = (key: string) => (values: string[]) => update({ [key]: values.join(',') || null });
   const oneCountry = list('country').length === 1;
   const [search, setSearch] = useState(params.get('q') ?? '');
-  const pushSearch = useDebouncedCallback((q: string) => update({ q: q.trim() || null }), 300);
+  const pushed = useRef(params.get('q') ?? '');
+  const pushSearch = useDebouncedCallback((q: string) => {
+    pushed.current = q.trim();
+    update({ q: q.trim() || null });
+  }, 300);
+  // Follow the URL when it changes elsewhere (Clear filters, back/forward), never while typing.
+  const urlQ = params.get('q') ?? '';
+  useEffect(() => {
+    if (urlQ !== pushed.current) {
+      pushed.current = urlQ;
+      setSearch(urlQ);
+    }
+  }, [urlQ]);
   const sort = params.get('sort') ?? 'name';
   const dir = params.get('dir') ?? 'asc';
 
