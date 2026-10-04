@@ -268,7 +268,8 @@ deploy approval (D69).
 | 2026-10-05 | Task 29: CI workflow, checked locally on a fresh Postgres | d8ca412..a5a7ebd |
 | 2026-10-05 | Final whole-branch review (S2) | 2b392b7 |
 | 2026-10-05 | Six review fixes, test-first (EMP-11, CSV-5 loops, migrate on start, export timezone, source links, LEAVE-2) | 2b392b7..4ae6cc6 |
-| 2026-10-05 | Phase 5 complete: report to Nikhil | this commit (hash in next entry) |
+| 2026-10-05 | Phase 5 complete: report to Nikhil | a3c2cea |
+| 2026-10-05 | Q41–Q42 logged; nine minor fixes test-first (D68) | a21e2f9..7cd6a9b |
 
 ### Build log
 
@@ -580,6 +581,7 @@ is done (hashes copied from `git log`).
 - Minor fix 7 · green: an empty or missing date gives "Enter the <field>."; a date written another way (only possible in a CSV file) gives "Enter the <field> as YYYY-MM-DD."
 - Minor fix 8 · red: an import duplicate shows on every row at once, even when one of the rows has problems of its own (CSV-6).
 - Minor fix 8 · green: the duplicate check reads every row's code and email, including rows that fail other checks (empty values skipped), so all clashes show in one preview.
+- Nine minor fixes done (Q41); 173 unit and API tests and 22 end-to-end tests pass. Phase 6 (manual QA) starts.
 
 ---
 

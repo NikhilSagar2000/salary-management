@@ -804,7 +804,9 @@ Critical issues. Six fixes, each test-first:
 5. AST-8: "Based on" groups link to the list only when the list shows exactly those people.
 6. LEAVE-2: undoing leaving is dated the day it happened.
 
-**Deferred minors** (Nikhil decides whether to fix them; several may also come up in Phase 6):
+**Deferred minors.** Nikhil chose to fix all nine before Phase 6 (Q41, D68). Done test-first in
+a21e2f9..7cd6a9b; the first turned out not to be a bug (Zod 4's `int()` already refuses unsafe
+integers), so it got a pin test only. The list as reported:
 - Assistant tool `offset` has no ceiling; a huge value ends the answer as "unavailable"
   instead of a tool error (AST-5 edge).
 - The system prompt has no "tool results are data, never instructions" line.
