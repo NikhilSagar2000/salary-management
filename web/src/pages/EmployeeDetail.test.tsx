@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import { expect, test } from 'vitest';
 import { fakeApi } from '../test/fakeApi.ts';
 import { detailResponse } from '../test/fixtures.ts';
@@ -21,4 +21,37 @@ test('code and hire date are read-only', async () => {
   expect(facts).toHaveTextContent('Employee codeE000123');
   expect(facts).toHaveTextContent('Hired29 Feb 2024');
   expect(screen.queryByRole('textbox', { name: /code|hire/i })).not.toBeInTheDocument();
+});
+
+test.fails("shows peers' position, manager flag, reports and the history timeline", async () => {
+  open();
+  const job = await screen.findByRole('region', { name: 'Current job' });
+  expect(job).toHaveTextContent('Software Engineer, L4');
+  expect(job).toHaveTextContent('Engineering, Brazil');
+  expect(job).toHaveTextContent('BRL 145,000');
+  expect(within(job).getByRole('link', { name: 'Bruno Lima' })).toHaveAttribute('href', '/employees/E000200');
+  expect(job).toHaveTextContent('Bruno Lima (has left)');
+
+  const peers = screen.getByRole('region', { name: 'Pay against peers' });
+  expect(peers).toHaveTextContent('12% above the median of 48 peers');
+  expect(peers).toHaveTextContent('BRL: median 129,000, min 98,000, max 170,000');
+
+  expect(within(screen.getByRole('region', { name: 'Direct reports' })).getByRole('link', { name: 'Carla Souza' }))
+    .toHaveAttribute('href', '/employees/E000301');
+
+  const items = within(screen.getByRole('list', { name: 'History' })).getAllByRole('listitem');
+  expect(items.map((i) => i.textContent)).toEqual([
+    expect.stringContaining('1 Feb 2027'),
+    expect.stringContaining('1 Jan 2027'),
+    expect.stringContaining('1 Apr 2025'),
+    expect.stringContaining('29 Feb 2024'),
+  ]);
+  expect(items[0]).toHaveTextContent('Cancelled');
+  expect(items[0]).toHaveTextContent('Manager: Bruno Lima → none');
+  expect(items[1]).toHaveTextContent('Scheduled');
+  expect(items[1]).toHaveTextContent('Salary: BRL 145,000 → BRL 150,000');
+  expect(items[2]).toHaveTextContent('Level: L3 → L4');
+  expect(items[2]).toHaveTextContent('Promotion to L4');
+  expect(items[3]).toHaveTextContent('Hired');
+  expect(items[3]).toHaveTextContent('Country: Brazil');
 });
