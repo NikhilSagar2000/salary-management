@@ -129,3 +129,25 @@ test("reads free requests left from OpenRouter's key info", async () => {
   expect(await freeRequestsLeft({ baseUrl: noField, apiKey: 'k' })).toBeNull();
   expect(await freeRequestsLeft({ baseUrl: 'http://127.0.0.1:9/api/v1', apiKey: 'k' })).toBeNull();
 });
+
+test.fails('sends at most three models, as OpenRouter allows (found with the real key: 4 models → 400)', async () => {
+  const { baseUrl, requests } = await fakeOpenRouter((_req, res, body) => {
+    if (JSON.parse(body).models.length > 3) {
+      res.writeHead(400, { 'content-type': 'application/json' }).end(JSON.stringify({ error: { message: "'models' array must have 3 items or fewer.", code: 400 } }));
+      return;
+    }
+    res.writeHead(200, { 'content-type': 'text/event-stream' }).end('data: {"choices":[{"delta":{"content":"ok"}}]}\n\ndata: [DONE]\n\n');
+  });
+  const model = openRouterModel({ baseUrl, apiKey: 'k', models: ['a/one:free', 'b/two:free', 'c/three:free', 'd/four:free'] });
+  expect(await collect(model(request))).toEqual([{ type: 'token', text: 'ok' }, { type: 'done' }]);
+  expect(JSON.parse(requests[0]!.body).models).toEqual(['a/one:free', 'b/two:free', 'c/three:free']);
+});
+
+test.fails("an OpenRouter error keeps OpenRouter's own message, for the server log", async () => {
+  const { baseUrl } = await fakeOpenRouter((_req, res) => {
+    res.writeHead(400, { 'content-type': 'application/json' }).end(JSON.stringify({ error: { message: 'Something specific went wrong.', code: 400 } }));
+  });
+  const err = (await failure(openRouterModel({ baseUrl, apiKey: 'k', models: ['m'] })(request))) as ModelError;
+  expect(err.kind).toBe('unavailable');
+  expect(err.message).toBe('OpenRouter answered 400: Something specific went wrong.');
+});
