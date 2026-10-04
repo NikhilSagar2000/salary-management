@@ -497,6 +497,7 @@ is done (hashes copied from `git log`).
 - Task 22 · red: an out-of-date save keeps the typed input, offers Reload, and saves on the reloaded version (EMP-13).
 - Task 22 · green: Reload after an out-of-date save refreshes the page behind the form and keeps what was typed, so saving again uses the latest version (EMP-13). Plan gains two steps: job-change form and leave form.
 - Task 22 · red: only scheduled changes get a Cancel button (EMP-11).
+- Task 22 · green: scheduled changes show a Cancel button (labelled with the date); it sends the loaded version and reloads the page (EMP-11).
 
 ---
 

@@ -115,7 +115,7 @@ test('a 409 keeps the typed input and offers Reload', async () => {
   expect(calls.filter((c) => c.method === 'PATCH').map((c) => (c.body as { version: number }).version)).toEqual([4, 5]);
 });
 
-test.fails('cancel appears only on scheduled changes', async () => {
+test('cancel appears only on scheduled changes', async () => {
   const calls = open(undefined, { 'POST /api/employees/E000123/changes/3/cancel': () => ({ status: 200, body: { code: 'E000123', version: 5 } }) });
   await screen.findByRole('list', { name: 'History' });
   const buttons = screen.getAllByRole('button', { name: /^Cancel the change on/ });

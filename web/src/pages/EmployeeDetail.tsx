@@ -16,6 +16,17 @@ export function EmployeeDetail() {
   const [detail, setDetail] = useState<Detail | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState<'details' | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  /** One-click writes (cancel, undo): send the loaded version, then reload; a failure is shown above the history. */
+  const run = async (path: string) => {
+    setActionError(null);
+    try {
+      await api(path, { method: 'POST', body: { version: detail!.version } });
+      load();
+    } catch (e) {
+      setActionError((e as Error).message);
+    }
+  };
   const load = useCallback(() => {
     setError(null);
     api<Detail>(`/api/employees/${code}`).then(setDetail, (e: Error) => setError(e.message));
@@ -85,7 +96,17 @@ export function EmployeeDetail() {
 
       <Stack gap="xs">
         <Title order={2} size="h4">History</Title>
-        <Timeline entries={d.timeline} />
+        {actionError && <Alert color="red" role="alert">{actionError}</Alert>}
+        <Timeline
+          entries={d.timeline}
+          action={(c) =>
+            c.scheduled && !c.cancelled && d.status !== 'left' ? (
+              <Button size="xs" variant="default" aria-label={`Cancel the change on ${formatDate(c.date)}`} onClick={() => run(`/api/employees/${d.code}/changes/${c.id}/cancel`)}>
+                Cancel
+              </Button>
+            ) : null
+          }
+        />
       </Stack>
     </Stack>
   );
