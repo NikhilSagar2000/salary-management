@@ -1,0 +1,47 @@
+# Unit, API and end-to-end tests on every push and pull request. Written locally; it first runs once Nikhil
+# approves pushing to GitHub. Tests use the fake model only: no OpenRouter key is needed or set here (AST-18).
+name: CI
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: acme
+          POSTGRES_PASSWORD: acme
+          POSTGRES_DB: acme
+        ports: ['4734:5432']
+        options: >-
+          --health-cmd "pg_isready -U acme -d acme"
+          --health-interval 2s --health-timeout 3s --health-retries 30
+    env:
+      DATABASE_URL: postgres://acme:acme@localhost:4734/acme
+      TEST_DATABASE_URL: postgres://acme:acme@localhost:4734/acme_test
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      # Locally db/init creates it; a service container can't run init scripts.
+      - name: Create the test database
+        run: psql "$DATABASE_URL" -c 'CREATE DATABASE acme_test'
+      - run: npm run migrate
+      - run: npm test
+      - run: npm run build -w web
+      - run: npx playwright install --with-deps chromium
+      - run: npm run e2e
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report
+          retention-days: 7
