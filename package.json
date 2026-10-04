@@ -16,6 +16,7 @@
     "migrate": "npm run migrate -w api",
     "dev:api": "npm run dev -w api",
     "hash-password": "npm run hash-password -w api --silent",
-    "seed": "npm run seed -w api --"
+    "seed": "npm run seed -w api --",
+    "measure:list": "npm run measure:list -w api --silent"
   }
 }

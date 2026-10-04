@@ -442,6 +442,7 @@ is done (hashes copied from `git log`).
 - Task 18 · green: a rate limit becomes an `error` event "The free AI model limit has been reached…", any other model failure "The assistant isn't available right now…"; the question stays saved, the message is saved as the reply, and the rest of the app keeps working (AST-14, AST-15).
 - Task 18 · red: `GET /api/assistant/status` reports free requests left; the OpenRouter key never reaches the browser (AST-16, AST-17).
 - Task 18 · green: `GET /api/assistant/status` returns `{ freeRequestsLeft }`, asked server-side with the server's key; no response carries the key (AST-16, AST-17).
+- Task 19: `npm run measure:list` times 200 list requests over HTTP on the seeded database and fails above 300 ms at p95; measured p95 99–104 ms (LIST-11, section 7).
 
 ---
 
@@ -580,6 +581,7 @@ Nothing measured yet. Every number here will come from a measurement, with how i
 | 2026-10-04 | Seed: write to Postgres in batches of 5,000 | 0.97–1.02 s | same runs, around `writeSeed()` |
 | 2026-10-04 | `change_log` view (assistant): raises in 2025 / every change | 2.83 s / 3.31 s | `\timing` in psql on the seeded dev DB (64,247 rows), Apple M3. Ceiling: six per-field lateral lookups per change; window functions or stored "previous" columns if it gets slow |
 | 2026-10-04 | List-style query (count over `current_state`) | ~40 ms | `\timing` in psql, seeded dev DB; a rough check, the real p95 is Task 19 |
+| 2026-10-04 | **LIST-11** list requests over HTTP (10 query shapes × 20 rounds: search, filters, salary sort/range, deep pages, leavers) | p50 89 ms · **p95 99 / 102 / 104 ms** · max 115–123 ms (3 runs; limit 300 ms) | `npm run measure:list`: in-process API on the seeded dev DB, `fetch` with a session, one warm-up round discarded; Apple M3, Postgres 17 in Docker, laptop on battery. Each request runs three queries (count, page, per-currency stats) over `current_state` |
 
 ---
 

@@ -9,7 +9,8 @@
     "test": "vitest run",
     "typecheck": "tsc -p .",
     "hash-password": "node src/hash-password.ts",
-    "seed": "node --env-file-if-exists=../.env src/seed/cli.ts"
+    "seed": "node --env-file-if-exists=../.env src/seed/cli.ts",
+    "measure:list": "node --env-file-if-exists=../.env src/measure-list.ts"
   },
   "dependencies": {
     "@acme/shared": "*",
