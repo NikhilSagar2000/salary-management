@@ -19,7 +19,7 @@ async function ask(rounds: Parameters<typeof scriptedModel>[0], opts: { history?
   return { answer, events, requests };
 }
 
-test.fails('streams a step per tool call, then tokens, then sources, then done', async () => {
+test('streams a step per tool call, then tokens, then sources, then done', async () => {
   const { events, answer } = await ask([
     [{ type: 'tool_call', id: 'c1', name: 'aggregate', args: { metric: 'salary', filters: { country: ['US'] } } }, { type: 'done' }],
     [{ type: 'token', text: 'The median is ' }, { type: 'token', text: 'USD 110,000.' }, { type: 'done' }],

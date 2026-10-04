@@ -1,6 +1,8 @@
-import type { Db } from '../db.ts';
-import type { ModelFn } from './model.ts';
-import type { Source } from './tools.ts';
+// One question → one streamed answer, using the tools (AST-3, AST-6, AST-8, AST-9, AST-13).
+import type pg from 'pg';
+import type { ChatMessage, ModelEvent, ModelFn, ToolCall } from './model.ts';
+import { systemPrompt } from './prompt.ts';
+import { describeFilters, runTool, TOOLS, type Source } from './tools.ts';
 
 export type Sources = { groups: Extract<Source, { kind: 'group' }>[]; people: Extract<Source, { kind: 'person' }>[]; morePeople: number };
 export type AnswerEvent =
@@ -10,9 +12,64 @@ export type AnswerEvent =
   | { type: 'done' };
 export type HistoryMessage = { role: 'user' | 'assistant'; content: string };
 
-export async function answerQuestion(_opts: {
-  model: ModelFn; db: Db & { connect: () => Promise<unknown> }; today: string; history: HistoryMessage[]; question: string;
+const MAX_TOOL_ROUNDS = 6;
+
+/** "Working out salary for United States…": what the assistant is doing, in words. */
+function stepText(name: string, args: Record<string, unknown>): string {
+  const who = describeFilters((args.filters ?? {}) as Parameters<typeof describeFilters>[0]);
+  if (name === 'aggregate') return `Working out ${String(args.metric ?? 'numbers').replace('_pct', ' %')} for ${who === 'Everyone' ? 'everyone' : who}…`;
+  if (name === 'get_employee') return `Reading ${String(args.code)}'s record…`;
+  if (name === 'query_changes') return `Looking at changes for ${who === 'Everyone' ? 'everyone' : who}…`;
+  return `Looking up people: ${who}…`;
+}
+
+export async function answerQuestion(opts: {
+  model: ModelFn; db: pg.Pool; today: string; history: HistoryMessage[]; question: string;
   signal: AbortSignal; onEvent: (e: AnswerEvent) => void;
 }): Promise<{ text: string; sources: Sources; basedOnData: boolean }> {
-  return { text: '', sources: { groups: [], people: [], morePeople: 0 }, basedOnData: false };
+  const messages: ChatMessage[] = [
+    { role: 'system', content: systemPrompt(opts.today) },
+    ...opts.history,
+    { role: 'user', content: opts.question },
+  ];
+  const found: Source[] = [];
+  let usedTools = false;
+  let text = '';
+  for (let round = 0; ; round++) {
+    const calls: Extract<ModelEvent, { type: 'tool_call' }>[] = [];
+    for await (const event of opts.model({ messages, tools: TOOLS, signal: opts.signal })) {
+      if (event.type === 'token') {
+        text += event.text;
+        opts.onEvent({ type: 'token', text: event.text });
+      }
+      if (event.type === 'tool_call') calls.push(event);
+    }
+    if (!calls.length) break;
+    messages.push({
+      role: 'assistant', content: null,
+      tool_calls: calls.map((c): ToolCall => ({ id: c.id, type: 'function', function: { name: c.name, arguments: JSON.stringify(c.args) } })),
+    });
+    for (const call of calls) {
+      opts.onEvent({ type: 'step', text: stepText(call.name, (call.args ?? {}) as Record<string, unknown>) });
+      const { result, sources } = await runTool(opts.db, opts.today, call.name, call.args);
+      usedTools = true;
+      found.push(...sources);
+      messages.push({ role: 'tool', tool_call_id: call.id, content: JSON.stringify(result) });
+    }
+    void round;
+  }
+  const sources = collectSources(found);
+  opts.onEvent({ type: 'sources', sources, basedOnData: usedTools });
+  opts.onEvent({ type: 'done' });
+  return { text, sources, basedOnData: usedTools };
+}
+
+function collectSources(found: Source[]): Sources {
+  const groups = new Map<string, Extract<Source, { kind: 'group' }>>();
+  const people = new Map<string, Extract<Source, { kind: 'person' }>>();
+  for (const s of found) {
+    if (s.kind === 'group') groups.set(`${s.label}|${s.query}`, s);
+    else people.set(s.code, s);
+  }
+  return { groups: [...groups.values()], people: [...people.values()], morePeople: 0 };
 }
