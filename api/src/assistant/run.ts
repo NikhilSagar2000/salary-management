@@ -13,6 +13,8 @@ export type AnswerEvent =
 export type HistoryMessage = { role: 'user' | 'assistant'; content: string };
 
 const MAX_TOOL_ROUNDS = 6;
+/** AST-13: earlier messages sent with each question, to bound context and free-tier cost. */
+const HISTORY_LIMIT = 20;
 const OUT_OF_LOOKUPS = 'You have used all your lookups. Answer now from what you found, and say plainly what you could not check.';
 
 /** "Working out salary for United States…": what the assistant is doing, in words. */
@@ -30,7 +32,7 @@ export async function answerQuestion(opts: {
 }): Promise<{ text: string; sources: Sources; basedOnData: boolean }> {
   const messages: ChatMessage[] = [
     { role: 'system', content: systemPrompt(opts.today) },
-    ...opts.history,
+    ...opts.history.slice(-HISTORY_LIMIT),
     { role: 'user', content: opts.question },
   ];
   const found: Source[] = [];

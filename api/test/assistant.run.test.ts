@@ -88,7 +88,7 @@ test('an answer without tool calls is marked not based on ACME data', async () =
   });
 });
 
-test.fails('sends at most the last 20 messages', async () => {
+test('sends at most the last 20 messages', async () => {
   const history = Array.from({ length: 30 }, (_, i) => ({ role: (i % 2 ? 'assistant' : 'user') as 'user' | 'assistant', content: `message ${i + 1}` }));
   const { requests } = await ask([[{ type: 'token', text: 'ok' }, { type: 'done' }]], { history });
   const sent = requests[0]!.messages;
