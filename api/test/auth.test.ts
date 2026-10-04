@@ -95,7 +95,7 @@ test('no response or log line contains the password hash or stored session hashe
   for (const secret of secrets) expect(everything).not.toContain(secret);
 });
 
-test.fails('malformed requests get a plain message, never internals', async () => {
+test('malformed requests get a plain message, never internals', async () => {
   const { app } = await testApp();
   const res = await request(app).post('/api/session').set('Content-Type', 'application/json').send('{"password":');
   expect(res.status).toBe(400);

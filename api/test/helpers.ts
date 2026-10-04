@@ -25,7 +25,8 @@ export function testPool() {
 /** A clock tests can move: `clock.set('2026-10-01T12:15:00Z')`. */
 export function mutableClock(iso: string) {
   let current = new Date(iso);
-  return { now: () => current, set: (next: string) => void (current = new Date(next)) } satisfies Clock & object;
+  const clock: Clock & { set(next: string): void } = { now: () => current, set: (next) => void (current = new Date(next)) };
+  return clock;
 }
 
 /** A fresh app on a migrated, emptied test database. */

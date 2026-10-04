@@ -2,6 +2,7 @@ import express from 'express';
 import type pg from 'pg';
 import { authRoutes, requireSession } from './auth/routes.ts';
 import { deleteSession, SESSION_COOKIE, sessionToken } from './auth/sessions.ts';
+import type { ErrorRequestHandler } from 'express';
 import type { Clock } from './clock.ts';
 
 export type Config = { passwordHash: string; production: boolean };
@@ -24,5 +25,16 @@ export function createApp(deps: { db: pg.Pool; clock: Clock; config: Config }) {
     await deleteSession(deps.db, sessionToken(req.get('cookie')));
     res.clearCookie(SESSION_COOKIE, { path: '/' }).status(204).end();
   });
+  app.use(errorHandler);
   return app;
 }
+
+/** Errors answer in plain words; details go to the server log only, never to the browser. */
+const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
+  if (err?.type === 'entity.parse.failed' || err?.type === 'entity.too.large') {
+    res.status(400).json({ error: "The request couldn't be read. Reload the page and try again." });
+    return;
+  }
+  console.error(err);
+  res.status(500).json({ error: 'Something went wrong on our side. Try again in a minute.' });
+};
