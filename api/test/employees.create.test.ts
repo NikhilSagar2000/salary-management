@@ -51,3 +51,12 @@ test('saves the hire change dated on the hire date', async () => {
     manager_set: true, manager_id: null, salary: 6070000, currency: 'JPY', cancelled_at: null,
   }]);
 });
+
+test.fails('rejects an email already used, ignoring case', async () => {
+  const { app } = await testApp();
+  const agent = await signIn(app);
+  expect((await agent.post('/api/employees').send(newEmployee)).status).toBe(201);
+  const res = await agent.post('/api/employees').send({ ...newEmployee, code: 'E000124', workEmail: 'Ana.Silva@ACME.example' });
+  expect(res.status).toBe(400);
+  expect(res.body).toEqual({ error: 'Some fields need fixing.', fields: { workEmail: 'That work email is already used.' } });
+});
