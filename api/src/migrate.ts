@@ -1,7 +1,7 @@
 import { readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import pg from 'pg';
-import { withTx } from './db.ts';
+import type pg from 'pg';
+import { createPool, DEV_DATABASE_URL, withTx } from './db.ts';
 
 export const MIGRATIONS_DIR = new URL('../db/migrations', import.meta.url).pathname;
 
@@ -23,7 +23,7 @@ export async function migrate(db: pg.Pool, dir = MIGRATIONS_DIR): Promise<string
 }
 
 if (import.meta.main) {
-  const db = new pg.Pool({ connectionString: process.env.DATABASE_URL });
+  const db = createPool(process.env.DATABASE_URL ?? DEV_DATABASE_URL);
   const applied = await migrate(db);
   console.log(applied.length ? `Applied: ${applied.join(', ')}` : 'Nothing to apply');
   await db.end();

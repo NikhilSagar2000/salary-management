@@ -400,6 +400,7 @@ is done (hashes copied from `git log`).
 - Task 16 · green: `get_employee` tool returns the employee page data (current job, peers, manager, reports, full timeline) via `employeeDetail` (AST-4).
 - Task 16 · red: `query_changes` tool classifies changes (raise, pay cut, promotion, relocation, manager change, leave…) and caps at 200 (AST-4).
 - Task 16 · green: `query_changes` tool over a new `change_log` view (each applied change with the values before it, classified as hire/promotion/demotion/raise/pay cut/role/department/relocation/manager change, plus leave and undo events), with raise %, at most 200 rows, total and people count (AST-4).
+- Task 16 · fix: `npm run migrate` now falls back to the local Docker database like the API and seed commands (one `DEV_DATABASE_URL` in `db.ts`). Measured `change_log` on the seeded dev DB (section 7).
 
 ---
 
@@ -536,6 +537,8 @@ Nothing measured yet. Every number here will come from a measurement, with how i
 |---|---|---|---|
 | 2026-10-04 | Seed: generate 10,000 people (63,154 job changes, 1,093 leavers, 30 outliers) | 1.40–1.49 s | `npm run seed -- --reset`, 3 runs, Apple M3, Postgres 17 in Docker; `performance.now()` around `generateSeed()` |
 | 2026-10-04 | Seed: write to Postgres in batches of 5,000 | 0.97–1.02 s | same runs, around `writeSeed()` |
+| 2026-10-04 | `change_log` view (assistant): raises in 2025 / every change | 2.83 s / 3.31 s | `\timing` in psql on the seeded dev DB (64,247 rows), Apple M3. Ceiling: six per-field lateral lookups per change; window functions or stored "previous" columns if it gets slow |
+| 2026-10-04 | List-style query (count over `current_state`) | ~40 ms | `\timing` in psql, seeded dev DB; a rough check, the real p95 is Task 19 |
 
 ---
 

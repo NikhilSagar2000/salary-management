@@ -6,6 +6,9 @@ pg.types.setTypeParser(pg.types.builtins.DATE, (value) => value);
 // bigint (salaries, counts) as JS numbers: salaries are capped at 10,000,000,000, far below 2^53.
 pg.types.setTypeParser(pg.types.builtins.INT8, Number);
 
+/** The local Docker database, used when DATABASE_URL isn't set. */
+export const DEV_DATABASE_URL = 'postgres://acme:acme@localhost:4734/acme';
+
 export const createPool = (connectionString: string) => new pg.Pool({ connectionString });
 
 /** Runs `fn` in one transaction: commits if it resolves, rolls back if it throws. */

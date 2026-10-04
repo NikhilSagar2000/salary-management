@@ -1,10 +1,10 @@
 // npm run seed [-- --reset]: loads the 10,000-person seed into DATABASE_URL.
-import { createPool } from '../db.ts';
+import { createPool, DEV_DATABASE_URL } from '../db.ts';
 import { migrate } from '../migrate.ts';
 import { generateSeed } from './generate.ts';
 import { writeSeed } from './write.ts';
 
-const db = createPool(process.env.DATABASE_URL ?? 'postgres://acme:acme@localhost:4734/acme');
+const db = createPool(process.env.DATABASE_URL ?? DEV_DATABASE_URL);
 await migrate(db);
 const existing = (await db.query('SELECT count(*) AS n FROM employees')).rows[0].n as number;
 if (existing > 0 && !process.argv.includes('--reset')) {
