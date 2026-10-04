@@ -66,3 +66,18 @@ test('rows show the listed columns, as a table and as phone cards', async () => 
   expect(kenjiCard).toHaveTextContent('Starting');
   expect(within(anaCard!).getByRole('link', { name: 'Ana Silva' })).toHaveAttribute('href', '/employees/E000123');
 });
+
+test.fails('stats line per currency above the list', async () => {
+  signedInWith(listResponse({
+    stats: [
+      { currency: 'USD', median: 128000, min: 62000, max: 410000, headcount: 2914 },
+      { currency: 'INR', median: 1550000, min: 480000, max: 9800000, headcount: 1 },
+    ],
+  }));
+  renderApp('/employees');
+  const summary = await screen.findByRole('list', { name: 'Pay for these employees' });
+  expect(within(summary).getAllByRole('listitem').map((li) => li.textContent)).toEqual([
+    'USD: median 128,000, min 62,000, max 410,000, 2,914 people',
+    'INR: median 1,550,000, min 480,000, max 9,800,000, 1 person',
+  ]);
+});
