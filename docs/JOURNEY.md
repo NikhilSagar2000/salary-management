@@ -314,6 +314,7 @@ is done (hashes copied from `git log`).
 - Task 9 · red: mark leaving (LEAVE-1).
 - Task 9 · green: `POST /api/employees/:code/leave` sets leave date and optional reason and records a "left" event (LEAVE-1).
 - Task 9 · red: leave date before hire and long reasons get plain messages (LEAVE-1); watched the database check surface as a 500.
+- Task 9 · green: a leave date before the hire date gets "The leave date can't be before the hire date (…)." (LEAVE-1).
 
 ---
 

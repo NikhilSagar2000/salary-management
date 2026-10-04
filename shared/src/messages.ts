@@ -27,6 +27,7 @@ export const MSG = {
   onlyScheduled: 'Only scheduled changes can be cancelled. Fix a past change by adding a new one.',
   hireNotCancellable: "The hire record can't be cancelled.",
   noChange: "That change doesn't exist for this employee.",
+  leaveBeforeHire: (hire: string) => `The leave date can't be before the hire date (${hire}).`,
   reasonTooLong: 'Keep the reason to 500 characters or fewer.',
   changeNothing: 'Change at least one of country, department, role, level, manager or salary.',
   changeBeforeHire: (hire: string) => `The change can't be dated before the hire date (${hire}).`,

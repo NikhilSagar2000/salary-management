@@ -22,7 +22,7 @@ test('marks leaving with a date and optional reason', async () => {
   expect(await events(db)).toEqual([{ kind: 'left', leave_date: '2026-12-31', reason: 'Moving abroad' }]);
 });
 
-test.fails('refuses a leave date before hire or a reason over 500 characters', async () => {
+test('refuses a leave date before hire or a reason over 500 characters', async () => {
   const { agent, db } = await setup();
   const early = await agent.post('/api/employees/E000123/leave').send({ version: 1, leaveDate: '2024-02-28' });
   expect(early.status).toBe(400);
