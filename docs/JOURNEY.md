@@ -191,6 +191,21 @@ Phase 4 (plan), still under P4:
 - Deviation from the skill, flagged to Nikhil: the skill wants code in every step now. The
   plan names files, interfaces and tests, and writes each task's code-level steps just before
   the task starts, so they're based on the interfaces that exist by then.
+- Advisor review before the stop caught that LIST-9 and STATS-2 disagreed on counting
+  starting people; fixed in d4b6938.
+
+Stop after the plan (question dialog):
+
+| # | Question | Options offered | Answer |
+|---|---|---|---|
+| Q37 | Which timezone decides 'today' (status, when scheduled changes start applying, stats)? HR could be in any of the six countries. | Setting, default UTC (Recommended) · Always UTC · HR's browser timezone | "HR's browser timezone" |
+| Q38 | How should the build (phase 5) be run? | Native (Recommended) · Subagent-driven | "Native (Recommended)" |
+| Q39 | The planning skill wants code-level steps for every task written now. When should they be written? | Just before each task (Recommended) · All now, before building | "Just before each task (Recommended)" |
+| Q40 | Do you approve docs/SPEC.md and tasks/todo.md? | Approve, start building · I'll read the files first | "Approve, start building" |
+
+Follow-up: added TIME-1 to `docs/SPEC.md` (browser timezone via `X-Timezone`, UTC
+fallback), changed the planned clock interface and Task 1/20 tests, and updated `CLAUDE.md`.
+Then started phase 5.
 
 ---
 
@@ -205,7 +220,8 @@ Phase 4 (plan), still under P4:
 | 2026-10-04 | Phase 3: pay research started (subagent); Q35–Q36; `docs/REQUIREMENTS.md`, `docs/SPEC.md` | this commit (hash in next entry) |
 | 2026-10-04 | Pay research returned and spot-checked; Phase 4 plan in `tasks/todo.md`; stop for Nikhil | same commit as above |
 | 2026-10-04 | Phase 3 + 4 committed | 3d6a8e4 |
-| 2026-10-04 | LIST-9 clarified: stats count people as STATS-2 says (caught in review before the stop) | this commit (hash in next entry) |
+| 2026-10-04 | LIST-9 clarified: stats count people as STATS-2 says (caught in review before the stop) | d4b6938 |
+| 2026-10-04 | Plan approved (Q37–Q40); TIME-1 added; phase 5 starts | this commit (hash in next entry) |
 
 ---
 
@@ -269,6 +285,9 @@ accepted when Nikhil approved the plan (P4).
 | D51 | CSV format details | Excel round trip | – | Export: UTF-8 with BOM, comma, formula cells prefixed with `'`. Import: comma or semicolon (German/Brazilian Excel uses semicolons), ISO dates, digits-only salary, 5 MB / 10,000 rows | Opens in Excel without mangling; safe against formula injection | C |
 | D52 | Chat extras | Streaming answers | – | Stop button (partial answer saved as "Stopped"); last 20 messages sent to the model; questions up to 2,000 characters; free requests left shown when OpenRouter reports it | Bounds quota use and context size | C |
 | D53 | List performance target | "Measured, never guessed" | – | 95th percentile ≤ 300 ms for list requests on the seeded DB on the dev machine, measured by a script | A target to measure against; **for Nikhil's review** | C |
+| D54 | Whose "today" | Six countries, one HR user | Setting (UTC default) · always UTC · browser timezone | Browser sends its IANA timezone in `X-Timezone`; "today" is the date there; UTC if missing or unknown. Clock becomes `now()` + `todayIn(clock, tz)` | Matches where HR actually is when using the app | N (Q37) |
+| D55 | Build execution | Phase 5 | Native · subagent-driven | Native: Claude builds every task in this session; one fresh review of the whole branch at the end | Fewer subagent prompts to log verbatim; the plan carries the design | N (Q38) |
+| D56 | Step-plan detail | writing-plans wants code for every step up front | Just before each task · all now | Code-level steps written just before each task, in `tasks/todo.md` under that task | Steps match the code that exists by then | N (Q39) |
 
 ---
 

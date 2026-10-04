@@ -54,7 +54,7 @@ employees in six countries, plus a read-only pay assistant. Built with Nikhil.
 - Employee code (`E000001`) and hire date never change after creation. Job, pay, manager and
   country changes are new effective-dated history rows; history rows are never edited.
 - Nothing is deleted except chats. Leavers are marked and can be undone.
-- "Today" comes from the app's injectable clock; tests fix it. The seed's dates sit on or
-  before 2026-09-30.
+- "Today" is the date in HR's browser timezone (`X-Timezone` header, UTC fallback), from the
+  app's injectable clock; tests fix it. The seed's dates sit on or before 2026-09-30.
 - Pay assistant: reads data only through tools, the model never writes or runs SQL, every
   answer shows its sources, the API key stays on the server, and tests never call the real model.

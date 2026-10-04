@@ -26,7 +26,7 @@ reasons: `docs/JOURNEY.md` section 4.
 - [x] Phase 2: brainstorm (Q1–Q36)
 - [x] Phase 3: `docs/REQUIREMENTS.md`, `docs/SPEC.md`, pay research
 - [x] Phase 4: this plan
-- [ ] **Stop: Nikhil approves this plan and picks the execution method**
+- [x] **Stop: Nikhil approved this plan (native execution, step detail just before each task)**
 - [ ] Phase 5: build (tasks 1–29 below)
 - [ ] Phase 6: manual QA (test cases for every screen and rule, run, record, fix test-first)
 - [ ] Phase 7: deploy after approval, README with set-up, tests and demo-recording script
@@ -38,8 +38,9 @@ reasons: `docs/JOURNEY.md` section 4.
 - Money: integers (Postgres `bigint`, parsed to JS `number`; max salary 10,000,000,000).
 - Dates are calendar dates as `YYYY-MM-DD` strings end to end; the `pg` DATE parser is
   overridden to return strings, never JS `Date`.
-- "Today" comes only from `Clock.today()`; tests use `fixedClock('2026-10-01')` unless a test
-  needs another date.
+- "Today" comes only from `todayIn(clock, tz)`, where `tz` is the request's `X-Timezone`
+  (UTC if missing or unknown); tests use `fixedClock('2026-10-01T12:00:00Z')` unless a test
+  needs another instant.
 - Stats: median = `percentile_cont(0.5)` rounded half away from zero, with min, max, headcount.
 - Plain-word messages are written once in `shared/src/messages.ts` and quoted from there.
 - WCAG AA; full keyboard use; Mantine components keep their built-in ARIA.
@@ -113,8 +114,11 @@ export const GENDERS = ['female', 'male', 'non_binary'] as const;
 export const ROLES: Record<Role, { department: Department; minLevel: number; maxLevel: number }>;
 
 // api/src/clock.ts
-export type Clock = { today(): string };              // 'YYYY-MM-DD'
-export const fixedClock = (date: string): Clock => ({ today: () => date });
+export type Clock = { now(): Date };
+export const systemClock: Clock;
+export const fixedClock = (iso: string): Clock => ({ now: () => new Date(iso) });
+export function todayIn(clock: Clock, tz: string): string;   // 'YYYY-MM-DD' in tz
+export function requestTimezone(header: string | undefined): string; // valid IANA or 'UTC'
 
 // api/src/assistant/model.ts
 export type ModelEvent =
@@ -147,6 +151,8 @@ is written just before the task starts, from the interfaces that exist at that p
   `api/test/helpers.ts`, `api/test/setup.ts`.
   Tests: `infra.test.ts` › "health answers ok" · "migrations apply once and are recorded" ·
   "dates round-trip unchanged under any server timezone" (review focus 1) ·
+  `clock.test.ts` › "today follows the X-Timezone header, falling back to UTC for a missing
+  or unknown zone" (TIME-1) ·
   `setup.test.ts` › "test set-up refuses OpenRouter's real base URL" (AST-18).
 - [ ] **Task 2: Reference data, shared schemas, formatting.** Files: `shared/src/*`.
   Tests: `shared/test/schemas.test.ts` › "employee schema requires each field with a plain
@@ -269,7 +275,8 @@ is written just before the task starts, from the interfaces that exist at that p
 - [ ] **Task 20: Web shell.** Vite + Mantine app, routes, API client, sign-in page, theme
   toggle, skip link. Tests: `web/src/test/shell.test.tsx` › "signed-out visit goes to sign-in
   and returns afterwards" (AUTH-5) · "theme follows the device and the toggle is remembered"
-  (UI-1) · "a failed request shows a plain message" (UI-4).
+  (UI-1) · "a failed request shows a plain message" (UI-4) · "every API request sends the browser's
+  timezone" (TIME-1).
 - [ ] **Task 21: Employee list page.** Tests: `EmployeeList.test.tsx` › "salary controls are
   disabled with the note unless one country is chosen" (LIST-5) · "search, filters, sort and
   page are read from and written to the URL" (LIST-6) · "rows show the listed columns"
@@ -327,6 +334,7 @@ Every `docs/SPEC.md` id and where it is tested (task number; test names above).
 
 | Criterion | Task(s) | Criterion | Task(s) | Criterion | Task(s) |
 |---|---|---|---|---|---|
+| TIME-1 | 1, 20 | | | | |
 | AUTH-1 | 3 | EMP-9 | 7 | AST-7 | 17 |
 | AUTH-2 | 3 | EMP-10 | 7 | AST-8 | 17, 26 |
 | AUTH-3 | 3 | EMP-11 | 8, 22 | AST-9 | 17 |

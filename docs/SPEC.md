@@ -1,7 +1,8 @@
 # ACME Salary Management: acceptance criteria
 
 Every criterion has an id (`AREA-n`). Each one maps to at least one named test in
-`tasks/todo.md`. "Today" always means the app clock's date (tests fix it). Plain-word messages
+`tasks/todo.md`. "Today" always means the date in HR's browser timezone (TIME-1), read from
+the app clock (tests fix it). Plain-word messages
 quoted here are the exact text the app shows, unless marked "e.g.".
 
 ## Reference data
@@ -32,6 +33,13 @@ fields it changes (country, department, role, level, manager, salary) plus an op
 The state on any date combines all non-cancelled changes dated on or before it, in date order
 (same date: the later-entered change wins). The hire change sets every field. A change dated
 after today is *scheduled*.
+
+## TIME: whose "today"
+
+- **TIME-1** Every request from the web app carries the browser's IANA timezone (header
+  `X-Timezone`, e.g. `Asia/Kolkata`); "today" is the current date there. A missing or unknown
+  timezone falls back to UTC. The same instant can be 1 Oct in London and 2 Oct in Tokyo,
+  and status, scheduled changes and stats follow the requesting browser's date.
 
 ## AUTH: sign-in
 
