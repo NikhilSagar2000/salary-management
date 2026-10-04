@@ -45,3 +45,32 @@ test('titles a new chat with its first question cut to 60 characters', async () 
   await ask('And in Germany?');
   expect((await agent.get(`/api/chats/${chat.id}`)).body.title).toBe(first.slice(0, 60).trim());
 });
+
+test('a reopened chat returns messages with their saved sources', async () => {
+  const { agent, chat, ask, requests } = await chatWith([
+    [{ type: 'tool_call', id: 'c1', name: 'query_employees', args: { filters: { country: ['US'] } } }, { type: 'done' }],
+    [{ type: 'token', text: 'One person: ' }, { type: 'token', text: 'Ana Silva.' }, { type: 'done' }],
+    [{ type: 'token', text: 'Still Ana.' }, { type: 'done' }],
+  ]);
+  const res = await ask('Who works in the US?');
+  expect(res.headers['content-type']).toBe('text/event-stream');
+  const events = sseEvents(res.body);
+  expect(events.map((e) => e.event)).toEqual(['step', 'token', 'token', 'sources', 'done']);
+
+  const reopened = (await agent.get(`/api/chats/${chat.id}`)).body;
+  expect(reopened.messages).toEqual([
+    expect.objectContaining({ role: 'user', content: 'Who works in the US?', status: 'complete' }),
+    expect.objectContaining({
+      role: 'assistant', content: 'One person: Ana Silva.', status: 'complete', basedOnData: true, errorKind: null,
+      sources: {
+        groups: [{ kind: 'group', label: 'United States', query: 'country=US', headcount: 1 }],
+        people: [{ kind: 'person', code: 'E000001', name: 'Ana Silva' }],
+        morePeople: 0,
+      },
+    }),
+  ]);
+  await ask('Anyone else?');
+  expect(requests[2]!.messages.slice(1).map((m) => [m.role, m.content])).toEqual([
+    ['user', 'Who works in the US?'], ['assistant', 'One person: Ana Silva.'], ['user', 'Anyone else?'],
+  ]);
+});

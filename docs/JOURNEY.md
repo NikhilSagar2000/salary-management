@@ -431,6 +431,7 @@ is done (hashes copied from `git log`).
 - Task 18 · green: chats — create ("New chat"), list newest first, open, rename (1–80 characters, plain message) and delete with their messages (AST-1).
 - Task 18 · red: a new chat is titled with its first question cut to 60 characters (AST-1); SSE test helpers.
 - Task 18 · green: `POST /api/chats/:id/messages` saves the question (the first one names the chat), streams the answer as server-sent events and saves it (AST-1).
+- Task 18 · test: over HTTP the answer streams step, tokens, sources, done; reopening the chat returns each answer with its saved sources, and later questions carry the earlier ones (AST-2, AST-3). Passed first run; not saving the sources made it fail.
 
 ---
 
