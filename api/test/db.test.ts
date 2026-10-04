@@ -9,7 +9,7 @@ async function insertEmployee(db: import('pg').Pool) {
   return rows[0].id as number;
 }
 
-test.fails('database refuses changing code or hire date', async () => {
+test('database refuses changing code or hire date', async () => {
   const { db } = await testApp();
   const id = await insertEmployee(db);
   const message = "The employee code and hire date can't be changed.";
