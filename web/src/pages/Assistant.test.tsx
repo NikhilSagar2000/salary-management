@@ -1,5 +1,5 @@
 import { MSG } from '@acme/shared';
-import { cleanup, screen, waitFor, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { expect, test, vi } from 'vitest';
 import { fakeApi, gate, sse, sseEvent } from '../test/fakeApi.ts';
@@ -20,7 +20,6 @@ const start = (at: string, routes: Parameters<typeof fakeApi>[0] = {}) => {
     'GET /api/session': () => ({ status: 200, body: { signedIn: true } }),
     'GET /api/chats': () => ({ status: 200, body: CHATS }),
     'GET /api/chats/2': () => ({ status: 200, body: { ...CHATS[0], messages: [] } }),
-    'GET /api/assistant/status': () => ({ status: 200, body: { freeRequestsLeft: null } }),
     ...routes,
   });
   renderApp(at);
@@ -153,18 +152,7 @@ test('Stop ends the stream and shows Stopped', async () => {
   hold.open();
 });
 
-test('free requests left are shown when known', async () => {
-  const calls = start('/assistant/2');
-  await screen.findByRole('heading', { name: 'Median pay in Brazil' });
-  await waitFor(() => expect(calls.some((c) => c.url.pathname === '/api/assistant/status')).toBe(true));
-  expect(screen.queryByText(/free model requests left/)).not.toBeInTheDocument();
-  cleanup();
-
-  start('/assistant/2', { 'GET /api/assistant/status': () => ({ status: 200, body: { freeRequestsLeft: 37 } }) });
-  expect(await screen.findByText('37 free model requests left today')).toBeInTheDocument();
-});
-
-test.fails('the chat shows no free-request count (removed, D72)', async () => {
+test('the chat shows no free-request count (removed, D72)', async () => {
   const calls = start('/assistant/2', { 'GET /api/assistant/status': () => ({ status: 200, body: { freeRequestsLeft: 37 } }) });
   await screen.findByRole('heading', { name: 'Median pay in Brazil' });
   expect(calls.some((c) => c.url.pathname === '/api/assistant/status')).toBe(false);

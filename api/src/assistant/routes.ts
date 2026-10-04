@@ -4,20 +4,14 @@ import type pg from 'pg';
 import type { Clock } from '../clock.ts';
 import { fieldErrors } from '../http.ts';
 import { chatHistory, createChat, deleteChat, getChat, listChats, renameChat, saveAnswer, saveQuestion } from './chats.ts';
-import { freeRequestsLeft, ModelError, type ModelFn } from './model.ts';
-import type { Config } from '../app.ts';
+import { ModelError, type ModelFn } from './model.ts';
 import { answerQuestion, type AnswerEvent } from './run.ts';
 
-export function assistantRoutes({ db, clock, model, config }: { db: pg.Pool; clock: Clock; model: ModelFn; config: Config }) {
+export function assistantRoutes({ db, clock, model }: { db: pg.Pool; clock: Clock; model: ModelFn }) {
   const router = Router();
   // ponytail: in-memory, fine for one server; a row lock in Postgres if the API ever runs on several
   const answering = new Set<number>();
   const noChat = (res: import('express').Response) => res.status(404).json({ error: MSG.noChat });
-
-  // AST-16: asked on the server with the server's key; only the number reaches the browser (AST-17).
-  router.get('/api/assistant/status', async (_req, res) => {
-    res.json({ freeRequestsLeft: await freeRequestsLeft(config.openRouter) });
-  });
 
   router.get('/api/chats', async (_req, res) => {
     res.json(await listChats(db));

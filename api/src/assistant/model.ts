@@ -101,7 +101,7 @@ async function* readStream(body: ReadableStream<Uint8Array>, onData: () => void)
   yield { type: 'done' };
 }
 
-/** Free-model requests left today (OpenRouter's GET /key), or null when unknown (AST-16). */
+/** Free-model requests left today (OpenRouter's GET /key), or null when unknown. Printed by `npm run smoke:model`. */
 export async function freeRequestsLeft(cfg: { baseUrl: string; apiKey: string }): Promise<number | null> {
   try {
     const res = await fetch(`${cfg.baseUrl}/key`, { headers: { authorization: `Bearer ${cfg.apiKey}` }, signal: AbortSignal.timeout(5000) });

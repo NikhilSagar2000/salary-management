@@ -3,7 +3,7 @@ import type { AddressInfo } from 'node:net';
 
 /**
  * A local stand-in for OpenRouter's chat API, so no end-to-end run reaches the real model (AST-18). A question first gets
- * a streamed `query_employees` call for engineers in Brazil, then a streamed answer. GET /key reports 42 free requests left.
+ * a streamed `query_employees` call for engineers in Brazil, then a streamed answer.
  * Switches in the question, for tests and manual QA: "[429]" gets the free-limit reply, "[500]" a server error,
  * "[no tools]" an answer without any lookup, "[html]" an answer with a table, a list and raw HTML, "[slow]" a long,
  * slow answer (for Stop and reloading mid-answer).
@@ -14,9 +14,6 @@ export async function startFakeOpenRouter(expectedKey: string) {
     for await (const chunk of req) raw += chunk;
     const json = (status: number, body: unknown) => res.writeHead(status, { 'content-type': 'application/json' }).end(JSON.stringify(body));
     if (req.headers.authorization !== `Bearer ${expectedKey}`) return json(401, { error: { code: 401, message: 'No auth credentials found' } });
-    if (req.method === 'GET' && req.url === '/api/v1/key') {
-      return json(200, { data: { free_model_daily_requests: { used: 8, limit: 50, remaining: 42 } } });
-    }
     if (req.method !== 'POST' || req.url !== '/api/v1/chat/completions') return json(404, { error: { code: 404, message: 'Not found' } });
 
     const { messages } = JSON.parse(raw) as { messages: { role: string; content: string | null }[] };

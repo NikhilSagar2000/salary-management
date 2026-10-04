@@ -257,7 +257,7 @@ is written just before the task starts, from the interfaces that exist at that p
   (AST-8) · "an answer without tool calls is marked not based on ACME data" (AST-9) · "sends
   at most the last 20 messages" (AST-13) · `assistant.model.test.ts` › "a 429 becomes
   rate_limited" (AST-14) · "network error, 5xx and a 60 s timeout become unavailable"
-  (AST-15) · "reads free requests left from OpenRouter's key info" (AST-16) · "parses streamed
+  (AST-15) · "reads free requests left from OpenRouter's key info" (smoke test; AST-16 removed) · "parses streamed
   tool-call deltas across chunks".
 - [x] **Task 18: Chats API and streaming route.** Files: `api/src/assistant/routes.ts`.
   Tests: `chats.test.ts` › "creates, lists newest first, renames (1–80 characters) and
@@ -302,8 +302,8 @@ is written just before the task starts, from the interfaces that exist at that p
   (CSV-7).
 - [x] **Task 26: Assistant page.** Tests: `Assistant.test.tsx` › "chat list, rename, and
   delete after confirming" (AST-1) · "model HTML shows as text, never runs" (AST-11) · "Stop
-  ends the stream and shows Stopped" (AST-12) · "free requests left are shown when known"
-  (AST-16) · "announces once when the answer finishes" (A11Y-4) · "sources link to people and
+  ends the stream and shows Stopped" (AST-12) · "the chat shows no free-request count"
+  (AST-16 removed, D72) · "announces once when the answer finishes" (A11Y-4) · "sources link to people and
   filtered lists" (AST-8).
 
 ### End to end and CI
@@ -348,7 +348,7 @@ Every `docs/SPEC.md` id and where it is tested (task number; test names above).
 | LIST-1 | 11 | LEAVE-1 | 9 | AST-13 | 17 |
 | LIST-2 | 11 | LEAVE-2 | 9 | AST-14 | 17, 18, 27 |
 | LIST-3 | 11 | LEAVE-3 | 9, 22 | AST-15 | 17 |
-| LIST-4 | 11 | LEAVE-4 | 9 | AST-16 | 17, 26 |
+| LIST-4 | 11 | LEAVE-4 | 9 | AST-16 | removed (D72) |
 | LIST-5 | 11, 21 | LEAVE-5 | 9 | AST-17 | 18, 27 |
 | LIST-6 | 21, 27 | LEAVE-6 | 11, 12 | AST-18 | 1 |
 | LIST-7 | 11 | STATS-1 | 12 | CSV-1 | 14, 21, 27 |
@@ -738,7 +738,7 @@ is saved when it ends as `complete`, `stopped` (connection closed; partial text 
 - [x] Step 5: "refuses a second answer while one streams" (AST-12).
 - [x] Step 6: "stopping saves the partial answer as Stopped" (AST-12).
 - [x] Step 7: "rate limit keeps the question and saves the free-limit message" (AST-14, AST-15).
-- [x] Step 8: "the key is never sent to the browser" (AST-17) and `/api/assistant/status` (AST-16).
+- [x] Step 8: "the key is never sent to the browser" (AST-17) and `/api/assistant/status` (AST-16; removed with D72).
 - [x] Task check: `npm test`.
 
 ### Task 20: Web shell

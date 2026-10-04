@@ -1,6 +1,6 @@
 import { chatTitleSchema, MSG, questionSchema } from '@acme/shared';
 import { Alert, Anchor, Button, Group, Modal, Paper, Skeleton, Stack, Text, Textarea, TextInput, Title, VisuallyHidden } from '@mantine/core';
-import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link } from 'react-router';
 import { api, ApiError, apiStream } from '../../api.ts';
 import { issuesToFields, useFormErrors } from '../../forms.ts';
@@ -9,7 +9,7 @@ import { Answer, Question, type Message, type Sources } from './Answer.tsx';
 type Chat = { id: number; title: string; updatedAt: string; messages: Message[] };
 
 /**
- * One chat: its questions and answers, the composer, rename and delete (AST-1, AST-3, AST-12, AST-16). `listTitle` is the
+ * One chat: its questions and answers, the composer, rename and delete (AST-1, AST-3, AST-12). `listTitle` is the
  * title in the chat list, which follows the server when the first question names the chat.
  */
 export function ChatView({ id, listTitle, onChanged, onDeleted }: { id: number; listTitle?: string; onChanged: () => void; onDeleted: () => void }) {
@@ -18,7 +18,6 @@ export function ChatView({ id, listTitle, onChanged, onDeleted }: { id: number; 
   const [question, setQuestion] = useState('');
   const [questionError, setQuestionError] = useState<string | null>(null);
   const [announce, setAnnounce] = useState('');
-  const [left, setLeft] = useState<number | null>(null);
   const [dialog, setDialog] = useState<'rename' | 'delete' | null>(null);
   const stop = useRef<AbortController | null>(null);
   const tempId = useRef(0);
@@ -39,10 +38,6 @@ export function ChatView({ id, listTitle, onChanged, onDeleted }: { id: number; 
   useEffect(() => {
     api<Chat>(`/api/chats/${id}`).then(setChat, (e: Error) => setError(e.message));
   }, [id]);
-  const loadStatus = useCallback(() => {
-    api<{ freeRequestsLeft: number | null }>('/api/assistant/status').then((s) => setLeft(s.freeRequestsLeft), () => {});
-  }, []);
-  useEffect(loadStatus, [loadStatus]);
   // Leaving the chat closes the stream, which stops the answer on the server too.
   useEffect(() => () => stop.current?.abort(), []);
 
@@ -93,7 +88,6 @@ export function ChatView({ id, listTitle, onChanged, onDeleted }: { id: number; 
     patch(aid, () => end);
     setAnnounce(end.status === 'complete' ? 'Answer finished.' : end.status === 'stopped' ? 'Answer stopped.' : end.content!);
     onChanged(); // the first question names the chat, and the list is newest first
-    loadStatus();
   };
 
   if (error) return <Alert color="red" role="alert">{error}</Alert>;
@@ -134,8 +128,7 @@ export function ChatView({ id, listTitle, onChanged, onDeleted }: { id: number; 
                 void send();
               }
             }} />
-          <Group justify="space-between">
-            <Text size="xs" c="dimmed">{left !== null && `${left} free model ${left === 1 ? 'request' : 'requests'} left today`}</Text>
+          <Group justify="flex-end">
             {/* Separate keyed buttons: reusing one element would turn Stop into a submit mid-click and send the waiting question. */}
             {streaming
               ? <Button key="stop" type="button" variant="light" color="red" onClick={() => stop.current?.abort()}>Stop</Button>

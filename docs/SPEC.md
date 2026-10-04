@@ -190,8 +190,8 @@ Limits and failures
   reached. Try again later; everything else in the app still works." The question stays saved.
 - **AST-15** Other model failures (network error, 5xx, no reply within 60 s) show: "The
   assistant isn't available right now. Try again in a minute." The rest of the app keeps working.
-- **AST-16** The chat shows how many free model requests are left today, when OpenRouter
-  reports it.
+- **AST-16** *Removed 2026-10-05 (P9, D72):* the chat no longer shows how many free model
+  requests are left today. `npm run smoke:model` still prints the count for whoever runs it.
 - **AST-17** The OpenRouter key is read on the server only; the browser talks only to the app's API.
 - **AST-18** No test calls the real model: unit tests inject a scripted model; end-to-end tests
   point the server at a local fake OpenRouter; the test set-up fails if the base URL is

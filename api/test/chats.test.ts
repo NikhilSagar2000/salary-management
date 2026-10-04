@@ -1,4 +1,3 @@
-import { createServer } from 'node:http';
 import { expect, test, vi } from 'vitest';
 import { ModelError, type ModelFn } from '../src/assistant/model.ts';
 import { asText, insertPeople, PASSWORD, scriptedModel, sseEvents, signIn, testApp } from './helpers.ts';
@@ -173,32 +172,18 @@ test('rate limit keeps the question and saves the free-limit message', async () 
   }
 });
 
-test('the key is never sent to the browser, and free requests left are reported', async () => {
+test('the key is never sent to the browser', async () => {
   const KEY = 'sk-or-v1-NEVER-IN-A-RESPONSE';
-  const keyServer = createServer((req, res) => {
-    const authorised = req.headers.authorization === `Bearer ${KEY}`;
-    res.writeHead(authorised ? 200 : 401, { 'content-type': 'application/json' });
-    res.end(JSON.stringify(authorised ? { data: { free_model_daily_requests: { used: 8, limit: 50, remaining: 42 } } } : { error: 'no' }));
-  });
-  await new Promise<void>((r) => keyServer.listen(0, '127.0.0.1', r));
-  try {
-    const baseUrl = `http://127.0.0.1:${(keyServer.address() as import('node:net').AddressInfo).port}/api/v1`;
-    const { model } = scriptedModel([[{ type: 'token', text: 'Hello.' }, { type: 'done' }]]);
-    const { app } = await testApp({ model, openRouter: { baseUrl, apiKey: KEY } });
-    const agent = await signIn(app);
-    const status = await agent.get('/api/assistant/status');
-    expect(status.body).toEqual({ freeRequestsLeft: 42 });
-    const chat = (await agent.post('/api/chats').send({})).body;
-    const bodies = [
-      JSON.stringify(status.headers), status.text,
-      (await agent.get('/api/chats')).text,
-      (await agent.post(`/api/chats/${chat.id}/messages`).send({ question: 'Hi' }).buffer(true).parse(asText)).body,
-      (await agent.get(`/api/chats/${chat.id}`)).text,
-    ];
-    for (const body of bodies) expect(body).not.toContain(KEY);
-  } finally {
-    keyServer.close();
-  }
+  const { model } = scriptedModel([[{ type: 'token', text: 'Hello.' }, { type: 'done' }]]);
+  const { app } = await testApp({ model, openRouter: { baseUrl: 'http://127.0.0.1:9/api/v1', apiKey: KEY } });
+  const agent = await signIn(app);
+  const chat = (await agent.post('/api/chats').send({})).body;
+  const replies = [
+    await agent.get('/api/chats'),
+    await agent.post(`/api/chats/${chat.id}/messages`).send({ question: 'Hi' }).buffer(true).parse(asText),
+    await agent.get(`/api/chats/${chat.id}`),
+  ];
+  for (const r of replies) expect(JSON.stringify(r.headers) + (r.text ?? JSON.stringify(r.body))).not.toContain(KEY);
 });
 
 test('an unavailable model is written to the server log with its reason, never to the browser', async () => {

@@ -119,7 +119,7 @@ JPY/INR amounts, loading, empty and error states, reload, and Back.
 | AST-13 | tests | `assistant.run.test.ts` (last 20 messages) | pass | Automated tests pass (see Steps) |
 | AST-14 | browser | Ask with `[429]`; then other pages | pass | [429] → the free-limit message; question saved; other pages fine |
 | AST-15 | browser | Ask with `[500]`; then other pages | pass | [500] → "The assistant isn't available right now. Try again in a minute." (announced once in the status line) |
-| AST-16 | browser | Look under the question box | pass | "42 free model requests left today" under the box |
+| AST-16 | browser | Look under the question box | removed (P9, D72) | Passed in QA ("42 free model requests left today" under the box); afterwards Nikhil asked to hide it. The chat shows none (test: "the chat shows no free-request count") |
 | AST-17 | browser | Watch network requests while asking | pass | Every request from the page went to localhost:4733 (resource timing and the network log) |
 | AST-18 | tests | `api/test/setup.ts` guard; e2e server uses the fake | pass | Automated tests pass (see Steps) |
 | CSV-1 | browser | Export a filtered list; open the file | pass | Export endpoint (as the link calls it): BOM, the 16 documented columns, 16 rows = the list's total for the same filter (browser download not used: downloads need Nikhil's say-so) |

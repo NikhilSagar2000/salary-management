@@ -15,7 +15,6 @@ test('an answer streams with sources from the fake model', async ({ page }) => {
   await expect(answer).toContainText('Here are the engineers in Brazil.');
   await expect(answer.locator('strong')).toHaveText('Brazil');
   await expect(page.getByRole('status')).toHaveText('Answer finished.');
-  await expect(page.getByText('42 free model requests left today')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Who are the engineers in Brazil?' })).toBeVisible();
 
   const basedOn = answer.getByRole('region', { name: 'Based on' });

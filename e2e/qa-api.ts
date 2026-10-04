@@ -41,7 +41,7 @@ try {
   // AUTH-1
   const routes: [string, string][] = [
     ['GET', '/api/employees'], ['GET', '/api/employees/E000001'], ['GET', '/api/employees/next-code'], ['GET', '/api/employees.csv'],
-    ['GET', '/api/pay-overview?country=US'], ['GET', '/api/chats'], ['GET', '/api/assistant/status'], ['GET', '/api/session'],
+    ['GET', '/api/pay-overview?country=US'], ['GET', '/api/chats'], ['GET', '/api/session'],
     ['POST', '/api/employees'], ['POST', '/api/imports/preview'], ['POST', '/api/chats'], ['DELETE', '/api/session'],
   ];
   const statuses = await Promise.all(routes.map(async ([method, path]) => (await call(path, { method, body: method === 'POST' ? {} : undefined })).status));
@@ -65,7 +65,7 @@ try {
   // AUTH-6
   const token = cookie.split('=')[1]!;
   const stored = (await sql('SELECT token_hash FROM sessions LIMIT 50')).map((r) => String(r.token_hash));
-  const samples = [await call('/api/employees', { cookie }), await call('/api/employees/E000001', { cookie }), await call('/api/assistant/status', { cookie }),
+  const samples = [await call('/api/employees', { cookie }), await call('/api/employees/E000001', { cookie }),
     await call('/api/chats', { cookie }), await call('/api/session', { cookie })].map((r) => r.text).join('\n');
   const log = readFileSync(process.argv[2] ?? '/dev/null', 'utf8');
   const leaks = [E2E_MODEL_KEY, 'scrypt:', token, ...stored].filter((s) => s && (samples.includes(s) || log.includes(s)));
