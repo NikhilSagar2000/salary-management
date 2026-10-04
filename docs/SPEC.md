@@ -67,7 +67,8 @@ after today is *scheduled*.
 - **LIST-8** Each row shows code, full name, country, department, role, level, current salary
   with its currency, hire date and status.
 - **LIST-9** Above the list: for the whole filtered set (not just the page), one line per
-  currency with median, min, max and headcount.
+  currency with median, min, max and headcount, counting people as STATS-2 says (starting
+  people are listed but not counted).
 - **LIST-10** At 375 px wide, rows show as cards, filters open in a drawer, and the page never
   scrolls sideways.
 - **LIST-11** On the seeded database, list requests (search + filters + sort) take at most

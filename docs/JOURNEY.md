@@ -204,6 +204,8 @@ Phase 4 (plan), still under P4:
 | 2026-10-04 | Set-up committed | a12346c |
 | 2026-10-04 | Phase 3: pay research started (subagent); Q35–Q36; `docs/REQUIREMENTS.md`, `docs/SPEC.md` | this commit (hash in next entry) |
 | 2026-10-04 | Pay research returned and spot-checked; Phase 4 plan in `tasks/todo.md`; stop for Nikhil | same commit as above |
+| 2026-10-04 | Phase 3 + 4 committed | 3d6a8e4 |
+| 2026-10-04 | LIST-9 clarified: stats count people as STATS-2 says (caught in review before the stop) | this commit (hash in next entry) |
 
 ---
 
