@@ -122,6 +122,7 @@ JPY/INR amounts, loading, empty and error states, reload, and Back.
 | AST-16 | browser | Look under the question box | removed (P9, D72) | Passed in QA ("42 free model requests left today" under the box); afterwards Nikhil asked to hide it. The chat shows none (test: "the chat shows no free-request count") |
 | AST-17 | browser | Watch network requests while asking | pass | Every request from the page went to localhost:4733 (resource timing and the network log) |
 | AST-18 | tests | `api/test/setup.ts` guard; e2e server uses the fake | pass | Automated tests pass (see Steps) |
+| AST-19 | e2e, browser | Added after QA (P11, D74): a long chat list and a long chat at 1280 × 640 | pass | Test "the chat list and the messages scroll separately; the question box stays in view"; screenshots at 1280 px and 390 px checked by eye |
 | CSV-1 | browser | Export a filtered list; open the file | pass | Export endpoint (as the link calls it): BOM, the 16 documented columns, 16 rows = the list's total for the same filter (browser download not used: downloads need Nikhil's say-so) |
 | CSV-2 | browser | Person named `=SUM(1)`; export | pass | First name =SUM(1) and last name +Kierkegaard export as '=SUM(1) and '+Kierkegaard |
 | CSV-3 | browser | Semicolons, BOM, shuffled columns, upper-case headers, currency column | pass | Semicolons, BOM, CRLF, shuffled columns, upper-case headers, a currency column, level "L2", names Søren Kierkegaard-Ørsted: 2 rows ready |

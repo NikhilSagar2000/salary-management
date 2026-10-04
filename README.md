@@ -10,15 +10,16 @@ questions from the data and shows what each answer is based on.
 ## What it does
 
 - **Employees:** search (accent-blind), filter, sort and page 10,000 people on the server; the
-  address holds the view, so reload, back and shared links work. One stats line per currency
-  (median, min, max, headcount). Cards and a filter drawer on a phone.
+  address holds the view, so reload, back and shared links work. Cards and a filter drawer on
+  a phone.
 - **An employee's page:** current job and pay, where they sit against peers, manager and
   reports, and a dated history: raises, promotions, moves, manager changes, scheduled changes
   (which can be cancelled), leaving and undoing it. History is never edited or deleted.
 - **Changes:** add people; edit details; change job, pay, country or manager from a date (past,
   today or future); mark leavers and undo. Every save checks it isn't overwriting someone
   else's newer change.
-- **Pay overview:** one country at a time, department by level, each cell linking to the list.
+- **Pay overview:** one country at a time, department by level, each cell giving the median, min,
+  max and headcount and linking to the list.
 - **Excel:** export any filtered list as CSV (UTF-8, safe from formula injection); import new
   people from CSV with a full preview, all or nothing.
 - **Pay assistant:** saved chats; answers stream in with the lookups they made; every answer
@@ -88,8 +89,8 @@ Record at desktop width first, then switch the browser to a phone size for one m
 1. **Sign in** (0:00). Open a deep link such as `/pay?country=DE` while signed out; sign in and
    land back on it.
 2. **Find people** (0:30). Employees: type "muller" (finds Müller); pick two countries and a
-   department; sort by Hired; open page 2. Reload and use Back to show the view is kept. Point at
-   the per-currency stats line. Pick one country to enable the salary range.
+   department; sort by Hired; open page 2. Reload and use Back to show the view is kept. Pick
+   one country to enable the salary range.
 3. **One person** (1:30). Open someone: current pay, "x% above the median of n peers", manager,
    history with from and to values.
 4. **Change pay** (2:00). Change job or pay with a date next month: a raise and a promotion.

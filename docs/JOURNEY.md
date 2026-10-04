@@ -711,6 +711,7 @@ is done (hashes copied from `git log`).
 - Red: lookup steps show while the answer is worked out, then go away (D73).
 - D73 · green: an answer lists its lookup steps only while it streams; finished, stopped and failed answers show none, as reopened ones never did. The narration test now checks its step mid-answer; the end-to-end answer test checks the steps are gone. SPEC AST-3, QA row and plan updated.
 - Red (end to end): the chat list and the messages scroll separately; the question box stays in view (AST-19, D74).
+- D74 · green: the assistant page fills the window below the top bar (480 px at least); the chat list and the messages each scroll, and the question box sits below the messages instead of sticking to the page. The first run still scrolled the page by 25 px: the hidden "Answer finished." status is absolutely positioned and escaped the scrolling box, so the box is now its positioning parent. Screenshots at 1280 px and 390 px checked by eye. SPEC AST-19 added; QA row and plan map updated; README no longer mentions the list's stats line (stale since D71). 190 unit and API tests and 26 end-to-end tests pass.
 
 ---
 

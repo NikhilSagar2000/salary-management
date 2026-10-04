@@ -60,7 +60,7 @@ test("Stop doesn't send what is waiting in the question box (AST-12)", async ({ 
   expect(sent).toHaveLength(1);
 });
 
-test.fail('the chat list and the messages scroll separately; the question box stays in view (AST-19)', async ({ page }) => {
+test('the chat list and the messages scroll separately; the question box stays in view (AST-19)', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 640 });
   for (let i = 0; i < 20; i++) await page.request.post('/api/chats');
   const chat = await (await page.request.post('/api/chats')).json();

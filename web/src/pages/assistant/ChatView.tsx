@@ -1,5 +1,5 @@
 import { chatTitleSchema, MSG, questionSchema } from '@acme/shared';
-import { Alert, Anchor, Button, Group, Modal, Paper, Skeleton, Stack, Text, Textarea, TextInput, Title, VisuallyHidden } from '@mantine/core';
+import { Alert, Anchor, Box, Button, Group, Modal, Paper, Skeleton, Stack, Text, Textarea, TextInput, Title, VisuallyHidden } from '@mantine/core';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link } from 'react-router';
 import { api, ApiError, apiStream } from '../../api.ts';
@@ -23,6 +23,7 @@ export function ChatView({ id, listTitle, onChanged, onDeleted }: { id: number; 
   const tempId = useRef(0);
   const streaming = chat?.messages.some((m) => m.status === 'streaming') ?? false;
   const end = useRef<HTMLDivElement>(null);
+  const scroller = useRef<HTMLDivElement>(null);
   const count = chat?.messages.length ?? 0;
   const last = chat?.messages.at(-1);
   // A new question (or opening the chat) scrolls to the newest message.
@@ -32,7 +33,8 @@ export function ChatView({ id, listTitle, onChanged, onDeleted }: { id: number; 
   }, [count]);
   // A growing answer stays in view, unless HR has scrolled up to read something else.
   useEffect(() => {
-    if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 400) end.current?.scrollIntoView({ block: 'end' });
+    const el = scroller.current;
+    if (el && el.scrollTop + el.clientHeight >= el.scrollHeight - 400) end.current?.scrollIntoView({ block: 'end' });
   }, [last?.content.length, last?.status, last?.steps?.length]);
 
   useEffect(() => {
@@ -94,7 +96,7 @@ export function ChatView({ id, listTitle, onChanged, onDeleted }: { id: number; 
   if (!chat) return <Skeleton h={240} aria-label="Loading chat" />;
   const title = listTitle ?? chat.title;
   return (
-    <Stack gap="md">
+    <Stack gap="md" style={{ flex: 1, minHeight: 0 }}>
       <Anchor component={Link} to="/assistant" size="sm" hiddenFrom="md">All chats</Anchor>
       <Group justify="space-between" wrap="nowrap" align="flex-start">
         <Title order={2} size="h3" style={{ overflowWrap: 'anywhere' }}>{title}</Title>
@@ -104,20 +106,25 @@ export function ChatView({ id, listTitle, onChanged, onDeleted }: { id: number; 
         </Group>
       </Group>
 
-      {chat.messages.length === 0 && (
-        <Text size="sm" c="dimmed">
-          Ask about pay, people or changes, for example "What is the median salary for L4 engineers in Germany?" or "Who
-          changed department this year?". Answers come from ACME's data through read-only lookups and say what they're based on.
-        </Text>
-      )}
-      <Stack gap="md">
-        {chat.messages.map((m) => (m.role === 'user' ? <Question key={m.id} text={m.content} /> : <Answer key={m.id} message={m} />))}
-      </Stack>
-      {/* Kept clear of the sticky question box below. */}
-      <div ref={end} style={{ scrollMarginBottom: 220 }} />
-      <VisuallyHidden role="status">{announce}</VisuallyHidden>
+      {/*
+        AST-19: the messages scroll on their own; focusable so the keyboard can scroll them too. Relative, so the hidden
+        status below stays inside this box instead of stretching the page.
+      */}
+      <Box ref={scroller} role="region" aria-label="Messages" tabIndex={0} pos="relative" style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
+        {chat.messages.length === 0 && (
+          <Text size="sm" c="dimmed">
+            Ask about pay, people or changes, for example "What is the median salary for L4 engineers in Germany?" or "Who
+            changed department this year?". Answers come from ACME's data through read-only lookups and say what they're based on.
+          </Text>
+        )}
+        <Stack gap="md">
+          {chat.messages.map((m) => (m.role === 'user' ? <Question key={m.id} text={m.content} /> : <Answer key={m.id} message={m} />))}
+        </Stack>
+        <div ref={end} />
+        <VisuallyHidden role="status">{announce}</VisuallyHidden>
+      </Box>
 
-      <Paper component="form" onSubmit={send} withBorder p="sm" pos="sticky" bottom={0} style={{ zIndex: 1 }}>
+      <Paper component="form" onSubmit={send} withBorder p="sm">
         <Stack gap="xs">
           <Textarea label="Your question" rows={3} maxLength={2000} value={question} error={questionError}
             description="Enter sends; Shift+Enter starts a new line."

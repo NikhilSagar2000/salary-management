@@ -316,7 +316,8 @@ is written just before the task starts, from the interfaces that exist at that p
   drawer" (LIST-10) · "no screen scrolls sideways at 375 or 1440 px" (UI-3) ·
   `assistant.spec.ts` › "an answer streams with sources from the fake model" (AST-3) · "rate
   limit message appears and other pages keep working" (AST-14) · "the browser never calls
-  openrouter.ai" (AST-17) · `import.spec.ts` › "export, then import new rows with a preview"
+  openrouter.ai" (AST-17) · "the chat list and the messages scroll separately; the question
+  box stays in view" (AST-19, D74) · `import.spec.ts` › "export, then import new rows with a preview"
   (CSV-1, CSV-4, CSV-7) · `secrets.spec.ts` › "the built web bundle holds no secret" (AUTH-6).
 - [x] **Task 28: Accessibility.** Tests: `a11y.spec.ts` › "no serious or critical axe problems
   on every screen, light and dark, desktop and phone" (A11Y-1) · `keyboard.spec.ts` › one test
@@ -361,7 +362,7 @@ Every `docs/SPEC.md` id and where it is tested (task number; test names above).
 | EMP-3 | 2, 22, 23 | AST-4 | 16 | CSV-8 | 15 |
 | EMP-4 | 5 | AST-5 | 16 | SEED-1–10 | 13 |
 | EMP-5 | 4, 6, 22 | AST-6 | 17 | A11Y-1, A11Y-2 | 28 |
-| EMP-6 | 6 | | | A11Y-3 | 22, 28 |
+| EMP-6 | 6 | AST-19 | added (D74) | A11Y-3 | 22, 28 |
 | EMP-7 | 7 | | | A11Y-4 | 26 |
 | EMP-8 | 7 | | | UI-1 | 20 |
 | | | | | UI-2 | 2 |

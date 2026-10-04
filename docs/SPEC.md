@@ -199,6 +199,11 @@ Limits and failures
   point the server at a local fake OpenRouter; the test set-up fails if the base URL is
   OpenRouter's.
 
+Layout
+- **AST-19** The assistant page fills the window below the top bar: the chat list and the open
+  chat's messages scroll separately, and the question box stays in view below the messages
+  (P11, D74). Windows shorter than 480 px scroll the whole page instead.
+
 ## CSV: Excel round trip
 
 Export
