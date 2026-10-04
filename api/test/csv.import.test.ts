@@ -77,3 +77,21 @@ test('quoted commas and line breaks, CRLF and trailing blank lines parse correct
     { line: 5, column: 'salary', message: 'Write the salary without separators, like 95000.' },
   ]);
 });
+
+test.fails('preview lists rows and every problem by line and column, saving nothing', async () => {
+  const { preview, db } = await setup();
+  const res = await preview([
+    HEADER,
+    row(1),
+    'E000002,Bea,Costa,female,not-an-email,BR,Engineering,Software Engineer,9,133000,2024-02-29',
+    'E000003,Caio,Lima,male,caio@acme.example,BR,Engineering,Software Engineer,3,133000,29/02/2024',
+  ].join('\n'));
+  expect(res.status).toBe(200);
+  expect(res.body.rows.map((r: { line: number; code: string }) => [r.line, r.code])).toEqual([[2, 'E000001']]);
+  expect(res.body.problems).toEqual([
+    { line: 3, column: 'work_email', message: 'Enter a work email, like name@acme.example.' },
+    { line: 3, column: 'level', message: 'Choose a level from L1 to L7.' },
+    { line: 4, column: 'hire_date', message: 'Enter the hire date as YYYY-MM-DD.' },
+  ]);
+  expect((await db.query('SELECT count(*)::int AS n FROM employees')).rows[0].n).toBe(0);
+});

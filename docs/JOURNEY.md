@@ -384,6 +384,7 @@ is done (hashes copied from `git log`).
 - Task 15 · green: files over 5 MB get 413 with a plain message; more than 10,000 rows is a whole-file problem (CSV-3).
 - Task 15 · red: Excel CSV quirks — quoted commas and line breaks, CRLF, trailing blank lines, with problems on the right line (review focus 3). Watched `csv-parse` report lines 4 and 6 instead of 3 and 5: it counts a quoted CRLF as two lines.
 - Task 15 · green: own RFC 4180 parser (D64) replaces `csv-parse`; quoted commas and line breaks, CRLF and trailing blank lines parse, and problems report the line a record starts on. While splitting the red/green commits, overlapping test runs against the shared test DB caused hangs and a misleading "2 failed"; the red commit was re-verified on its own (82 passed + 1 expected fail). Lesson 5 added.
+- Task 15 · red: preview lists valid rows and every problem by line and column, saving nothing (CSV-4). It caught a duplicate message for an out-of-range level ("Software Engineer goes from L1 to L7." after "Choose a level from L1 to L7.").
 
 ---
 
