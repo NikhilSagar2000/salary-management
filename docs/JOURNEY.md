@@ -232,6 +232,7 @@ is done (hashes copied from `git log`).
   harness, API on Node 24's built-in TypeScript type stripping. Docker already held a
   `salary-management_pgdata` volume from 1 Oct with an unknown owner; left untouched, and the
   Compose project is named `acme-salary` so this app gets its own volume.
+- Task 1 · red: health check test (`infra.test.ts` › "health answers ok").
 
 ---
 
