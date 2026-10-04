@@ -672,6 +672,7 @@ is done (hashes copied from `git log`).
 - P7 logged; D71: the pay summary above the employee list goes (Nikhil). Red: the list shows no pay summary.
 - D71 · green: the employee list shows no pay summary and its API no longer computes one (one query fewer per list request); the statistics tests (median rounding, who is counted, relocation) now run through the pay overview; SPEC LIST-9 marked removed and STATS-2 reworded, REQUIREMENTS, plan map and QA row updated. 186 unit and API tests and 25 end-to-end tests pass.
 - P8 investigated: the dev database showed each question failing in the same second; the app's exact request to OpenRouter (4 models) answered 400 "'models' array must have 3 items or fewer." (the smoke test only ever sent 1 or 2). Red: send at most three models; keep OpenRouter's message for the server log.
+- Red: an unavailable model is written to the server log with its reason (the browser keeps the plain message); P8's cause was invisible because only unexpected errors were logged.
 
 ---
 

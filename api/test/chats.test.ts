@@ -1,5 +1,5 @@
 import { createServer } from 'node:http';
-import { expect, test } from 'vitest';
+import { expect, test, vi } from 'vitest';
 import { ModelError, type ModelFn } from '../src/assistant/model.ts';
 import { asText, insertPeople, PASSWORD, scriptedModel, sseEvents, signIn, testApp } from './helpers.ts';
 
@@ -199,4 +199,16 @@ test('the key is never sent to the browser, and free requests left are reported'
   } finally {
     keyServer.close();
   }
+});
+
+test.fails('an unavailable model is written to the server log with its reason, never to the browser', async () => {
+  const logged = vi.spyOn(console, 'error').mockImplementation(() => {});
+  const reason = "OpenRouter answered 400: 'models' array must have 3 items or fewer.";
+  const { app } = await testApp({ model: async function* () { throw new ModelError('unavailable', reason); } });
+  const agent = await signIn(app);
+  const chat = (await agent.post('/api/chats').send({})).body;
+  const res = await agent.post(`/api/chats/${chat.id}/messages`).send({ question: 'Median pay?' }).buffer(true).parse(asText);
+  expect(sseEvents(res.body)).toEqual([{ event: 'error', data: { kind: 'unavailable', message: "The assistant isn't available right now. Try again in a minute." } }]);
+  expect(logged.mock.calls.flat().join(' ')).toContain(reason);
+  logged.mockRestore();
 });
