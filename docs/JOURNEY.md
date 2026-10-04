@@ -244,6 +244,8 @@ is done (hashes copied from `git log`).
 - Task 1 · green: every test file runs `assertFakeModel(process.env)` first; the suite refuses to start when `OPENROUTER_BASE_URL` points at openrouter.ai (checked: exit 1 with that message).
 - Task 1 · refactor: test pools are built with `createPool`, so the DATE parser always applies.
 - Task 1 · chore: `api/src/main.ts` starts the API on 4732 (checked: `GET /api/health` → `{"ok":true}`).
+- Task 1 done: commits ff7947b..666d9d9.
+- Task 2 · red: shared reference data (countries, currencies, 19 roles with level ranges, genders) and the required-fields test (`schemas.test.ts`); D57 corrects the role count.
 
 ---
 
@@ -310,6 +312,7 @@ accepted when Nikhil approved the plan (P4).
 | D54 | Whose "today" | Six countries, one HR user | Setting (UTC default) · always UTC · browser timezone | Browser sends its IANA timezone in `X-Timezone`; "today" is the date there; UTC if missing or unknown. Clock becomes `now()` + `todayIn(clock, tz)` | Matches where HR actually is when using the app | N (Q37) |
 | D55 | Build execution | Phase 5 | Native · subagent-driven | Native: Claude builds every task in this session; one fresh review of the whole branch at the end | Fewer subagent prompts to log verbatim; the plan carries the design | N (Q38) |
 | D56 | Step-plan detail | writing-plans wants code for every step up front | Just before each task · all now | Code-level steps written just before each task, in `tasks/todo.md` under that task | Steps match the code that exists by then | N (Q39) |
+| D57 | Correction to D49 | D49 says "22 roles" | – | The SPEC table has **19** roles across 9 departments; the table was always right, the count in D49 (and in my stop message to Nikhil) was wrong | Found while typing the table into `shared/src/reference.ts` | C |
 
 ---
 
@@ -395,6 +398,9 @@ Where the AI was wrong or could have been, and how it was caught:
   from the docs' markdown source (section 9, S1). My recall of 50/day was right.
 - The requirements' commit rules contradicted each other; I nearly wrote my own
   interpretation into `CLAUDE.md` without asking. Caught before committing; asked Q34.
+
+- I wrote "22 roles" in D49 and in the stop message; the table has 19. Caught while
+  typing the table into code in Task 2; corrected in D57.
 
 Subagent prompts (verbatim):
 
