@@ -480,6 +480,7 @@ is done (hashes copied from `git log`).
 - Task 21 · green: employee list page — search, multi-select filters, salary range only for one country (with the reason shown otherwise), sortable headers, paging and page size, export and add buttons; the URL query is the API query (LIST-5).
 - Task 21 · test: list state round-trips through the URL — search (debounced), filters, sort direction and page are read from it, written to it and sent to the API unchanged (LIST-6). Passed first run; a mutation that never sorts descending failed it. Web tests now allow 15 s each.
 - Task 21 · red: rows show the listed columns in the table and, for phones, as cards (LIST-8, LIST-10).
+- Task 21 · green: on a phone the list shows one card per employee (name link, role and level, department and country, salary, status) instead of the table (LIST-8, LIST-10).
 
 ---
 

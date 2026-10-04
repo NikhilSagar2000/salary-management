@@ -48,7 +48,7 @@ test('search, filters, sort and page are read from and written to the URL', asyn
   await waitFor(() => expect(apiQuery()).toBe('?q=kim&country=BR&sort=level&dir=desc&page=3'));
 });
 
-test.fails('rows show the listed columns, as a table and as phone cards', async () => {
+test('rows show the listed columns, as a table and as phone cards', async () => {
   signedInWith();
   renderApp('/employees');
   const table = await screen.findByRole('table');

@@ -3,7 +3,7 @@ import {
   type Currency,
 } from '@acme/shared';
 import {
-  Alert, Anchor, Badge, Button, Group, MultiSelect, NumberInput, Pagination, Select, SimpleGrid, Skeleton, Stack, Table, Text,
+  Alert, Anchor, Badge, Button, Group, MultiSelect, NumberInput, Pagination, Paper, Select, SimpleGrid, Skeleton, Stack, Table, Text,
   TextInput, Title, UnstyledButton,
 } from '@mantine/core';
 import { useDebouncedCallback } from '@mantine/hooks';
@@ -110,6 +110,7 @@ export function EmployeeList() {
       {!data && !error && <Skeleton h={320} aria-label="Loading employees" />}
       {data && (
         <>
+          <EmployeeCards rows={data.rows} />
           <EmployeeTable
             rows={data.rows}
             sort={sort}
@@ -144,7 +145,7 @@ function exportQuery(params: URLSearchParams) {
 function EmployeeTable(props: { rows: Row[]; sort: string; dir: string; canSortSalary: boolean; onSort: (key: string) => void }) {
   const { rows, sort, dir } = props;
   return (
-    <Table.ScrollContainer minWidth={760}>
+    <Table.ScrollContainer minWidth={760} visibleFrom="sm">
       <Table striped highlightOnHover verticalSpacing="xs">
         <Table.Thead>
           <Table.Tr>
@@ -185,3 +186,26 @@ function EmployeeTable(props: { rows: Row[]; sort: string; dir: string; canSortS
   );
 }
 
+
+/** LIST-10: on a phone each employee is a card instead of a table row. */
+function EmployeeCards({ rows }: { rows: Row[] }) {
+  return (
+    <Stack component="ul" aria-label="Employees" gap="xs" hiddenFrom="sm" p={0} m={0} style={{ listStyle: 'none' }}>
+      {rows.map((r) => (
+        <Paper component="li" key={r.code} withBorder p="sm">
+          <Group justify="space-between" wrap="nowrap" align="flex-start">
+            <Stack gap={2}>
+              <Anchor component={Link} to={`/employees/${r.code}`} fw={600}>{r.firstName} {r.lastName}</Anchor>
+              <Text size="sm">{r.role} · L{r.level}</Text>
+              <Text size="sm" c="dimmed">{r.department}, {COUNTRY_NAMES[r.country as keyof typeof COUNTRY_NAMES]}</Text>
+            </Stack>
+            <Stack gap={4} align="flex-end">
+              <Text size="sm" fw={600} style={{ whiteSpace: 'nowrap' }}>{formatMoney(r.salary, r.currency)}</Text>
+              <Badge variant="light" color={STATUS_COLOR[r.status]}>{label(r.status)}</Badge>
+            </Stack>
+          </Group>
+        </Paper>
+      ))}
+    </Stack>
+  );
+}
