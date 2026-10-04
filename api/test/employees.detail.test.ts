@@ -132,7 +132,7 @@ test('a leave event says whether it is still ahead and whether it was undone (LE
   expect((await leaves()).find((e: { date: string }) => e.date === '2026-09-30')).toEqual({ type: 'left', date: '2026-09-30', reason: null, scheduled: false, undone: false });
 });
 
-test.fails("someone who has left isn't compared with today's peers (EMP-14)", async () => {
+test("someone who has left isn't compared with today's peers (EMP-14)", async () => {
   const { agent, hire } = await setup();
   await hire({ salary: 100000 });
   await hire({ salary: 120000 });

@@ -220,7 +220,7 @@ test('leave events read Left, Leaves or Leave cancelled', async () => {
   expect(within(items[1]!).getByText('Moving abroad')).toHaveStyle({ textDecoration: 'line-through' });
 });
 
-test.fails("someone who has left shows their last job, without a comparison to today's peers", async () => {
+test("someone who has left shows their last job, without a comparison to today's peers", async () => {
   open(detailResponse({ status: 'left', leaveDate: '2025-03-22', peers: null }));
   expect(await screen.findByRole('region', { name: 'Last job' })).toHaveTextContent('Software Engineer, L4');
   expect(screen.queryByRole('region', { name: 'Current job' })).not.toBeInTheDocument();

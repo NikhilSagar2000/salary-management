@@ -82,7 +82,7 @@ export function EmployeeDetail() {
       </SimpleGrid>
 
       <SimpleGrid cols={{ base: 1, md: 3 }} spacing="md">
-        <Section title="Current job">
+        <Section title={d.status === 'left' ? 'Last job' : 'Current job'}>
           <Text>{d.current.role}, L{d.current.level}</Text>
           <Text size="sm" c="dimmed">{d.current.department}, {COUNTRY_NAMES[d.current.country as Country]}</Text>
           <Text fw={600}>{formatMoney(d.current.salary, d.current.currency)}</Text>
@@ -104,7 +104,11 @@ export function EmployeeDetail() {
                 Same country, role and level. {d.peers.currency}: median {grouped(d.peers.median)}, min {grouped(d.peers.min)}, max {grouped(d.peers.max)}
               </Text>
             </>
-          ) : <Text size="sm" c="dimmed">No one else has this country, role and level today.</Text>}
+          ) : (
+            <Text size="sm" c="dimmed">
+              {d.status === 'left' ? 'Not compared: peers are counted as of today, after this person left.' : 'No one else has this country, role and level today.'}
+            </Text>
+          )}
         </Section>
         <Section title="Direct reports">
           {d.reports.length ? (

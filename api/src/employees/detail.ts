@@ -16,7 +16,8 @@ export async function employeeDetail(db: Db, code: string, today: string, timezo
   if (!e) return null;
   const asOf = e.hire_date > today ? e.hire_date : today;
   const s = (await db.query('SELECT * FROM employee_state($1) WHERE employee_id = $2', [asOf, e.id])).rows[0];
-  const peers = await peerStats(db, today, s);
+  // Peers are counted as of today, so someone who has left isn't compared with them.
+  const peers = statusOn(today, e.hire_date, e.leave_date) === 'left' ? null : await peerStats(db, today, s);
   const manager = s.manager_id
     ? (await db.query('SELECT code, first_name, last_name, leave_date FROM employees WHERE id = $1', [s.manager_id])).rows[0]
     : null;
