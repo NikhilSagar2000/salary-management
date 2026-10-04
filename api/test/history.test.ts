@@ -77,3 +77,12 @@ test('a country change needs a salary in the new currency', async () => {
   expect((await change({ effectiveDate: '2026-01-01', salary: 84000 })).status).toBe(201);
   expect(await stateOn(db, '2026-01-01')).toMatchObject({ country: 'DE', salary: 84000, currency: 'EUR' });
 });
+
+test.fails('refuses a relocation that would leave a later salary in the old currency', async () => {
+  const { db, change } = await setup();
+  expect((await change({ effectiveDate: '2027-01-01', salary: 140000 })).status).toBe(201); // scheduled, BRL
+  const move = await change({ effectiveDate: '2026-11-01', country: 'DE', salary: 80000 });
+  expect(move.status).toBe(400);
+  expect(move.body.fields).toEqual({ country: 'A salary change on 1 Jan 2027 is in BRL; cancel it before moving this person to Germany.' });
+  expect(await stateOn(db, '2027-01-02')).toMatchObject({ country: 'BR', salary: 140000, currency: 'BRL' });
+});
