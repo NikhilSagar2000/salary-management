@@ -95,6 +95,13 @@ async function* readStream(body: ReadableStream<Uint8Array>, onData: () => void)
   yield { type: 'done' };
 }
 
-export async function freeRequestsLeft(_cfg: { baseUrl: string; apiKey: string }): Promise<number | null> {
-  return -1;
+/** Free-model requests left today (OpenRouter's GET /key), or null when unknown (AST-16). */
+export async function freeRequestsLeft(cfg: { baseUrl: string; apiKey: string }): Promise<number | null> {
+  try {
+    const res = await fetch(`${cfg.baseUrl}/key`, { headers: { authorization: `Bearer ${cfg.apiKey}` }, signal: AbortSignal.timeout(5000) });
+    const remaining = (await res.json())?.data?.free_model_daily_requests?.remaining;
+    return typeof remaining === 'number' ? remaining : null;
+  } catch {
+    return null;
+  }
 }

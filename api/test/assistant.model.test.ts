@@ -116,7 +116,7 @@ test('network error, 5xx and a 60 s timeout become unavailable', async () => {
   expect((err as Error).name).toBe('AbortError');
 });
 
-test.fails("reads free requests left from OpenRouter's key info", async () => {
+test("reads free requests left from OpenRouter's key info", async () => {
   const { baseUrl, requests } = await fakeOpenRouter((_req, res) => {
     res.writeHead(200, { 'content-type': 'application/json' });
     res.end(JSON.stringify({ data: { label: 'k', is_free_tier: true, free_model_daily_requests: { used: 13, limit: 50, remaining: 37 } } }));

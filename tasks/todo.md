@@ -244,7 +244,7 @@ is written just before the task starts, from the interfaces that exist at that p
   kinds and caps at 200" · "aggregate computes exact stats split by currency" (AST-4) · "bad
   arguments and unknown tools return an error result" · "tool queries run in a read-only
   transaction" · "no tool parameter accepts SQL or free-form expressions" (AST-5).
-- [ ] **Task 17: Model client and answer loop.** Files: `api/src/assistant/{model,prompt,run,sources}.ts`.
+- [x] **Task 17: Model client and answer loop.** Files: `api/src/assistant/{model,prompt,run,sources}.ts`.
   The OpenRouter client is tested against a local fake HTTP server. Tests:
   `assistant.run.test.ts` › "streams a step per tool call, then tokens, then sources, then
   done" (AST-3) · "stops tool calls after 6 rounds and asks for an answer" (AST-6) · "system
@@ -704,14 +704,14 @@ a nudge to answer. The model sees the last 20 earlier messages. `openRouterModel
 `/chat/completions` with the `models` fallback list; 429 → `ModelError('rate_limited')`;
 network error, 5xx or 60 s without a reply → `ModelError('unavailable')`.
 
-- [ ] Step 1: "streams a step per tool call, then tokens, then sources, then done" (AST-3).
-- [ ] Step 2: "stops tool calls after 6 rounds and asks for an answer" (AST-6).
-- [ ] Step 3: "system prompt lists reference data and today's date and holds no secret" (AST-7).
-- [ ] Step 4: "sources come from the tool calls: groups with filters and headcount, people capped at 20 with a list link" (AST-8).
-- [ ] Step 5: "an answer without tool calls is marked not based on ACME data" (AST-9).
-- [ ] Step 6: "sends at most the last 20 messages" (AST-13).
-- [ ] Step 7: model › "parses streamed tool-call deltas across chunks".
-- [ ] Step 8: model › "a 429 becomes rate_limited" (AST-14).
-- [ ] Step 9: model › "network error, 5xx and a 60 s timeout become unavailable" (AST-15).
-- [ ] Step 10: model › "reads free requests left from OpenRouter's key info" (AST-16).
-- [ ] Task check: `npm test`.
+- [x] Step 1: "streams a step per tool call, then tokens, then sources, then done" (AST-3).
+- [x] Step 2: "stops tool calls after 6 rounds and asks for an answer" (AST-6).
+- [x] Step 3: "system prompt lists reference data and today's date and holds no secret" (AST-7).
+- [x] Step 4: "sources come from the tool calls: groups with filters and headcount, people capped at 20 with a list link" (AST-8).
+- [x] Step 5: "an answer without tool calls is marked not based on ACME data" (AST-9).
+- [x] Step 6: "sends at most the last 20 messages" (AST-13).
+- [x] Step 7: model › "parses streamed tool-call deltas across chunks".
+- [x] Step 8: model › "a 429 becomes rate_limited" (AST-14).
+- [x] Step 9: model › "network error, 5xx and a 60 s timeout become unavailable" (AST-15).
+- [x] Step 10: model › "reads free requests left from OpenRouter's key info" (AST-16).
+- [x] Task check: `npm test`.
