@@ -304,7 +304,7 @@ is written just before the task starts, from the interfaces that exist at that p
 
 ### End to end and CI
 
-- [ ] **Task 27: Playwright flows.** Files: `e2e/playwright.config.ts`,
+- [x] **Task 27: Playwright flows.** Files: `e2e/playwright.config.ts`,
   `e2e/fake-openrouter.ts`, specs. Server on 4733 against a freshly seeded test database,
   `OPENROUTER_BASE_URL` pointing at the fake. Tests: `auth.spec.ts` › "signed-out visit
   redirects and returns" (AUTH-5) · `list.spec.ts` › "list state survives reload, copied link
