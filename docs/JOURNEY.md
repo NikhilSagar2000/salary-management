@@ -262,6 +262,7 @@ is done (hashes copied from `git log`).
 - Task 3 · test: wrong password gets 401 "That password isn't right." and no cookie (AUTH-2). Passed on first run because sign-in already had this branch; a mutation (accept any password) made it fail, then reverted.
 - Task 3 · red: sign-in lockout test (AUTH-3).
 - Task 3 · green: 5 wrong passwords from one IP within 15 minutes lock sign-in for 15 minutes with 429 (AUTH-3); in-memory per IP (one server), trust one proxy in production.
+- Task 3 · red: sign-out test (AUTH-4).
 
 ---
 

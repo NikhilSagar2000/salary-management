@@ -58,3 +58,13 @@ test('locks sign-in for 15 minutes after 5 wrong tries from one IP', async () =>
   clock.set('2026-10-01T12:15:01Z');
   expect((await request(app).post('/api/session').send({ password: PASSWORD })).status).toBe(204);
 });
+
+test.fails('sign-out makes the old cookie stop working', async () => {
+  const { app } = await testApp();
+  const signedIn = await request(app).post('/api/session').send({ password: PASSWORD });
+  const session = signedIn.headers['set-cookie']![0]!.split(';')[0]!;
+  const out = await request(app).delete('/api/session').set('Cookie', session);
+  expect(out.status).toBe(204);
+  expect(out.headers['set-cookie']![0]).toMatch(/^acme_session=;/);
+  expect((await request(app).get('/api/session').set('Cookie', session)).status).toBe(401);
+});
