@@ -66,3 +66,28 @@ test('parses streamed tool-call deltas across chunks', async () => {
     { type: 'token', text: 'The median ' }, { type: 'token', text: 'is 110,000.' }, { type: 'done' },
   ]);
 });
+
+const failure = async (events: AsyncIterable<ModelEvent>) => {
+  try {
+    await collect(events);
+  } catch (err) {
+    return err;
+  }
+  return null;
+};
+
+test.fails('a 429 becomes rate_limited', async () => {
+  const { baseUrl } = await fakeOpenRouter((_req, res) => {
+    res.writeHead(429, { 'content-type': 'application/json', 'x-ratelimit-remaining': '0' });
+    res.end('{"error":{"code":429,"message":"Rate limit exceeded","metadata":{"error_type":"rate_limit_exceeded"}}}');
+  });
+  const err = await failure(openRouterModel({ baseUrl, apiKey: 'k', models: ['m'] })(request));
+  expect(err).toBeInstanceOf(ModelError);
+  expect((err as ModelError).kind).toBe('rate_limited');
+
+  const { baseUrl: midStream } = await fakeOpenRouter((_req, res) => {
+    res.writeHead(200, { 'content-type': 'text/event-stream' });
+    res.end('data: {"error":{"code":429,"message":"Rate limit exceeded"},"choices":[{"delta":{},"finish_reason":"error"}]}\n\n');
+  });
+  expect(((await failure(openRouterModel({ baseUrl: midStream, apiKey: 'k', models: ['m'] })(request))) as ModelError).kind).toBe('rate_limited');
+});

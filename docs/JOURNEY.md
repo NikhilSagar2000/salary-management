@@ -421,6 +421,7 @@ is done (hashes copied from `git log`).
 - Task 17 · green: each question carries at most the last 20 earlier messages (AST-13).
 - Task 17 · red: OpenRouter client parses streamed tool-call deltas split across chunks; tests use a local fake OpenRouter server.
 - Task 17 · green: `openRouterModel` streams `/chat/completions` with the `models` fallback list, yields text tokens, joins tool-call fragments per index across chunks, skips keep-alive comments.
+- Task 17 · red: a 429 (status or mid-stream error) becomes `rate_limited` (AST-14).
 
 ---
 
