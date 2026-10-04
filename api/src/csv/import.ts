@@ -1,5 +1,4 @@
 import { CURRENCY, employeeCreateSchema, MSG, type Country } from '@acme/shared';
-import { parse } from 'csv-parse/sync';
 import type pg from 'pg';
 
 const MAX_ROWS = 10_000;
@@ -18,22 +17,62 @@ const COLUMN_OF: Record<string, string> = {
   department: 'department', role: 'role', level: 'level', salary: 'salary', hireDate: 'hire_date', managerCode: 'manager_code',
 };
 
+
+/**
+ * RFC 4180 CSV: quoted fields may hold the delimiter, line breaks and doubled quotes; CRLF, LF or CR line ends;
+ * empty lines skipped. Each record keeps the file line it starts on. An unclosed quote is an error.
+ */
+export function parseCsv(text: string, delimiter: string): { records: { line: number; cells: string[] }[]; error?: string } {
+  const records: { line: number; cells: string[] }[] = [];
+  let cells: string[] = [];
+  let cell = '';
+  let line = 1;
+  let start = 1;
+  let quotedFrom = 0;
+  const endRecord = () => {
+    cells.push(cell);
+    if (cells.length > 1 || cells[0] !== '') records.push({ line: start, cells });
+    cells = [];
+    cell = '';
+  };
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i]!;
+    if (quotedFrom) {
+      if (ch === '"' && text[i + 1] === '"') cell += text[i++];
+      else if (ch === '"') quotedFrom = 0;
+      else {
+        if (ch === '\n' || (ch === '\r' && text[i + 1] !== '\n')) line++;
+        cell += ch;
+      }
+    } else if (ch === '"' && cell === '') quotedFrom = line;
+    else if (ch === delimiter) {
+      cells.push(cell);
+      cell = '';
+    } else if (ch === '\r' || ch === '\n') {
+      if (ch === '\r' && text[i + 1] === '\n') i++;
+      endRecord();
+      start = ++line;
+    } else cell += ch;
+  }
+  if (quotedFrom) return { records, error: MSG.importUnclosedQuote(quotedFrom) };
+  endRecord();
+  return { records };
+}
+
 type Record_ = { line: number; values: Record<string, string> };
 
 /** Splits the file into header-keyed records with their starting file line. */
 function readCsv(text: string): { records: Record_[]; problems: Problem[] } {
-  const body = text.replace(/^﻿/, '');
+  const body = text.replace(/^\uFEFF/, '');
   const firstLine = body.split(/\r?\n/, 1)[0] ?? '';
   const delimiter = (firstLine.match(/;/g)?.length ?? 0) > (firstLine.match(/,/g)?.length ?? 0) ? ';' : ',';
-  const parsed = parse(body, { delimiter, skip_empty_lines: true, info: true, raw: true, relax_column_count: true }) as unknown as {
-    record: string[]; info: { lines: number }; raw: string;
-  }[];
+  const { records: parsed, error } = parseCsv(body, delimiter);
+  if (error) return { records: [], problems: [{ line: 0, column: '', message: error }] };
   const [header, ...rest] = parsed;
-  const columns = header!.record.map((c) => c.trim().toLowerCase());
-  const records = rest.map(({ record, info, raw }) => {
-    const line = info.lines - (raw.replace(/\r?\n$/, '').match(/\n/g)?.length ?? 0);
+  const columns = (header?.cells ?? []).map((c) => c.trim().toLowerCase());
+  const records = rest.map(({ line, cells }) => {
     const values: Record<string, string> = {};
-    columns.forEach((c, i) => (values[c] = (record[i] ?? '').trim()));
+    columns.forEach((c, i) => (values[c] = (cells[i] ?? '').trim()));
     return { line, values };
   });
   return { records, problems: [] };

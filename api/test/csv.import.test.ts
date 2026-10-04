@@ -60,7 +60,7 @@ test('refuses files over 5 MB or 10,000 rows', async () => {
   ]);
 });
 
-test.fails('quoted commas and line breaks, CRLF and trailing blank lines parse correctly', async () => {
+test('quoted commas and line breaks, CRLF and trailing blank lines parse correctly', async () => {
   const { preview } = await setup();
   const csv = [
     HEADER,

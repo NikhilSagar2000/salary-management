@@ -11,3 +11,7 @@ Rules learned from Nikhil's corrections and preferences. Read at session start.
 4. **Push back with numbers when an answer has a hidden cost.** "Let the model compute
    everything" (Q21) ran into context size and arithmetic accuracy. Laying out the problem
    led to a better choice (Q25).
+5. **One test run at a time, and stop on failure.** Two Vitest runs shared the test database,
+   killed runs left Postgres sessions holding locks, and a `;`-chained command committed after a
+   failing run. Chain with `&&`, check `pgrep -f "vitest run"` before running, and terminate
+   orphaned `acme_test` sessions after killing a run.

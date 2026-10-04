@@ -13,7 +13,6 @@
   },
   "dependencies": {
     "@acme/shared": "*",
-    "csv-parse": "^7.0.3",
     "express": "^5.2.1",
     "pg": "^8.23.1",
     "zod": "^4.6.5"

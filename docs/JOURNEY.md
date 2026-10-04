@@ -383,6 +383,7 @@ is done (hashes copied from `git log`).
 - Task 15 · red: files over 5 MB or 10,000 rows are refused plainly (CSV-3).
 - Task 15 · green: files over 5 MB get 413 with a plain message; more than 10,000 rows is a whole-file problem (CSV-3).
 - Task 15 · red: Excel CSV quirks — quoted commas and line breaks, CRLF, trailing blank lines, with problems on the right line (review focus 3). Watched `csv-parse` report lines 4 and 6 instead of 3 and 5: it counts a quoted CRLF as two lines.
+- Task 15 · green: own RFC 4180 parser (D64) replaces `csv-parse`; quoted commas and line breaks, CRLF and trailing blank lines parse, and problems report the line a record starts on. While splitting the red/green commits, overlapping test runs against the shared test DB caused hangs and a misleading "2 failed"; the red commit was re-verified on its own (82 passed + 1 expected fail). Lesson 5 added.
 
 ---
 
@@ -456,6 +457,7 @@ accepted when Nikhil approved the plan (P4).
 | D61 | Seed same-job gender gap | Q29 "small gap, varies by country" | – | Women and non-binary staff × (1 − gap): US 1% (Payscale), DE 6% (Destatis adjusted), JP 12% (midpoint of the research's 10–15%); GB 4%, BR 6%, IN 8% are **my estimates** (no official adjusted figure) | Research says use estimates where none exist | C |
 | D62 | Seed organisation mix and history | SEED-9 "looks real" | – | Departments: Engineering 40%, Sales 15%, Customer Support 12%, Marketing 7%, Operations 7%, Product 6%, Finance 5%, Design 4%, HR 4%. Levels L1–L7: 12/22/26/20/12/6/2% within each role's range. Gender 42% female, 56% male, 2% non-binary. Hire dates 2012–2026 skewed to recent years; raise every 1 April (US/GB 3–5%, DE 2–4%, JP 1–3%, IN 7–11%, BR 5–9%); promotion every 2–4 years (+8–15%); about 12% leavers, about 1% relocations | Plausible tech-company shape; all **my estimates**, for Nikhil to adjust | C |
 | D63 | CSV parsing library | Import must handle Excel CSV quoting | Hand-written parser · `csv-parse` | `csv-parse` (RFC 4180, BOM, quoted commas and line breaks, CRLF) | Quoting edge cases are where hand-written CSV parsers break; one well-tested dependency | C |
+| D64 | CSV parsing (replaces D63) | `csv-parse` miscounts lines inside quoted CRLF fields (a quoted CRLF counts as two lines), so problems pointed one line too far | Patch line numbers around `csv-parse` · own parser | A ~35-line RFC 4180 parser in `api/src/csv/import.ts` that tracks each record's start line; `csv-parse` removed | One source of truth for both cells and line numbers; no dependency | C |
 
 ---
 
