@@ -402,6 +402,7 @@ is done (hashes copied from `git log`).
 - Task 16 · green: `query_changes` tool over a new `change_log` view (each applied change with the values before it, classified as hire/promotion/demotion/raise/pay cut/role/department/relocation/manager change, plus leave and undo events), with raise %, at most 200 rows, total and people count (AST-4).
 - Task 16 · fix: `npm run migrate` now falls back to the local Docker database like the API and seed commands (one `DEV_DATABASE_URL` in `db.ts`). Measured `change_log` on the seeded dev DB (section 7).
 - Task 16 · red: `aggregate` tool — exact median/min/max/headcount by any grouping, split by currency, as of a date; raise % over a date range (AST-4).
+- Task 16 · green: `aggregate` tool — median/min/max/headcount of salary (always per currency), headcount, or raise % between dates, grouped by up to four of country, department, role, level, gender, status, hire year, manager, as of a date; counts exclude people not yet started; one source per group (AST-4).
 
 ---
 

@@ -1,9 +1,10 @@
 // The pay assistant's tools (AST-4, AST-5): read-only, typed arguments, no SQL from the model.
-import { COUNTRIES, COUNTRY_NAMES, CURRENCY, DEPARTMENTS, formatMoney, GENDERS, MSG, ROLE_NAMES, SORTS, STATUSES } from '@acme/shared';
+import { COUNTRIES, COUNTRY_NAMES, CURRENCY, DEPARTMENTS, formatMoney, GENDERS, MSG, ROLE_NAMES, SORTS, STATUSES, type Country } from '@acme/shared';
 import type pg from 'pg';
 import { z } from 'zod';
 import { employeeDetail } from '../employees/detail.ts';
 import { listFilter, STATUS_SQL, type Filters } from '../employees/list.ts';
+import { CURRENCY_ORDER, PAY_STATS } from '../stats/peers.ts';
 
 export type Source = { kind: 'group'; label: string; query: string; headcount: number } | { kind: 'person'; code: string; name: string };
 type ToolResult = { result: unknown; sources: Source[] };
@@ -183,10 +184,90 @@ async function queryChanges(db: pg.Pool, today: string, args: z.infer<typeof que
   };
 }
 
+const GROUP_BY = ['country', 'department', 'role', 'level', 'gender', 'status', 'hire_year', 'manager'] as const;
+type GroupBy = (typeof GROUP_BY)[number];
+const GROUP_SQL: Record<GroupBy, string> = {
+  country: 's.country', department: 's.department', role: 's.role', level: 's.level', gender: 'e.gender',
+  status: `(${STATUS_SQL})`, hire_year: 'extract(year FROM e.hire_date)::int', manager: 'gm.code',
+};
+const GROUP_ORDER: Partial<Record<GroupBy, string>> = {
+  country: `array_position(ARRAY['US','IN','GB','DE','BR','JP'], s.country)`,
+  department: `array_position(ARRAY[${DEPARTMENTS.map((d) => `'${d}'`).join(',')}], s.department)`,
+};
+
+const aggregateSchema = z
+  .object({
+    metric: z.enum(['salary', 'headcount', 'raise_pct']).describe(
+      'salary: median, min, max and headcount of annual base salary (always per currency); headcount: number of people; ' +
+        'raise_pct: median, min, max and count of raise or pay-cut percentages between `from` and `to`',
+    ),
+    groupBy: z.array(z.enum(GROUP_BY)).max(4).default([]),
+    filters: filtersSchema.default({}).describe("Which people; default: everyone employed on the date (not starting, not left)"),
+    asOf: date.optional().describe('Date for salary and headcount (default today)'),
+    from: date.optional().describe('raise_pct: changes on or after'),
+    to: date.optional().describe('raise_pct: changes on or before'),
+  })
+  .strict();
+
+const MAX_GROUPS = 500;
+const PCT = (expr: string) => `round(${expr}::numeric, 1)::float`;
+
+async function aggregate(db: pg.Pool, today: string, args: z.infer<typeof aggregateSchema>): Promise<ToolResult> {
+  const f = args.filters;
+  if (salaryNeedsOneCountry(f)) return { result: { error: 'Salary filters need exactly one country.' }, sources: [] };
+  const asOf = args.metric === 'raise_pct' ? today : (args.asOf ?? today);
+  const { params, fromWhere } = listFilter(toFilters(f), asOf);
+  const keys = args.groupBy;
+  const select = keys.map((k) => `${GROUP_SQL[k]} AS ${k}`);
+  const groupCols = keys.map((k) => GROUP_SQL[k]);
+  const order = keys.map((k) => GROUP_ORDER[k] ?? GROUP_SQL[k]);
+  const join = keys.includes('manager') ? 'LEFT JOIN employees gm ON gm.id = s.manager_id' : '';
+  const notStarting = f.status?.includes('starting') ? [] : [`(${STATUS_SQL}) <> 'starting'`];
+  let sql: string;
+  if (args.metric === 'raise_pct') {
+    const where = [`l.kinds && ARRAY['raise','pay_cut']`];
+    if (args.from) where.push(`l.date >= $${params.push(args.from)}`);
+    if (args.to) where.push(`l.date <= $${params.push(args.to)}`);
+    const pct = '(l.salary - l.prev_salary) * 100.0 / l.prev_salary';
+    sql = `SELECT ${[...select, `${PCT(`percentile_cont(0.5) WITHIN GROUP (ORDER BY ${pct})`)} AS median`,
+      `${PCT(`min(${pct})`)} AS min`, `${PCT(`max(${pct})`)} AS max`, 'count(*)::int AS count'].join(', ')}
+      ${fromWhere(where, `${join} JOIN change_log l ON l.employee_id = e.id`)}`;
+  } else {
+    const stats = args.metric === 'salary' ? [`s.currency`, PAY_STATS] : ['count(*)::int AS headcount'];
+    if (args.metric === 'salary') {
+      groupCols.unshift('s.currency');
+      order.unshift(CURRENCY_ORDER);
+    }
+    sql = `SELECT ${[...select, ...stats].join(', ')} ${fromWhere(notStarting, join)}`;
+  }
+  if (groupCols.length) sql += ` GROUP BY ${groupCols.join(', ')} ORDER BY ${order.join(', ')}`;
+  const { rows } = await db.query(`${sql} LIMIT ${MAX_GROUPS}`, params);
+  const groupFilters = (g: Record<string, unknown>): ToolFilters => {
+    const merged: ToolFilters = { ...f };
+    if (g.country) merged.country = [g.country as Country];
+    if (g.department) merged.department = [g.department as (typeof DEPARTMENTS)[number]];
+    if (g.role) merged.role = [g.role as (typeof ROLE_NAMES)[number]];
+    if (g.level) merged.level = [g.level as number];
+    if (g.gender) merged.gender = [g.gender as (typeof GENDERS)[number]];
+    if (g.status) merged.status = [g.status as (typeof STATUSES)[number]];
+    if (g.manager) merged.managerCode = g.manager as string;
+    return merged;
+  };
+  return {
+    result: { groups: rows },
+    sources: rows.slice(0, PEOPLE_IN_SOURCES).map((g) => {
+      const merged = groupFilters(g);
+      const label = [describeFilters(merged), g.hire_year && `hired in ${g.hire_year}`].filter(Boolean).join(' · ');
+      return { kind: 'group' as const, label, query: listQueryOf(merged), headcount: (g.headcount ?? g.count) as number };
+    }),
+  };
+}
+
 const TOOLS_BY_NAME = {
   query_employees: { schema: queryEmployeesSchema, run: queryEmployees },
   get_employee: { schema: getEmployeeSchema, run: getEmployee },
   query_changes: { schema: queryChangesSchema, run: queryChanges },
+  aggregate: { schema: aggregateSchema, run: aggregate },
 } as const;
 
 /** Runs one tool call from the model. Never throws for bad input: the error goes back to the model. */

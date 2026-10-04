@@ -91,7 +91,7 @@ test('query_changes classifies kinds and caps at 200', async () => {
   expect(raises.sources[0]).toEqual({ kind: 'group', label: 'Everyone · raise · 2025-04-01 to 2025-04-01', query: '', headcount: 231 });
 });
 
-test.fails('aggregate computes exact stats split by currency', async () => {
+test('aggregate computes exact stats split by currency', async () => {
   const { tool, db } = await setup([
     { code: 'E000001', country: 'US', level: 3, salary: 100000, gender: 'female' },
     { code: 'E000002', country: 'US', level: 3, salary: 120000, gender: 'male' },
