@@ -255,7 +255,7 @@ is written just before the task starts, from the interfaces that exist at that p
   rate_limited" (AST-14) · "network error, 5xx and a 60 s timeout become unavailable"
   (AST-15) · "reads free requests left from OpenRouter's key info" (AST-16) · "parses streamed
   tool-call deltas across chunks".
-- [ ] **Task 18: Chats API and streaming route.** Files: `api/src/assistant/routes.ts`.
+- [x] **Task 18: Chats API and streaming route.** Files: `api/src/assistant/routes.ts`.
   Tests: `chats.test.ts` › "creates, lists newest first, renames (1–80 characters) and
   deletes chats" · "titles a new chat with its first question cut to 60 characters" (AST-1) ·
   "a reopened chat returns messages with their saved sources" (AST-2) · "rejects questions
@@ -727,12 +727,12 @@ Routes: `GET/POST /api/chats`, `GET/PATCH/DELETE /api/chats/:id`,
 is saved when it ends as `complete`, `stopped` (connection closed; partial text kept) or
 `error` (`rate_limited` / `unavailable`, with the plain message). One answer per chat at a time.
 
-- [ ] Step 1: "creates, lists newest first, renames (1–80 characters) and deletes chats" (AST-1).
-- [ ] Step 2: "titles a new chat with its first question cut to 60 characters" (AST-1).
-- [ ] Step 3: "a reopened chat returns messages with their saved sources" (AST-2, AST-3 over HTTP).
-- [ ] Step 4: "rejects questions over 2,000 characters" (AST-12).
-- [ ] Step 5: "refuses a second answer while one streams" (AST-12).
-- [ ] Step 6: "stopping saves the partial answer as Stopped" (AST-12).
-- [ ] Step 7: "rate limit keeps the question and saves the free-limit message" (AST-14, AST-15).
-- [ ] Step 8: "the key is never sent to the browser" (AST-17) and `/api/assistant/status` (AST-16).
-- [ ] Task check: `npm test`.
+- [x] Step 1: "creates, lists newest first, renames (1–80 characters) and deletes chats" (AST-1).
+- [x] Step 2: "titles a new chat with its first question cut to 60 characters" (AST-1).
+- [x] Step 3: "a reopened chat returns messages with their saved sources" (AST-2, AST-3 over HTTP).
+- [x] Step 4: "rejects questions over 2,000 characters" (AST-12).
+- [x] Step 5: "refuses a second answer while one streams" (AST-12).
+- [x] Step 6: "stopping saves the partial answer as Stopped" (AST-12).
+- [x] Step 7: "rate limit keeps the question and saves the free-limit message" (AST-14, AST-15).
+- [x] Step 8: "the key is never sent to the browser" (AST-17) and `/api/assistant/status` (AST-16).
+- [x] Task check: `npm test`.

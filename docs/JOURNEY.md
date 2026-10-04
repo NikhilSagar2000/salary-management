@@ -441,6 +441,7 @@ is done (hashes copied from `git log`).
 - Task 18 · red: a rate limit or an unavailable model sends a plain error event, keeps the question and saves the message (AST-14, AST-15).
 - Task 18 · green: a rate limit becomes an `error` event "The free AI model limit has been reached…", any other model failure "The assistant isn't available right now…"; the question stays saved, the message is saved as the reply, and the rest of the app keeps working (AST-14, AST-15).
 - Task 18 · red: `GET /api/assistant/status` reports free requests left; the OpenRouter key never reaches the browser (AST-16, AST-17).
+- Task 18 · green: `GET /api/assistant/status` returns `{ freeRequestsLeft }`, asked server-side with the server's key; no response carries the key (AST-16, AST-17).
 
 ---
 

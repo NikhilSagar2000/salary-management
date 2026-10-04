@@ -173,7 +173,7 @@ test('rate limit keeps the question and saves the free-limit message', async () 
   }
 });
 
-test.fails('the key is never sent to the browser, and free requests left are reported', async () => {
+test('the key is never sent to the browser, and free requests left are reported', async () => {
   const KEY = 'sk-or-v1-NEVER-IN-A-RESPONSE';
   const keyServer = createServer((req, res) => {
     const authorised = req.headers.authorization === `Bearer ${KEY}`;
