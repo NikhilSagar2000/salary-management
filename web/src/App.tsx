@@ -9,13 +9,13 @@ import { PayOverview } from './pages/PayOverview.tsx';
 import { Layout } from './shell/Layout.tsx';
 import { RequireSession } from './shell/RequireSession.tsx';
 import { SignIn } from './shell/SignIn.tsx';
-import { theme } from './theme.ts';
+import { cssVariablesResolver, theme } from './theme.ts';
 
 /** Providers and routes; main.tsx adds the browser router, tests add an in-memory one. */
 /** `env="test"` turns off Mantine transitions and portals for tests. */
 export function App({ env }: { env?: 'default' | 'test' }) {
   return (
-    <MantineProvider theme={theme} defaultColorScheme="auto" env={env}>
+    <MantineProvider theme={theme} cssVariablesResolver={cssVariablesResolver} defaultColorScheme="auto" env={env}>
       <Routes>
         <Route path="/signin" element={<SignIn />} />
         <Route element={<RequireSession><Layout /></RequireSession>}>

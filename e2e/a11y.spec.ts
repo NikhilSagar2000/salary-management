@@ -22,7 +22,6 @@ for (const colorScheme of ['light', 'dark'] as const) {
       test.use({ colorScheme, viewport });
 
       test(`no serious or critical axe problems on every screen (${colorScheme}, ${size})`, async ({ page, browser }) => {
-        test.fail(); // expected to fail until the contrast and button-name problems are fixed
         const screens = ['/employees', '/employees/E000001', '/employees/new', '/pay', '/import', '/assistant', await chatWithAnswer(page)];
         for (const path of screens) {
           await page.goto(path);
