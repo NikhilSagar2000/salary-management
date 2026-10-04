@@ -377,6 +377,7 @@ is done (hashes copied from `git log`).
 - Task 14 · green: cells starting with = + - @, tab or CR get a leading apostrophe so Excel shows them as text (CSV-2).
 - Task 14 · test: names with accents, apostrophes and commas export intact (commas quoted) (review focus 2). Passed first run; removing the quoting made it fail.
 - Task 15 · red: import preview accepts comma or semicolon files, BOM, any column order and header case (CSV-3); D63 adds `csv-parse`.
+- Task 15 · green: `POST /api/imports/preview` reads comma- or semicolon-separated CSV (BOM allowed, any column order, any header case, `L3` or `3` for level) and returns the rows as they would be saved, checked with the shared employee rules (CSV-3).
 
 ---
 

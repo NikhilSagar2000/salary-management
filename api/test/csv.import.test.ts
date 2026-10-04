@@ -13,7 +13,7 @@ const HEADER = 'code,first_name,last_name,gender,work_email,country,department,r
 const row = (n: number, extra = '') =>
   `E${String(n).padStart(6, '0')},Ana${n},Silva,female,ana${n}@acme.example,BR,Engineering,Software Engineer,3,133000,2024-02-29${extra}`;
 
-test.fails('accepts comma or semicolon, BOM, any column order and header case', async () => {
+test('accepts comma or semicolon, BOM, any column order and header case', async () => {
   const { preview } = await setup();
   const comma = await preview([HEADER, row(1), row(2)].join('\n'));
   expect(comma.status).toBe(200);
