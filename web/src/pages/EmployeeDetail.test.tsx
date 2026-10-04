@@ -150,3 +150,28 @@ test('change job or pay sends a dated change with only what changed', async () =
     version: 4, effectiveDate: '2026-11-01', country: 'DE', level: 5, salary: 90000, note: 'Moving to Berlin',
   });
 });
+
+test.fails('mark as leaving, then only Undo is offered', async () => {
+  const calls = open(undefined, { 'POST /api/employees/E000123/leave': () => ({ status: 200, body: { code: 'E000123', version: 5 } }) });
+  await userEvent.click(await screen.findByRole('button', { name: 'Mark as leaving' }));
+  const dialog = await screen.findByRole('dialog', { name: 'Mark as leaving' });
+  fireEvent.change(within(dialog).getByLabelText('Leave date'), { target: { value: '2026-12-31' } });
+  await userEvent.type(within(dialog).getByLabelText('Reason (optional)'), 'Moving abroad');
+  await userEvent.click(within(dialog).getByRole('button', { name: 'Save' }));
+  await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  expect(calls.find((c) => c.url.pathname.endsWith('/leave'))!.body).toEqual({ version: 4, leaveDate: '2026-12-31', reason: 'Moving abroad' });
+});
+
+test.fails('after leaving only Undo is offered', async () => {
+  const calls = open(detailResponse({ status: 'left', leaveDate: '2026-09-30', leaveReason: 'Resigned' }), {
+    'POST /api/employees/E000123/undo-leave': () => ({ status: 200, body: { code: 'E000123', version: 5 } }),
+  });
+  const undo = await screen.findByRole('button', { name: 'Undo leaving' });
+  for (const name of ['Edit details', 'Change job or pay', 'Mark as leaving']) {
+    expect(screen.queryByRole('button', { name })).not.toBeInTheDocument();
+  }
+  expect(screen.queryByRole('button', { name: /^Cancel the change/ })).not.toBeInTheDocument();
+  expect(screen.getByText('This person has left. Undo leaving first to make changes.')).toBeInTheDocument();
+  await userEvent.click(undo);
+  await waitFor(() => expect(calls.find((c) => c.url.pathname.endsWith('/undo-leave'))!.body).toEqual({ version: 4 }));
+});
