@@ -187,3 +187,18 @@ test('announces once when the answer finishes', async () => {
   await waitFor(() => expect(status).toHaveTextContent('Answer finished.'));
   expect(screen.getByRole('article', { name: 'Answer' })).toHaveTextContent('The median is BRL 129,000.');
 });
+
+test.fails('the first question names the chat', async () => {
+  let list = [{ id: 3, title: 'New chat', updatedAt: '2026-10-04T09:00:00Z' }, ...CHATS];
+  start('/assistant/3', {
+    'GET /api/chats': () => ({ status: 200, body: list }),
+    'GET /api/chats/3': () => ({ status: 200, body: { ...list[0], messages: [] } }),
+    'POST /api/chats/3/messages': () => {
+      list = [{ ...list[0]!, title: 'What is the median pay in Brazil?' }, ...list.slice(1)];
+      return { status: 200, events: sse(sseEvent('token', { text: 'BRL 129,000.' }), sseEvent('sources', { sources: noSources, basedOnData: false }), sseEvent('done', {})) };
+    },
+  });
+  expect(await screen.findByRole('heading', { name: 'New chat' })).toBeInTheDocument();
+  await ask('What is the median pay in Brazil?');
+  expect(await screen.findByRole('heading', { name: 'What is the median pay in Brazil?' })).toBeInTheDocument();
+});
