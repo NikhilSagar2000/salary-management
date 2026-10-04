@@ -13,7 +13,7 @@ beforeAll(async () => {
   await writeSeed(db, seed);
 }, 180_000);
 
-test.fails('exactly 10,000 with the country split', async () => {
+test('exactly 10,000 with the country split', async () => {
   expect(seed.employees).toHaveLength(10_000);
   const { rows } = await db.query(
     `SELECT c.country, count(*)::int AS n FROM job_changes c
