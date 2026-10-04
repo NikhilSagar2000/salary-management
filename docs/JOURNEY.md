@@ -295,6 +295,7 @@ is done (hashes copied from `git log`).
 - Task 7 · red: role/level combination on the change date and later (EMP-8).
 - Task 7 · green: after inserting, the person's state is re-checked on the change date and every later change date; a bad role/level combination rolls back with the message, prefixed "On <date>:" for later dates (EMP-8).
 - Task 7 · red: a move needs a salary (EMP-9); watched it hit the database check as a 500.
+- Task 7 · green: a country change without a salary gets "Moving to another country needs a salary in the new currency." (EMP-9).
 
 ---
 

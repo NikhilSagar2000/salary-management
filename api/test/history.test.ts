@@ -67,7 +67,7 @@ test('refuses a department, role and level combination not allowed on that date'
   expect((await db.query('SELECT count(*) AS n FROM job_changes')).rows[0].n).toBe(3);
 });
 
-test.fails('a country change needs a salary in the new currency', async () => {
+test('a country change needs a salary in the new currency', async () => {
   const { db, change } = await setup();
   const noSalary = await change({ effectiveDate: '2025-03-01', country: 'DE' });
   expect(noSalary.status).toBe(400);

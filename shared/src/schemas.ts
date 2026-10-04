@@ -88,5 +88,6 @@ export const jobChangeSchema = z.object({
 }).superRefine((c, ctx) => {
   const changes = [c.country, c.department, c.role, c.level, c.salary].some((v) => v !== undefined);
   if (!changes) ctx.addIssue({ code: 'custom', path: [], message: MSG.changeNothing });
+  if (c.country !== undefined && c.salary === undefined) ctx.addIssue({ code: 'custom', path: ['salary'], message: MSG.moveNeedsSalary });
 });
 export type JobChange = z.infer<typeof jobChangeSchema>;

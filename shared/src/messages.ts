@@ -17,6 +17,7 @@ export const MSG = {
   salaryTooLarge: 'That salary is too large. The most allowed is 10,000,000,000.',
   roleNotInDepartment: (role: string, department: string) => `${role} isn't a role in ${department}.`,
   fixFields: 'Some fields need fixing.',
+  moveNeedsSalary: 'Moving to another country needs a salary in the new currency.',
   changeNothing: 'Change at least one of country, department, role, level, manager or salary.',
   changeBeforeHire: (hire: string) => `The change can't be dated before the hire date (${hire}).`,
   changeAfterLeave: (leave: string) => `The change can't be dated after the leave date (${leave}).`,
