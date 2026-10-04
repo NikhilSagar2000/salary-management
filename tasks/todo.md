@@ -521,3 +521,19 @@ rolls back and answers 400 with a plain message.
   loop" (EMP-10).
 - [x] Step 8: `concurrency.test.ts` job-change case (EMP-13).
 - [x] Task check: `npm test`, `npm run typecheck`.
+
+### Task 8: Cancel scheduled changes
+
+Files: `api/src/app.ts` (request "today" from `X-Timezone`; JSON 404 for unknown `/api`
+routes), `api/src/employees/changes.ts` (`cancelChange`), routes, `api/test/history.test.ts`,
+`api/test/concurrency.test.ts`. `POST /api/employees/:code/changes/:id/cancel` `{ version }`.
+Only changes dated after today (in the browser's timezone) can be cancelled; the hire change
+never; the timeline is re-checked after cancelling.
+
+- [ ] Step 1: "a cancelled scheduled change stays in history and stops applying" (EMP-11).
+- [ ] Step 2: "refuses to cancel a change dated today or earlier", where "today" follows
+  `X-Timezone` (EMP-11, TIME-1 at request level; replaces the Task 11 ruling).
+- [ ] Step 3: "the hire change can't be cancelled".
+- [ ] Step 4: `concurrency.test.ts` cancel case (EMP-13).
+- [ ] Step 5: "no route edits a change's fields": PATCH/PUT/DELETE on a change → 404 JSON (EMP-12).
+- [ ] Task check: `npm test`.

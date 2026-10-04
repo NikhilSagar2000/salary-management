@@ -303,6 +303,7 @@ is done (hashes copied from `git log`).
 - Task 7 · test: out-of-date job change gets 409 (EMP-13); passed first run, a mutation dropping the version check made it fail.
 - Task 7 · fix: `FieldProblem` used a TypeScript parameter property, which Node's type stripping rejects (Vitest compiled it fine; `npm run typecheck` caught it). Checked the API boots with plain `node`.
 - Root `npm test` now type-checks first, so code Node can't run never reaches a commit (lesson from the Task 7 fix).
+- Task 8 · red: cancel a scheduled change (EMP-11).
 
 ---
 

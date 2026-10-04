@@ -112,3 +112,15 @@ test('manager must exist, not be the person, be employed on the date, and not fo
   expect(created.body.fields).toEqual({ managerCode: 'No employee with code E000999.' });
   expect((await person('E000400', 'Davi', '2025-01-01', { managerCode: 'E000123' })).status).toBe(201);
 });
+
+test.fails('a cancelled scheduled change stays in history and stops applying', async () => {
+  const { agent, db, change } = await setup(); // today: 2026-10-01
+  const raise = await change({ effectiveDate: '2027-01-01', salary: 150000 });
+  const id = (await db.query("SELECT max(id) AS id FROM job_changes")).rows[0].id;
+  const res = await agent.post(`/api/employees/E000123/changes/${id}/cancel`).send({ version: raise.body.version });
+  expect(res.status).toBe(200);
+  expect(res.body).toEqual({ code: 'E000123', version: 3 });
+  expect((await stateOn(db, '2027-01-02')).salary).toBe(133000);
+  const { rows } = await db.query('SELECT salary, cancelled_at IS NOT NULL AS cancelled FROM job_changes WHERE id = $1', [id]);
+  expect(rows).toEqual([{ salary: 150000, cancelled: true }]);
+});
