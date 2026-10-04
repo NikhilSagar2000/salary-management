@@ -42,3 +42,16 @@ test('never combines currencies', async () => {
     { currency: 'JPY', median: 6000000, min: 6000000, max: 6000000, headcount: 1 },
   ]);
 });
+
+test.fails('counts active and leaving, not starting; left only when asked', async () => {
+  const { stats, agent } = await setup([
+    { code: 'E000001', country: 'US', salary: 100000 }, // active
+    { code: 'E000002', country: 'US', salary: 200000, leaveDate: '2026-12-31' }, // leaving
+    { code: 'E000003', country: 'US', salary: 900000, hireDate: '2026-12-01' }, // starting
+    { code: 'E000004', country: 'US', salary: 10000, leaveDate: '2026-09-01' }, // left
+  ]);
+  expect(await stats()).toEqual([{ currency: 'USD', median: 150000, min: 100000, max: 200000, headcount: 2 }]);
+  expect((await agent.get('/api/employees')).body.total).toBe(3); // the starting person is listed, just not counted
+  expect(await stats('?status=active,leaving,left')).toEqual([{ currency: 'USD', median: 100000, min: 10000, max: 200000, headcount: 3 }]);
+  expect(await stats('?status=starting')).toEqual([]);
+});
