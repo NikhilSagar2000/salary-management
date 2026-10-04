@@ -270,6 +270,7 @@ is done (hashes copied from `git log`).
 - Task 3 · green: `npm run hash-password` reads a password from stdin and prints the `APP_PASSWORD_HASH` value.
 - Task 4 · red: identity guard test (EMP-5).
 - Task 4 · green: `employees` table; a trigger refuses changes to code or hire date (EMP-5). First draft had a leave_reason check that rejected NULL reasons (NULL AND false); fixed and test DB reset.
+- Task 4 · red: history guard and job-change shape tests (EMP-12).
 
 ---
 
