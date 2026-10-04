@@ -30,7 +30,7 @@ test('streams a step per tool call, then tokens, then sources, then done', async
   expect(answer.basedOnData).toBe(true);
 });
 
-test.fails('stops tool calls after 6 rounds and asks for an answer', async () => {
+test('stops tool calls after 6 rounds and asks for an answer', async () => {
   const lookup = (n: number) => [{ type: 'tool_call' as const, id: `c${n}`, name: 'get_employee', args: { code: 'E000001' } }, { type: 'done' as const }];
   const { events, requests, answer } = await ask([
     ...Array.from({ length: 6 }, (_, i) => lookup(i)),

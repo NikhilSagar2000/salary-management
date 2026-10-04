@@ -13,6 +13,7 @@ export type AnswerEvent =
 export type HistoryMessage = { role: 'user' | 'assistant'; content: string };
 
 const MAX_TOOL_ROUNDS = 6;
+const OUT_OF_LOOKUPS = 'You have used all your lookups. Answer now from what you found, and say plainly what you could not check.';
 
 /** "Working out salary for United States…": what the assistant is doing, in words. */
 function stepText(name: string, args: Record<string, unknown>): string {
@@ -36,13 +37,15 @@ export async function answerQuestion(opts: {
   let usedTools = false;
   let text = '';
   for (let round = 0; ; round++) {
+    const lastRound = round === MAX_TOOL_ROUNDS;
+    if (lastRound) messages.push({ role: 'user', content: OUT_OF_LOOKUPS });
     const calls: Extract<ModelEvent, { type: 'tool_call' }>[] = [];
-    for await (const event of opts.model({ messages, tools: TOOLS, signal: opts.signal })) {
+    for await (const event of opts.model({ messages, tools: lastRound ? [] : TOOLS, signal: opts.signal })) {
       if (event.type === 'token') {
         text += event.text;
         opts.onEvent({ type: 'token', text: event.text });
       }
-      if (event.type === 'tool_call') calls.push(event);
+      if (event.type === 'tool_call' && !lastRound) calls.push(event);
     }
     if (!calls.length) break;
     messages.push({
@@ -56,7 +59,6 @@ export async function answerQuestion(opts: {
       found.push(...sources);
       messages.push({ role: 'tool', tool_call_id: call.id, content: JSON.stringify(result) });
     }
-    void round;
   }
   const sources = collectSources(found);
   opts.onEvent({ type: 'sources', sources, basedOnData: usedTools });
