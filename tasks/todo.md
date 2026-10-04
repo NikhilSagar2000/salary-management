@@ -671,3 +671,23 @@ nothing saved. Import → re-runs every check inside one transaction; any proble
 - [x] Step 8: "import saves all rows in one transaction or none, re-checking at commit" (CSV-7).
 - [x] Step 9: "reports an empty file, missing columns or an unreadable file plainly" (CSV-8).
 - [x] Task check: `npm test`.
+
+### Task 16: Assistant tools
+
+Files: `api/src/assistant/tools.ts`, `api/src/db.ts` (`readOnlyTx`), `api/src/employees/list.ts`
+(`listFilter` takes the extra tool filters), `api/db/migrations/006_change_log.sql` (view: each
+change with the values before it and its kinds), `api/test/assistant.tools.test.ts`.
+`runTool(db, today, name, args) → { result, sources }`; `TOOLS` = OpenAI-style function specs
+generated from the Zod schemas (`z.toJSONSchema`). Shared employee filters: search, codes,
+country, department, role, level, gender, status, hired/left date ranges, salary range (one
+country), manager. Sources: `{ kind: 'group', label, query, headcount }` or
+`{ kind: 'person', code, name }`.
+
+- [ ] Step 1: "query_employees filters any field, caps at 200 rows and reports the total" (AST-4).
+- [ ] Step 2: "get_employee returns the full history" (AST-4).
+- [ ] Step 3: "query_changes classifies kinds and caps at 200" (AST-4).
+- [ ] Step 4: "aggregate computes exact stats split by currency" (AST-4).
+- [ ] Step 5: "bad arguments and unknown tools return an error result" (AST-5).
+- [ ] Step 6: "tool queries run in a read-only transaction" (AST-5).
+- [ ] Step 7: "no tool parameter accepts SQL or free-form expressions" (AST-5).
+- [ ] Task check: `npm test`.
