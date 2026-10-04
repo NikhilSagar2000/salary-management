@@ -33,6 +33,9 @@ export const isoDate = (field: string) =>
     return d.getUTCFullYear() === +m[1]! && d.getUTCMonth() === +m[2]! - 1 && d.getUTCDate() === +m[3]!;
   }, { error: MSG.date(field) });
 
+/** A manager's employee code; null means no manager. */
+const managerCode = z.string({ error: MSG.managerCode }).regex(/^E\d{6}$/, { error: MSG.managerCode }).nullable().optional();
+
 const text = (message: string) => z.string({ error: message }).trim().min(1, { error: message }).max(100);
 
 export const employeeCreateSchema = z.object({
@@ -47,6 +50,7 @@ export const employeeCreateSchema = z.object({
   role: z.enum(ROLE_NAMES, { error: MSG.role }),
   level: z.number({ error: MSG.level }).int({ error: MSG.level }).min(1, { error: MSG.level }).max(7, { error: MSG.level }),
   salary: salarySchema,
+  managerCode,
 }).superRefine((job, ctx) => {
   for (const issue of jobProblems(job)) ctx.addIssue({ code: 'custom', ...issue });
 });
@@ -84,9 +88,10 @@ export const jobChangeSchema = z.object({
   role: z.enum(ROLE_NAMES, { error: MSG.role }).optional(),
   level: z.number({ error: MSG.level }).int({ error: MSG.level }).min(1, { error: MSG.level }).max(7, { error: MSG.level }).optional(),
   salary: salarySchema.optional(),
+  managerCode,
   note: z.string().trim().max(500).optional(),
 }).superRefine((c, ctx) => {
-  const changes = [c.country, c.department, c.role, c.level, c.salary].some((v) => v !== undefined);
+  const changes = [c.country, c.department, c.role, c.level, c.salary, c.managerCode].some((v) => v !== undefined);
   if (!changes) ctx.addIssue({ code: 'custom', path: [], message: MSG.changeNothing });
   if (c.country !== undefined && c.salary === undefined) ctx.addIssue({ code: 'custom', path: ['salary'], message: MSG.moveNeedsSalary });
 });

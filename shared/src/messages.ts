@@ -20,6 +20,10 @@ export const MSG = {
   moveNeedsSalary: 'Moving to another country needs a salary in the new currency.',
   laterSalaryWrongCurrency: (date: string, currency: string, country: string) =>
     `A salary change on ${date} is in ${currency}; cancel it before moving this person to ${country}.`,
+  managerCode: 'Manager code must be E followed by 6 digits, like E000123.',
+  ownManager: "Someone can't be their own manager.",
+  managerNotEmployed: (name: string, date: string) => `${name} isn't employed on ${date}.`,
+  managerLoop: 'That would make a reporting loop.',
   changeNothing: 'Change at least one of country, department, role, level, manager or salary.',
   changeBeforeHire: (hire: string) => `The change can't be dated before the hire date (${hire}).`,
   changeAfterLeave: (leave: string) => `The change can't be dated after the leave date (${leave}).`,

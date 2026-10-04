@@ -87,7 +87,7 @@ test('refuses a relocation that would leave a later salary in the old currency',
   expect(await stateOn(db, '2027-01-02')).toMatchObject({ country: 'BR', salary: 140000, currency: 'BRL' });
 });
 
-test.fails('manager must exist, not be the person, be employed on the date, and not form a loop', async () => {
+test('manager must exist, not be the person, be employed on the date, and not form a loop', async () => {
   const { agent, db, change } = await setup();
   const person = (code: string, first: string, hireDate: string, extra = {}) =>
     agent.post('/api/employees').send({ ...newEmployee, code, firstName: first, lastName: 'Lima', workEmail: `${first}@acme.example`, hireDate, ...extra });

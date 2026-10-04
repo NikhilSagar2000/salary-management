@@ -2,6 +2,7 @@ import { COUNTRY_NAMES, CURRENCY, formatDate, jobProblems, MSG, type Country, ty
 import type pg from 'pg';
 import { withTx } from '../db.ts';
 import { FieldProblem } from '../http.ts';
+import { resolveManager } from './managers.ts';
 
 /** Adds a dated job change if `version` is current; returns the new version, or null if nothing matched. */
 export async function addChange(db: pg.Pool, code: string, c: JobChange): Promise<number | null> {
@@ -20,10 +21,12 @@ export async function addChange(db: pg.Pool, code: string, c: JobChange): Promis
       const country = c.country ?? (await tx.query('SELECT country FROM employee_state($1) WHERE employee_id = $2', [c.effectiveDate, id])).rows[0]?.country;
       currency = CURRENCY[country as Country];
     }
+    const managerSet = c.managerCode !== undefined;
+    const managerId = managerSet ? await resolveManager(tx, id, c.managerCode!, c.effectiveDate) : null;
     await tx.query(
-      `INSERT INTO job_changes (employee_id, effective_date, country, department, role, level, salary, currency, note)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-      [id, c.effectiveDate, c.country, c.department, c.role, c.level, c.salary, currency, c.note],
+      `INSERT INTO job_changes (employee_id, effective_date, country, department, role, level, manager_set, manager_id, salary, currency, note)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+      [id, c.effectiveDate, c.country, c.department, c.role, c.level, managerSet, managerId, c.salary, currency, c.note],
     );
     await checkTimeline(tx, id, c.effectiveDate);
     return version as number;

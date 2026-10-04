@@ -1,6 +1,7 @@
 import { CURRENCY, MSG, type EmployeeCreate } from '@acme/shared';
 import type pg from 'pg';
 import { withTx } from '../db.ts';
+import { resolveManager } from './managers.ts';
 
 export async function nextCode(db: pg.Pool): Promise<string> {
   const { rows } = await db.query("SELECT coalesce(max(substr(code, 2)::int), 0) + 1 AS n FROM employees");
@@ -19,6 +20,7 @@ export function duplicateField(err: unknown, e: { code: string }): Record<string
 /** Saves the person and their hire change (every field set, dated on the hire date) together. */
 export async function createEmployee(db: pg.Pool, e: EmployeeCreate) {
   await withTx(db, async (tx) => {
+    const managerId = await resolveManager(tx, null, e.managerCode ?? null, e.hireDate);
     const { rows } = await tx.query(
       `INSERT INTO employees (code, first_name, last_name, gender, work_email, hire_date)
        VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
@@ -26,8 +28,8 @@ export async function createEmployee(db: pg.Pool, e: EmployeeCreate) {
     );
     await tx.query(
       `INSERT INTO job_changes (employee_id, effective_date, country, department, role, level, manager_set, manager_id, salary, currency)
-       VALUES ($1, $2, $3, $4, $5, $6, true, NULL, $7, $8)`,
-      [rows[0].id, e.hireDate, e.country, e.department, e.role, e.level, e.salary, CURRENCY[e.country]],
+       VALUES ($1, $2, $3, $4, $5, $6, true, $7, $8, $9)`,
+      [rows[0].id, e.hireDate, e.country, e.department, e.role, e.level, managerId, e.salary, CURRENCY[e.country]],
     );
   });
   return { code: e.code, version: 1 };
