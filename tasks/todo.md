@@ -463,3 +463,20 @@ change, and `cancelled_at` can be set once.
   history" (EMP-12): updating a change's salary, deleting a change, deleting an employee,
   updating or deleting a leave event all fail; setting `cancelled_at` once works, twice fails.
 - [x] Task check: `npm test`, `npm run typecheck`.
+
+### Task 5: Create employee
+
+Files: `api/src/employees/{create,routes}.ts`, `api/src/http.ts` (field-error reply),
+`api/test/employees.create.test.ts`. Errors answer 400
+`{ error: 'Some fields need fixing.', fields: { <field>: <message> } }`. The hire change stores
+every field (`manager_set` true; manager rules arrive with Task 7).
+
+- [ ] Step 1: "suggests the next free code": none → `E000001`; after `E000123` → `E000124`.
+- [ ] Step 2: "rejects a malformed or used code": `E12` → schema message; `E000123` twice →
+  "E000123 is already used."
+- [ ] Step 3: "creates an employee with currency from the country": 201 `{ code, version: 1 }`;
+  the hire change has currency BRL for country BR.
+- [ ] Step 4: "saves the hire change dated on the hire date": one change on the hire date
+  with country, department, role, level, salary, currency set and `manager_set` true.
+- [ ] Step 5: "rejects an email already used, ignoring case" → "That work email is already used."
+- [ ] Task check: `npm test`, `npm run typecheck`.
