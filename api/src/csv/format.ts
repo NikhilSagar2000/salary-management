@@ -1,8 +1,12 @@
 type Cell = string | number | null | undefined;
 
-/** One CSV cell: quoted when it holds a comma, quote or line break. */
+/**
+ * One CSV cell: text that Excel would run as a formula (starting with = + - @, tab or CR) gets a leading
+ * apostrophe (CSV-2); then quoted when it holds a comma, quote or line break.
+ */
 function cell(value: Cell): string {
-  const s = value === null || value === undefined ? '' : String(value);
+  let s = value === null || value === undefined ? '' : String(value);
+  if (typeof value === 'string' && /^[=+\-@\t\r]/.test(s)) s = `'${s}`;
   return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
 

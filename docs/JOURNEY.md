@@ -374,6 +374,7 @@ is done (hashes copied from `git log`).
 - Task 14 · red: CSV export of every filtered row (CSV-1).
 - Task 14 · green: `GET /api/employees.csv` exports every row matching the list filters, in list order, as UTF-8 CSV with a BOM and the documented columns; the list's filter SQL is now shared (`listFilter`) (CSV-1).
 - Task 14 · red: formula-like cells get an apostrophe (CSV-2).
+- Task 14 · green: cells starting with = + - @, tab or CR get a leading apostrophe so Excel shows them as text (CSV-2).
 
 ---
 
