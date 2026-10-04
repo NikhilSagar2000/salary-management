@@ -257,6 +257,7 @@ is done (hashes copied from `git log`).
 - Task 2 · green: `formatMoney` ("USD 128,000") and `formatDate` ("4 Oct 2026", timezone-proof) (UI-2). Checked the API can import `@acme/shared` under Node type stripping.
 - Task 3 · red: signed-out requests test (AUTH-1); test helpers now migrate and empty the test database per file; D58 (session mechanism).
 - Task 3 · green: every `/api` route except health answers 401 "Please sign in." without a session (AUTH-1).
+- Task 3 · red: sign-in cookie tests (AUTH-2).
 
 ---
 

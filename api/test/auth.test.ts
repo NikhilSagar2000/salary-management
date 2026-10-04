@@ -1,6 +1,6 @@
 import request from 'supertest';
 import { expect, test } from 'vitest';
-import { testApp } from './helpers.ts';
+import { PASSWORD, testApp } from './helpers.ts';
 
 test('rejects /api requests without a session', async () => {
   const { app } = await testApp();
@@ -10,4 +10,27 @@ test('rejects /api requests without a session', async () => {
     expect(res.body).toEqual({ error: 'Please sign in.' });
   }
   expect((await request(app).get('/api/health')).status).toBe(200);
+});
+
+test.fails('signs in with the right password and sets a 7-day httpOnly cookie', async () => {
+  const { app, clock } = await testApp();
+  const res = await request(app).post('/api/session').send({ password: PASSWORD });
+  expect(res.status).toBe(204);
+  const cookie = res.headers['set-cookie']![0]!;
+  expect(cookie).toMatch(/^acme_session=[A-Za-z0-9_-]{43};/);
+  expect(cookie).toContain('HttpOnly');
+  expect(cookie).toContain('SameSite=Lax');
+  expect(cookie).toContain('Max-Age=604800');
+  expect(cookie).toContain('Path=/');
+  expect(cookie).not.toContain('Secure');
+  const session = cookie.split(';')[0]!;
+  expect((await request(app).get('/api/session').set('Cookie', session)).status).toBe(200);
+  clock.set('2026-10-08T12:00:01Z'); // 7 days and a second later
+  expect((await request(app).get('/api/session').set('Cookie', session)).status).toBe(401);
+});
+
+test.fails('the session cookie is Secure in production', async () => {
+  const { app } = await testApp({ production: true });
+  const res = await request(app).post('/api/session').send({ password: PASSWORD });
+  expect(res.headers['set-cookie']![0]).toContain('Secure');
 });
