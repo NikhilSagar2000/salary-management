@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { expect, test } from 'vitest';
 import { fakeApi } from '../test/fakeApi.ts';
@@ -46,4 +46,23 @@ test('search, filters, sort and page are read from and written to the URL', asyn
   await userEvent.click(await screen.findByRole('button', { name: '3' }));
   expect(screen.getByTestId('location')).toHaveTextContent('sort=level&dir=desc&page=3');
   await waitFor(() => expect(apiQuery()).toBe('?q=kim&country=BR&sort=level&dir=desc&page=3'));
+});
+
+test.fails('rows show the listed columns, as a table and as phone cards', async () => {
+  signedInWith();
+  renderApp('/employees');
+  const table = await screen.findByRole('table');
+  const [, ana] = within(table).getAllByRole('row');
+  expect(within(ana!).getAllByRole('cell').map((c) => c.textContent)).toEqual([
+    'E000123', 'Ana Silva', 'Brazil', 'Engineering', 'Software Engineer', 'L3', 'BRL 133,000', '29 Feb 2024', 'Active',
+  ]);
+  expect(within(ana!).getByRole('link', { name: 'Ana Silva' })).toHaveAttribute('href', '/employees/E000123');
+
+  const cards = screen.getByRole('list', { name: 'Employees' });
+  const [anaCard, kenjiCard] = within(cards).getAllByRole('listitem');
+  expect(anaCard).toHaveTextContent('Ana Silva');
+  expect(anaCard).toHaveTextContent('Software Engineer · L3');
+  expect(anaCard).toHaveTextContent('BRL 133,000');
+  expect(kenjiCard).toHaveTextContent('Starting');
+  expect(within(anaCard!).getByRole('link', { name: 'Ana Silva' })).toHaveAttribute('href', '/employees/E000123');
 });
