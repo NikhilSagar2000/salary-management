@@ -18,3 +18,19 @@ export async function markLeaving(db: pg.Pool, code: string, l: Leave): Promise<
     return rows[0].version as number;
   });
 }
+
+/** Undoes leaving if `version` is current; returns the new version, or null if nothing matched. */
+export async function undoLeaving(db: pg.Pool, code: string, version: number): Promise<number | null> {
+  return withTx(db, async (tx) => {
+    const { rows } = await tx.query(
+      `UPDATE employees e SET leave_date = NULL, leave_reason = NULL, version = e.version + 1, updated_at = now()
+       FROM employees old WHERE old.id = e.id AND e.code = $1 AND e.version = $2
+       RETURNING e.id, e.version, old.leave_date`,
+      [code, version],
+    );
+    if (!rows[0]) return null;
+    if (!rows[0].leave_date) throw new FieldProblem({ form: MSG.notLeaving });
+    await tx.query("INSERT INTO leave_events (employee_id, kind, leave_date) VALUES ($1, 'undone', $2)", [rows[0].id, rows[0].leave_date]);
+    return rows[0].version as number;
+  });
+}

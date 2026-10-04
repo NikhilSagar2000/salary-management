@@ -33,7 +33,7 @@ test('refuses a leave date before hire or a reason over 500 characters', async (
   expect(await events(db)).toEqual([]);
 });
 
-test.fails('undo clears date and reason and both events show in history', async () => {
+test('undo clears date and reason and both events show in history', async () => {
   const { agent, db } = await setup();
   await agent.post('/api/employees/E000123/leave').send({ version: 1, leaveDate: '2026-09-30', reason: 'Resigned' });
   const res = await agent.post('/api/employees/E000123/undo-leave').send({ version: 2 });

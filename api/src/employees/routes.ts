@@ -5,7 +5,7 @@ import { fieldErrors, sendFieldErrors, sendStaleOrMissing } from '../http.ts';
 import { createEmployee, duplicateField, nextCode } from './create.ts';
 import { addChange, cancelChange } from './changes.ts';
 import { updateDetails } from './details.ts';
-import { markLeaving } from './leave.ts';
+import { markLeaving, undoLeaving } from './leave.ts';
 
 export function employeeRoutes({ db }: { db: pg.Pool }) {
   const router = Router();
@@ -67,6 +67,14 @@ export function employeeRoutes({ db }: { db: pg.Pool }) {
     const version = await markLeaving(db, req.params.code, parsed.data);
     if (version === null) return sendStaleOrMissing(res, db, req.params.code);
     res.json({ code: req.params.code, version });
+  });
+
+  router.post('/api/employees/:code/undo-leave', async (req, res) => {
+    const version = Number(req.body?.version);
+    if (!Number.isInteger(version)) return sendFieldErrors(res, { version: MSG.stale });
+    const next = await undoLeaving(db, req.params.code, version);
+    if (next === null) return sendStaleOrMissing(res, db, req.params.code);
+    res.json({ code: req.params.code, version: next });
   });
 
   return router;
