@@ -12,6 +12,11 @@ const writes: Record<string, { prepare?: (agent: Agent) => Promise<unknown>; wri
     prepare: (agent) => agent.post('/api/employees/E000123/changes').send({ version: 1, effectiveDate: '2027-01-01', salary: 150000 }),
     write: (agent, version) => agent.post('/api/employees/E000123/changes/2/cancel').send({ version }),
   },
+  leave: { write: (agent, version) => agent.post('/api/employees/E000123/leave').send({ version, leaveDate: '2026-12-31' }) },
+  'undo leave': {
+    prepare: (agent) => agent.post('/api/employees/E000123/leave').send({ version: 1, leaveDate: '2026-12-31' }),
+    write: (agent, version) => agent.post('/api/employees/E000123/undo-leave').send({ version }),
+  },
 };
 
 test.each(Object.entries(writes))('an old version gets 409 and nothing changes (%s)', async (_name, { prepare, write }) => {

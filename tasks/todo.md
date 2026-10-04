@@ -191,7 +191,7 @@ is written just before the task starts, from the interfaces that exist at that p
   change stays in history and stops applying" · "refuses to cancel a change dated today or
   earlier" (EMP-11) · `concurrency.test.ts` › cancel case (EMP-13) · "no route edits a change's
   fields" (EMP-12).
-- [ ] **Task 9: Leavers.** Files: `api/src/employees/leave.ts`. Tests: `leave.test.ts` ›
+- [x] **Task 9: Leavers.** Files: `api/src/employees/leave.ts`. Tests: `leave.test.ts` ›
   "marks leaving with a date and optional reason" · "refuses a leave date before hire or a
   reason over 500 characters" (LEAVE-1) · "undo clears date and reason and both events show
   in history" (LEAVE-2) · "refuses every write except undo after leaving" (LEAVE-3) ·
@@ -546,12 +546,12 @@ Files: `shared/src/schemas.ts` (`leaveSchema`), `api/src/employees/leave.ts`, ro
 `POST /api/employees/:code/undo-leave` `{ version }`; each also writes a `leave_events` row.
 "Has left" = leave date on or before today (browser timezone).
 
-- [ ] Step 1: "marks leaving with a date and optional reason" (LEAVE-1).
-- [ ] Step 2: "refuses a leave date before hire or a reason over 500 characters" (LEAVE-1).
-- [ ] Step 3: "undo clears date and reason and both events show in history" (LEAVE-2).
-- [ ] Step 4: "refuses every write except undo after leaving" (LEAVE-3): details, job change,
+- [x] Step 1: "marks leaving with a date and optional reason" (LEAVE-1).
+- [x] Step 2: "refuses a leave date before hire or a reason over 500 characters" (LEAVE-1).
+- [x] Step 3: "undo clears date and reason and both events show in history" (LEAVE-2).
+- [x] Step 4: "refuses every write except undo after leaving" (LEAVE-3): details, job change,
   cancel and a second leave answer 409 "This person has left. Undo leaving first to make changes."
-- [ ] Step 5: "DELETE on an employee URL answers 404" (LEAVE-4).
-- [ ] Step 6: "scheduled changes after the leave date stop applying and return on undo" (LEAVE-5).
-- [ ] Step 7: `concurrency.test.ts` leave and undo cases (EMP-13).
-- [ ] Task check: `npm test`.
+- [x] Step 5: "DELETE on an employee URL answers 404" (LEAVE-4).
+- [x] Step 6: "scheduled changes after the leave date stop applying and return on undo" (LEAVE-5).
+- [x] Step 7: `concurrency.test.ts` leave and undo cases (EMP-13).
+- [x] Task check: `npm test`.
