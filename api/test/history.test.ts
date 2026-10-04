@@ -53,3 +53,16 @@ test('refuses a change before hire, after leaving, or changing nothing', async (
   expect(after.body.fields).toEqual({ effectiveDate: "The change can't be dated after the leave date (30 Jun 2026)." });
   expect((await db.query('SELECT count(*) AS n, max(version) AS v FROM job_changes, employees')).rows[0]).toEqual({ n: 1, v: 1 });
 });
+
+test.fails('refuses a department, role and level combination not allowed on that date', async () => {
+  const { db, change } = await setup();
+  const wrongDept = await change({ effectiveDate: '2025-01-01', department: 'Sales' });
+  expect(wrongDept.status).toBe(400);
+  expect(wrongDept.body.fields).toEqual({ role: "Software Engineer isn't a role in Sales." });
+  expect((await change({ effectiveDate: '2025-01-01', department: 'Sales', role: 'Account Executive' })).status).toBe(201);
+  expect((await change({ effectiveDate: '2027-01-01', level: 6 })).status).toBe(201); // scheduled: Account Executive L6
+  const breaksLater = await change({ effectiveDate: '2026-11-01', role: 'Sales Development Representative', level: 2 });
+  expect(breaksLater.status).toBe(400);
+  expect(breaksLater.body.fields).toEqual({ level: 'On 1 Jan 2027: Sales Development Representative goes from L1 to L3.' });
+  expect((await db.query('SELECT count(*) AS n FROM job_changes')).rows[0].n).toBe(3);
+});
