@@ -29,7 +29,7 @@ async function collect(events: AsyncIterable<ModelEvent>) {
 }
 const request = { messages: [{ role: 'user' as const, content: 'hi' }], tools: [], signal: new AbortController().signal };
 
-test.fails('parses streamed tool-call deltas across chunks', async () => {
+test('parses streamed tool-call deltas across chunks', async () => {
   const sse = [
     ': OPENROUTER PROCESSING',
     'data: {"choices":[{"delta":{"role":"assistant","content":null,"tool_calls":[{"index":0,"id":"call_1","type":"function","function":{"name":"aggregate","arguments":""}}]}}]}',
