@@ -35,3 +35,19 @@ test('returns status, current job and pay against peers', async () => {
   expect(starting.body).toMatchObject({ status: 'starting', current: { salary: 50000 } });
   expect((await agent.get('/api/employees/E000999')).status).toBe(404);
 });
+
+test.fails('shows the manager with a has-left flag and the direct reports', async () => {
+  const { agent, hire } = await setup();
+  const bruno = await hire({ firstName: 'Bruno', lastName: 'Lima', level: 5, role: 'Engineering Manager' });
+  await agent.post('/api/employees').send({ ...newEmployee, managerCode: bruno });
+  await hire({ firstName: 'Carla', lastName: 'Souza', managerCode: 'E000123', level: 2 });
+  const left = await hire({ firstName: 'Davi', lastName: 'Rocha', managerCode: 'E000123', level: 2 });
+  await agent.post(`/api/employees/${left}/leave`).send({ version: 1, leaveDate: '2026-09-15' });
+
+  const ana = await agent.get('/api/employees/E000123');
+  expect(ana.body.current.manager).toEqual({ code: bruno, name: 'Bruno Lima', hasLeft: false });
+  expect(ana.body.reports).toEqual([{ code: 'E000201', name: 'Carla Souza' }]);
+
+  await agent.post(`/api/employees/${bruno}/leave`).send({ version: 1, leaveDate: '2026-09-30' });
+  expect((await agent.get('/api/employees/E000123')).body.current.manager).toEqual({ code: bruno, name: 'Bruno Lima', hasLeft: true });
+});

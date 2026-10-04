@@ -323,6 +323,7 @@ is done (hashes copied from `git log`).
 - Task 9 · test: out-of-date leave and undo get 409 (EMP-13); every employee write is now in the concurrency table. Passed first run; a mutation ignoring the version made both fail.
 - Task 10 · red: detail with status, current job and peers (EMP-14).
 - Task 10 · green: `GET /api/employees/:code` returns personal details, status (starting/active/leaving/left as of today), the current job and pay, and peers' median/min/max/headcount with the person's % position (EMP-14).
+- Task 10 · red: manager with has-left flag and direct reports (EMP-14).
 
 ---
 
