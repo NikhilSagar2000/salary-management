@@ -129,7 +129,7 @@ test('aggregate computes exact stats split by currency', async () => {
   });
 });
 
-test.fails('bad arguments and unknown tools return an error result', async () => {
+test('bad arguments and unknown tools return an error result', async () => {
   const { tool } = await setup([]);
   expect(await tool('drop_table', {})).toEqual({ result: { error: 'There is no tool called "drop_table".' }, sources: [] });
   const badCountry = await tool('query_employees', { filters: { country: ['XX'] } });

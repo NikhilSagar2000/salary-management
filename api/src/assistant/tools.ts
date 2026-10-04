@@ -272,9 +272,10 @@ const TOOLS_BY_NAME = {
 
 /** Runs one tool call from the model. Never throws for bad input: the error goes back to the model. */
 export async function runTool(db: pg.Pool, today: string, name: string, args: unknown): Promise<ToolResult> {
+  if (!Object.hasOwn(TOOLS_BY_NAME, name)) return { result: { error: `There is no tool called "${name}".` }, sources: [] };
   const tool = TOOLS_BY_NAME[name as keyof typeof TOOLS_BY_NAME];
   const parsed = tool.schema.safeParse(args);
-  if (!parsed.success) return { result: { error: parsed.error.message }, sources: [] };
+  if (!parsed.success) return { result: { error: z.prettifyError(parsed.error) }, sources: [] };
   return (tool.run as (db: pg.Pool, today: string, args: unknown) => Promise<ToolResult>)(db, today, parsed.data);
 }
 

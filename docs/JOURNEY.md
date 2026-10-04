@@ -404,6 +404,7 @@ is done (hashes copied from `git log`).
 - Task 16 · red: `aggregate` tool — exact median/min/max/headcount by any grouping, split by currency, as of a date; raise % over a date range (AST-4).
 - Task 16 · green: `aggregate` tool — median/min/max/headcount of salary (always per currency), headcount, or raise % between dates, grouped by up to four of country, department, role, level, gender, status, hire year, manager, as of a date; counts exclude people not yet started; one source per group (AST-4).
 - Task 16 · red: bad arguments and unknown tool names come back as error results, not crashes (AST-5).
+- Task 16 · green: an unknown tool name or bad arguments come back to the model as a readable error (`z.prettifyError`), never a crash; unknown keys such as `sql` are refused (AST-5).
 
 ---
 
