@@ -65,12 +65,20 @@ type Record_ = { line: number; values: Record<string, string> };
 /** Splits the file into header-keyed records with their starting file line. */
 function readCsv(text: string): { records: Record_[]; problems: Problem[] } {
   const body = text.replace(/^\uFEFF/, '');
+  const whole = (message: string) => ({ records: [], problems: [{ line: 0, column: '', message }] });
+  if (body.startsWith('PK\u0003\u0004')) return whole(MSG.importWorkbook);
+  if (!body.trim()) return whole(MSG.importEmpty);
   const firstLine = body.split(/\r?\n/, 1)[0] ?? '';
   const delimiter = (firstLine.match(/;/g)?.length ?? 0) > (firstLine.match(/,/g)?.length ?? 0) ? ';' : ',';
   const { records: parsed, error } = parseCsv(body, delimiter);
   if (error) return { records: [], problems: [{ line: 0, column: '', message: error }] };
   const [header, ...rest] = parsed;
   const columns = (header?.cells ?? []).map((c) => c.trim().toLowerCase());
+  const missing = REQUIRED.filter((c) => !columns.includes(c));
+  if (missing.length) return whole(MSG.importMissingColumns(missing));
+  const unknown = columns.filter((c) => !REQUIRED.includes(c) && !OPTIONAL.includes(c));
+  if (unknown.length) return whole(MSG.importUnknownColumns(unknown));
+  if (!rest.length) return whole(MSG.importNoRows);
   const records = rest.map(({ line, cells }) => {
     const values: Record<string, string> = {};
     columns.forEach((c, i) => (values[c] = (cells[i] ?? '').trim()));

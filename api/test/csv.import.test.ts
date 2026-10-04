@@ -177,7 +177,7 @@ test('import saves all rows in one transaction or none, re-checking at commit', 
   expect(await count()).toBe(5);
 });
 
-test.fails('reports an empty file, missing columns or an unreadable file plainly', async () => {
+test('reports an empty file, missing columns or an unreadable file plainly', async () => {
   const { preview } = await setup();
   const fileProblem = async (csv: string) => {
     const res = await preview(csv);

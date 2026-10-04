@@ -393,6 +393,7 @@ is done (hashes copied from `git log`).
 - Task 15 · red: import saves all rows in one transaction or none, re-checking at commit (CSV-7).
 - Task 15 · green: `POST /api/imports` re-runs every check inside one transaction and saves all rows (people + hire changes, managers resolved from the file or the database) or nothing, answering 400 with the problems (CSV-7).
 - Task 15 · red: whole-file problems in plain words — empty file, header only, missing or unknown columns, unclosed quote, an Excel workbook instead of CSV (CSV-8).
+- Task 15 · green: whole-file problems in plain words — empty file, header but no rows, missing columns, unknown columns, unclosed quote, and an Excel workbook uploaded instead of CSV (CSV-8).
 
 ---
 

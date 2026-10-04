@@ -23,6 +23,11 @@ export const MSG = {
   importDuplicate: (value: string, lines: number[]) =>
     `${value} appears more than once in the file (lines ${lines.slice(0, -1).join(', ')} and ${lines.at(-1)}).`,
   importNothingSaved: 'Nothing was imported. Fix these problems and try again.',
+  importEmpty: 'The file is empty.',
+  importNoRows: 'The file has a header row but no employees under it.',
+  importMissingColumns: (cols: string[]) => `The file is missing these columns: ${cols.join(', ')}.`,
+  importUnknownColumns: (cols: string[]) => `The file has columns the app doesn't use: ${cols.join(', ')}.`,
+  importWorkbook: 'This looks like an Excel workbook, not a CSV file. In Excel choose File › Save As › CSV UTF-8, then import that file.',
   importLeaveEmpty: 'Leave this column empty: import only adds new employees.',
   importCurrency: (currency: string, country: string) => `Currency must be ${currency} for country ${country}.`,
   pageSize: (v: string) => `Page size must be 25, 50 or 100, not "${v}".`,
