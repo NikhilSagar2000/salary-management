@@ -99,3 +99,11 @@ test('the search box follows the URL when it changes elsewhere', async () => {
   await userEvent.click(screen.getByRole('button', { name: 'Clear filters' }));
   expect(screen.getByLabelText('Search')).toHaveValue('');
 });
+
+test('export downloads the current filter', async () => {
+  signedInWith(listResponse({ total: 200 }));
+  renderApp('/employees?country=US&department=Sales&sort=hireDate&dir=desc&page=3&pageSize=50');
+  expect(await screen.findByRole('link', { name: 'Export CSV' })).toHaveAttribute(
+    'href', '/api/employees.csv?country=US&department=Sales&sort=hireDate&dir=desc',
+  );
+});

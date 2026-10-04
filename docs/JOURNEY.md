@@ -487,6 +487,7 @@ is done (hashes copied from `git log`).
 - Task 21 · green: when nothing matches, the list says so plainly with a Clear filters button, and shows no table or stats (review focus 5).
 - Task 21 · red: the search box follows the URL when it changes elsewhere (Clear filters, back/forward) (LIST-6).
 - Task 21 · green: the search box follows the URL when it changes elsewhere (Clear filters, back/forward) without overwriting what is being typed (LIST-6).
+- Task 21 · test: Export CSV links to `/api/employees.csv` with the current filters and sort but no paging, so the file has every matching row (CSV-1). Passed first run; keeping the page parameter made it fail.
 
 ---
 
