@@ -52,3 +52,13 @@ test('every full name differs and fits country and gender', () => {
   const genders = seed.employees.reduce<Record<string, number>>((acc, e) => ({ ...acc, [e.gender]: (acc[e.gender] ?? 0) + 1 }), {});
   expect(genders.non_binary).toBeGreaterThan(0);
 });
+
+test('codes E000001–E010000, emails unique', () => {
+  const codes = seed.employees.map((e) => e.code).sort();
+  expect(codes[0]).toBe('E000001');
+  expect(codes.at(-1)).toBe('E010000');
+  expect(new Set(codes).size).toBe(10_000);
+  const emails = seed.employees.map((e) => e.workEmail.toLowerCase());
+  expect(new Set(emails).size).toBe(10_000);
+  for (const email of emails) expect(email).toMatch(/^[a-z]+(\.[a-z]+)*@acme\.example$/);
+});
