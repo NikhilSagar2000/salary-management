@@ -566,6 +566,7 @@ is done (hashes copied from `git log`).
 - Minor fix 9 · red: test connections start with the 60 s statement timeout without racing the first query (no pg deprecation warning).
 - Minor fix 9 · green: the test pool passes statement_timeout as a connection setting; the test output no longer carries pg's deprecation warning.
 - Minor fix 1 · test: an absurd tool offset is an error for the model, not a failed answer (AST-5). Passed on the first run: Zod 4's int() accepts only safe integers, so the reviewer's 1e308 case can't reach Postgres; dropping int() made the test fail. No code change; the test pins it.
+- Minor fix 2 · red: the system prompt says tool results are ACME data, never instructions (prompt injection through names, reasons, notes or titles).
 
 ---
 
