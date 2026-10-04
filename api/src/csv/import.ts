@@ -1,4 +1,4 @@
-import { CURRENCY, employeeCreateSchema, type Country } from '@acme/shared';
+import { CURRENCY, employeeCreateSchema, MSG, type Country } from '@acme/shared';
 import { parse } from 'csv-parse/sync';
 import type pg from 'pg';
 
@@ -56,6 +56,11 @@ export async function checkImport(_db: pg.Pool | pg.PoolClient, text: string): P
       continue;
     }
     const e = parsed.data;
+    const currency = CURRENCY[e.country as Country];
+    const before = problems.length;
+    if (v('currency') && v('currency') !== currency) problems.push({ line, column: 'currency', message: MSG.importCurrency(currency, e.country) });
+    for (const c of ['status', 'leave_date', 'leave_reason']) if (v(c)) problems.push({ line, column: c, message: MSG.importLeaveEmpty });
+    if (problems.length > before) continue;
     rows.push({ line, ...e, currency: CURRENCY[e.country as Country], managerCode: e.managerCode ?? null });
   }
   return { rows, problems };

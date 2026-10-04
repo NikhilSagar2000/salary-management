@@ -33,7 +33,7 @@ test('accepts comma or semicolon, BOM, any column order and header case', async 
   expect(shuffled.body.rows[0]).toMatchObject({ code: 'E000009', salary: 95000, level: 2, currency: 'USD', hireDate: '2025-01-15' });
 });
 
-test.fails("allows the export's status and leave columns only when empty", async () => {
+test("allows the export's status and leave columns only when empty", async () => {
   const { preview } = await setup();
   const header = `${HEADER},currency,manager_code,status,leave_date,leave_reason`;
   const ok = await preview([header, row(1, ',BRL,,,,'), row(2, ',,,,,')].join('\n'));
