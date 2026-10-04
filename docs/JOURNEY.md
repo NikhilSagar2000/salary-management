@@ -591,6 +591,7 @@ is done (hashes copied from `git log`).
 - Phase 6 · results so far: sign-in, list, employee page, the three change dialogs and add employee run in Chrome and by API/SQL (e2e/qa-api.ts, e2e/qa-shots.ts); two fixes already made (bad list addresses, country sort); more findings queued for one fix batch.
 - Phase 6 · results: every screen and rule has been run; 13 findings queued for the fix batch (Stop also submits, refused actions losing their message, the hire's Cancel, misleading leave history and leaver pay comparison, overlap at 390, the chat not scrolling, stale field messages, job-change levels, pagination wrap).
 - Phase 6 QA fix 3 · red (found by QA, UI-4): a refusal that belongs to no field (e.g. cancelling a hire, undoing a leave that isn't there) answers with its own message; the page showed only "Some fields need fixing."
+- Phase 6 QA fix 3 · green: a 400 whose only problem is the whole request carries that message as its error, so buttons without a form (cancel, undo leaving) show it.
 
 ---
 

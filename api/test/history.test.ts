@@ -163,7 +163,7 @@ test("no route edits a change's fields", async () => {
   }
 });
 
-test.fails('a refusal that belongs to no field answers with its own message (UI-4)', async () => {
+test('a refusal that belongs to no field answers with its own message (UI-4)', async () => {
   const { app, db } = await testApp();
   const agent = await signIn(app);
   await agent.post('/api/employees').send({ ...newEmployee, hireDate: '2026-12-01' });

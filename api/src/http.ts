@@ -21,7 +21,8 @@ export function queryErrors(res: Response, issues: Issue[]) {
 }
 
 export function sendFieldErrors(res: Response, fields: Record<string, string>) {
-  res.status(400).json({ error: MSG.fixFields, fields });
+  // A problem with the whole request (no field to show it beside) is the message itself.
+  res.status(400).json({ error: fields.form ?? MSG.fixFields, fields });
 }
 
 /** After a write matched no row: 404 if the employee doesn't exist, else 409 (out-of-date version). */
