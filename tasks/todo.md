@@ -29,6 +29,10 @@ reasons: `docs/JOURNEY.md` section 4.
 - [x] **Stop: Nikhil approved this plan (native execution, step detail just before each task)**
 - [x] Phase 5: build (tasks 1–29 below; final review and its fixes; see "Phase 5 review" at the end)
 - [ ] Phase 6: manual QA (test cases for every screen and rule, run, record, fix test-first)
+  - [ ] Write `docs/QA.md`: 13 screen cases and one row per criterion (86), each with how it's run
+  - [ ] Run on the end-to-end server (fresh seed, fake model with QA switches), screen by screen
+  - [ ] Record pass/fail per row; fix failures test-first and note the commit
+  - [ ] AUTH-3 last (it locks the IP out); AST-10 waits for the OpenRouter key
 - [ ] Phase 7: deploy after approval, README with set-up, tests and demo-recording script
 
 ## Global constraints

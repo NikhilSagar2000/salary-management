@@ -3,8 +3,10 @@ import type { AddressInfo } from 'node:net';
 
 /**
  * A local stand-in for OpenRouter's chat API, so no end-to-end run reaches the real model (AST-18). A question first gets
- * a streamed `query_employees` call for engineers in Brazil, then a streamed answer; a question containing "[429]" gets
- * OpenRouter's free-limit reply. GET /key reports 42 free requests left.
+ * a streamed `query_employees` call for engineers in Brazil, then a streamed answer. GET /key reports 42 free requests left.
+ * Switches in the question, for tests and manual QA: "[429]" gets the free-limit reply, "[500]" a server error,
+ * "[no tools]" an answer without any lookup, "[html]" an answer with a table, a list and raw HTML, "[slow]" a long,
+ * slow answer (for Stop and reloading mid-answer).
  */
 export async function startFakeOpenRouter(expectedKey: string) {
   const server = createServer(async (req, res) => {
@@ -22,15 +24,22 @@ export async function startFakeOpenRouter(expectedKey: string) {
     if (question.includes('[429]')) {
       return json(429, { error: { code: 429, message: 'Rate limit exceeded', metadata: { error_type: 'rate_limit_exceeded' } } });
     }
+    if (question.includes('[500]')) return json(500, { error: { code: 500, message: 'Internal server error' } });
     res.writeHead(200, { 'content-type': 'text/event-stream' });
     const send = (delta: unknown) => res.write(`data: ${JSON.stringify({ choices: [{ index: 0, delta }] })}\n\n`);
-    if (messages.at(-1)?.role !== 'tool') {
+    const words = question.includes('[html]')
+      ? ['**Median pay** by level:\n\n', '| Level | Median |\n|---|---|\n| L3 | BRL 120,000 |\n\n', '- one\n- two\n\n',
+        '<img src="x" onerror="document.title=\'HACKED\'"> <script>document.title=\'HACKED\'</script> <b>bold?</b>']
+      : question.includes('[slow]')
+        ? Array.from({ length: 60 }, (_, i) => `word${i + 1} `)
+        : ['Here are ', 'the engineers ', 'in **Brazil**.'];
+    if (messages.at(-1)?.role !== 'tool' && !question.includes('[no tools]')) {
       send({ tool_calls: [{ index: 0, id: 'call_1', type: 'function', function: { name: 'query_employees', arguments: '{"filters":{"country":["BR"],' } }] });
       send({ tool_calls: [{ index: 0, function: { arguments: '"department":["Engineering"]},"limit":5}' } }] });
     } else {
-      for (const words of ['Here are ', 'the engineers ', 'in **Brazil**.']) {
-        send({ content: words });
-        await new Promise((r) => setTimeout(r, 50));
+      for (const w of words) {
+        send({ content: w });
+        await new Promise((r) => setTimeout(r, question.includes('[slow]') ? 400 : 50));
       }
     }
     res.end('data: [DONE]\n\n');
