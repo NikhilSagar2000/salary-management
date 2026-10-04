@@ -118,3 +118,16 @@ test("undoing leaving is dated the day it was undone, in HR's timezone (LEAVE-2)
   expect(await events('UTC')).toEqual([{ type: 'undone', date: '2026-10-01' }, { type: 'left', date: '2026-12-31' }]);
   expect(await events('Asia/Tokyo')).toEqual([{ type: 'undone', date: '2026-10-02' }, { type: 'left', date: '2026-12-31' }]);
 });
+
+test.fails('a leave event says whether it is still ahead and whether it was undone (LEAVE-2)', async () => {
+  const { app } = await testApp(); // today: 2026-10-01
+  const agent = await signIn(app);
+  await agent.post('/api/employees').send(newEmployee);
+  await agent.post('/api/employees/E000123/leave').send({ version: 1, leaveDate: '2026-12-31', reason: 'Moving abroad' });
+  const leaves = async () => (await agent.get('/api/employees/E000123')).body.timeline.filter((e: { type: string }) => e.type === 'left');
+  expect(await leaves()).toEqual([{ type: 'left', date: '2026-12-31', reason: 'Moving abroad', scheduled: true, undone: false }]);
+  await agent.post('/api/employees/E000123/undo-leave').send({ version: 2 });
+  expect(await leaves()).toEqual([{ type: 'left', date: '2026-12-31', reason: 'Moving abroad', scheduled: true, undone: true }]);
+  await agent.post('/api/employees/E000123/leave').send({ version: 3, leaveDate: '2026-09-30', reason: null });
+  expect((await leaves()).find((e: { date: string }) => e.date === '2026-09-30')).toEqual({ type: 'left', date: '2026-09-30', reason: null, scheduled: false, undone: false });
+});

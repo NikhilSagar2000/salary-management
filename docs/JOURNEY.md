@@ -594,6 +594,7 @@ is done (hashes copied from `git log`).
 - Phase 6 QA fix 3 · green: a 400 whose only problem is the whole request carries that message as its error, so buttons without a form (cancel, undo leaving) show it.
 - Phase 6 QA fix 4 · red (found by QA, EMP-11): a starting person's hire reads "Starts" and offers no Cancel (the server refuses to cancel a hire).
 - Phase 6 QA fix 4 · green: a hire dated after today reads "Starts" and has no Cancel; other scheduled changes keep "Scheduled" and Cancel.
+- Phase 6 QA fix 5 · red (found by QA, LEAVE-2): a leave event says whether it is still ahead and whether it was later undone; the page reads Left, Leaves or Leave cancelled (an undone leave used to read "Leaves" as if it would happen).
 
 ---
 
