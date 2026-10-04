@@ -2,7 +2,7 @@ import { expect, test } from 'vitest';
 import { testPool } from './helpers.ts';
 
 // Its own file: Node prints each deprecation once per process, so an earlier pool would hide it.
-test.fails('test connections start with the 60 s statement timeout, without racing the first query', async () => {
+test('test connections start with the 60 s statement timeout, without racing the first query', async () => {
   const warnings: string[] = [];
   const onWarning = (w: Error) => warnings.push(w.message);
   process.on('warning', onWarning);

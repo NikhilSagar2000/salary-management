@@ -9,7 +9,7 @@ pg.types.setTypeParser(pg.types.builtins.INT8, Number);
 /** The local Docker database, used when DATABASE_URL isn't set. */
 export const DEV_DATABASE_URL = 'postgres://acme:acme@localhost:4734/acme';
 
-export const createPool = (connectionString: string) => new pg.Pool({ connectionString });
+export const createPool = (connectionString: string, extra: pg.PoolConfig = {}) => new pg.Pool({ connectionString, ...extra });
 
 /** Runs `fn` in one transaction: commits if it resolves, rolls back if it throws. */
 export async function withTx<T>(db: pg.Pool, fn: (client: pg.PoolClient) => Promise<T>): Promise<T> {
