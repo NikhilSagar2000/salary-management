@@ -45,3 +45,6 @@ export const MAX_SALARY = 10_000_000_000;
 
 export const STATUSES = ['starting', 'active', 'leaving', 'left'] as const;
 export type Status = (typeof STATUSES)[number];
+
+export const SORTS = ['name', 'code', 'country', 'department', 'role', 'level', 'hireDate', 'salary'] as const;
+export type Sort = (typeof SORTS)[number];

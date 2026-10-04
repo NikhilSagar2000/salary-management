@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { MSG } from './messages.ts';
-import { COUNTRIES, DEPARTMENTS, GENDERS, LEVELS, MAX_SALARY, ROLE_NAMES, ROLES, STATUSES, type Role, type Status } from './reference.ts';
+import { COUNTRIES, DEPARTMENTS, GENDERS, LEVELS, MAX_SALARY, ROLE_NAMES, ROLES, SORTS, STATUSES, type Role, type Status } from './reference.ts';
 
 /** A salary typed by a person (number or text) → whole number, or a plain message. */
 export const salarySchema = z.unknown().transform((value, ctx) => {
@@ -138,6 +138,8 @@ export const listQuerySchema = z.object({
   level: csvOf(LEVELS, 'level'),
   gender: csvOf(GENDERS, 'gender'),
   status: csvOf(STATUSES, 'status').transform((s) => s ?? DEFAULT_STATUSES),
+  sort: z.enum(SORTS, { error: (i) => MSG.unknownValue('sort', String(i.input)) }).default('name'),
+  dir: z.enum(['asc', 'desc'], { error: (i) => MSG.unknownValue('sort direction', String(i.input)) }).default('asc'),
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().pipe(z.union([z.literal(25), z.literal(50), z.literal(100)])).default(25),
 });

@@ -79,7 +79,7 @@ test('default status filter hides people who have left', async () => {
   expect(await sorted('?status=starting')).toEqual(['E000002']);
 });
 
-test.fails('sorts by each column both ways, ties broken by code', async () => {
+test('sorts by each column both ways, ties broken by code', async () => {
   const { list } = await setup([
     { code: 'E000001', lastName: 'Costa', country: 'BR', department: 'Sales', role: 'Account Executive', level: 2, hireDate: '2021-05-01' },
     { code: 'E000002', lastName: 'Abe', country: 'JP', department: 'Engineering', level: 5, hireDate: '2019-01-01' },

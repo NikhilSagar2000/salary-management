@@ -337,6 +337,7 @@ is done (hashes copied from `git log`).
 - Task 11 · red: status filter, leavers hidden by default (LIST-3, LEAVE-6).
 - Task 11 · green: status filter (starting/active/leaving/left as of today); default hides people who have left (LIST-3, LEAVE-6).
 - Task 11 · red: sort by each column both ways (LIST-4).
+- Task 11 · green: sort by name (last, first), code, country, department, role, level or hire date, either direction, ties by code (LIST-4).
 
 ---
 
