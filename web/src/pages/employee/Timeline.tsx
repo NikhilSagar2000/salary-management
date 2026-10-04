@@ -25,7 +25,7 @@ export function Timeline({ entries, action }: { entries: Detail['timeline']; act
               <Group gap="xs">
                 <Text size="sm" fw={600}>{formatDate(e.date)}</Text>
                 {e.type === 'change' && e.hire && <Badge variant="light">Hired</Badge>}
-                {e.type === 'change' && e.scheduled && !e.cancelled && <Badge variant="light" color="blue">Scheduled</Badge>}
+                {e.type === 'change' && e.scheduled && !e.cancelled && <Badge variant="light" color="blue">{e.hire ? 'Starts' : 'Scheduled'}</Badge>}
                 {e.type === 'change' && e.cancelled && <Badge variant="light" color="gray">Cancelled{e.cancelledOn && ` on ${formatDate(e.cancelledOn)}`}</Badge>}
                 {e.type === 'change' && e.wontApply && <Badge variant="light" color="yellow">Won't apply (after leave date)</Badge>}
                 {e.type === 'left' && <Badge variant="light" color="gray">Leaves</Badge>}

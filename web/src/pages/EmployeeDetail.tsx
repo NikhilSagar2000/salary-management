@@ -120,7 +120,7 @@ export function EmployeeDetail() {
         <Timeline
           entries={d.timeline}
           action={(c) =>
-            c.scheduled && !c.cancelled && d.status !== 'left' ? (
+            c.scheduled && !c.cancelled && !c.hire && d.status !== 'left' ? (
               <Button size="xs" variant="default" aria-label={`Cancel the change on ${formatDate(c.date)}`} onClick={() => run(`/api/employees/${d.code}/changes/${c.id}/cancel`)}>
                 Cancel
               </Button>
