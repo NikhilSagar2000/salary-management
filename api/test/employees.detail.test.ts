@@ -1,0 +1,37 @@
+import { expect, test } from 'vitest';
+import { newEmployee, signIn, testApp } from './helpers.ts';
+
+async function setup() {
+  const { app, db } = await testApp(); // today: 2026-10-01
+  const agent = await signIn(app);
+  let n = 200;
+  const hire = async (extra: Record<string, unknown> = {}) => {
+    const code = `E000${n++}`;
+    const res = await agent.post('/api/employees').send({ ...newEmployee, code, workEmail: `${code}@acme.example`, ...extra });
+    if (res.status !== 201) throw new Error(JSON.stringify(res.body));
+    return code;
+  };
+  return { agent, db, hire };
+}
+
+test.fails('returns status, current job and pay against peers', async () => {
+  const { agent, hire } = await setup();
+  // Peers: BR Software Engineer L3 — salaries 100k, 120k, 133k (Ana), 140k → median 126,500
+  await hire({ salary: 100000 });
+  await hire({ salary: 120000 });
+  await hire({ salary: 140000 });
+  await hire({ salary: 999000, level: 4 }); // not a peer (other level)
+  await hire({ salary: 50000, hireDate: '2026-12-01' }); // starting: not counted
+  await agent.post('/api/employees').send(newEmployee); // Ana, E000123, 133,000
+  const res = await agent.get('/api/employees/E000123');
+  expect(res.status).toBe(200);
+  expect(res.body).toMatchObject({
+    code: 'E000123', firstName: 'Ana', lastName: 'Silva', gender: 'female', workEmail: 'ana.silva@acme.example',
+    hireDate: '2024-02-29', leaveDate: null, leaveReason: null, status: 'active', version: 1,
+    current: { country: 'BR', currency: 'BRL', department: 'Engineering', role: 'Software Engineer', level: 3, salary: 133000, manager: null },
+    peers: { currency: 'BRL', median: 126500, min: 100000, max: 140000, headcount: 4, position: 5 },
+  });
+  const starting = await agent.get('/api/employees/E000204');
+  expect(starting.body).toMatchObject({ status: 'starting', current: { salary: 50000 } });
+  expect((await agent.get('/api/employees/E000999')).status).toBe(404);
+});

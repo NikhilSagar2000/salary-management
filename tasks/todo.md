@@ -555,3 +555,21 @@ Files: `shared/src/schemas.ts` (`leaveSchema`), `api/src/employees/leave.ts`, ro
 - [x] Step 6: "scheduled changes after the leave date stop applying and return on undo" (LEAVE-5).
 - [x] Step 7: `concurrency.test.ts` leave and undo cases (EMP-13).
 - [x] Task check: `npm test`.
+
+### Task 10: Employee detail
+
+Files: `api/src/employees/detail.ts`, `api/src/stats/peers.ts`, routes,
+`api/test/employees.detail.test.ts`. `GET /api/employees/:code` →
+`{ code, firstName, lastName, gender, workEmail, hireDate, leaveDate, leaveReason, status,
+version, current: { country, currency, department, role, level, salary, manager }, peers,
+reports, timeline }`. "Current" is the state today (for someone starting: on their hire date).
+Peers = same country, role and level, active or leaving today, including the person;
+`position` = whole-number % above (+) or below (−) the peer median.
+Timeline entries in date order: changes (`changes: [{ field, from, to }]`, `scheduled`,
+`cancelled`, `wontApply`) and leave events.
+
+- [ ] Step 1: "returns status, current job and pay against peers" (+ unknown code → 404).
+- [ ] Step 2: "shows the manager with a has-left flag and the direct reports".
+- [ ] Step 3: "timeline lists each change with from → to, and marks scheduled, cancelled,
+  won't-apply and leave events".
+- [ ] Task check: `npm test`.
