@@ -629,6 +629,7 @@ is done (hashes copied from `git log`).
 - Model smoke test fix 1 · red (found with the real free models): badly shaped tool arguments (a single value where a list is expected) go back to the model as an error; the step text read the unchecked arguments and crashed the whole answer ("f.country.map is not a function").
 - Model smoke test fix 1 · green: the step text describes only arguments that pass the tool's own checks (validArgs), with plain wording otherwise; the tool's error still goes back to the model, which can correct itself.
 - Model smoke test (D44) with Nikhil's key: npm run smoke:model added; apodex-1.1-mini (Nikhil's primary), lfm-2.5 and nemotron-3-ultra pass streamed tool calls and several lookup rounds; qwen3.8 rate-limited upstream; failover unverified (can't be forced). AST-10 partly fails: narration from the lookup round is joined onto the answer.
+- Phase 6 QA fix 13 · red (found with the real model, AST-10): words a model writes before a lookup become a step and are taken back from the answer, so the saved answer is only the final reply.
 
 ---
 

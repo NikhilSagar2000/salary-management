@@ -233,3 +233,21 @@ test('sending a question scrolls the chat to it', async () => {
   await waitFor(() => expect(scrolled).toHaveBeenCalled());
   scrolled.mockRestore();
 });
+
+test.fails('words the server takes back are cleared from the answer and kept as a step', async () => {
+  start('/assistant/2', {
+    'POST /api/chats/2/messages': () => ({
+      status: 200,
+      events: sse(
+        sseEvent('token', { text: 'Let me check the data first. ' }), sseEvent('reset', {}), sseEvent('step', { text: 'Let me check the data first.' }),
+        sseEvent('token', { text: "The data can't answer this because there is no bonus data." }),
+        sseEvent('sources', { sources: noSources, basedOnData: true }), sseEvent('done', {}),
+      ),
+    }),
+  });
+  await ask('How much bonus did engineers get?');
+  const answer = await screen.findByRole('article', { name: 'Answer' });
+  await waitFor(() => expect(answer).toHaveTextContent("The data can't answer this because there is no bonus data."));
+  expect(within(answer).getByRole('listitem')).toHaveTextContent('Let me check the data first.');
+  expect(answer).not.toHaveTextContent('first. The data');
+});

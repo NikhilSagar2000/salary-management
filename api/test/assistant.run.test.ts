@@ -115,3 +115,14 @@ test('badly shaped tool arguments go back to the model as an error, not a failed
   expect(String(toolReply?.content)).toMatch(/country/);
   expect(answer.text).toBe('Fixed.');
 });
+
+test.fails('words written before a lookup become a step, so the answer is only the final reply (AST-10)', async () => {
+  const { events, answer } = await ask([
+    [{ type: 'token', text: 'Let me check the data first. ' },
+      { type: 'tool_call', id: 'c1', name: 'aggregate', args: { metric: 'salary', filters: { country: ['US'] } } }, { type: 'done' }],
+    [{ type: 'token', text: "The data can't answer this because " }, { type: 'token', text: 'there is no bonus data.' }, { type: 'done' }],
+  ]);
+  expect(events.map((e) => e.type)).toEqual(['token', 'reset', 'step', 'step', 'token', 'token', 'sources', 'done']);
+  expect(events[2]).toEqual({ type: 'step', text: 'Let me check the data first.' });
+  expect(answer.text).toBe("The data can't answer this because there is no bonus data.");
+});

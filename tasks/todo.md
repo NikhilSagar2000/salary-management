@@ -269,7 +269,7 @@ is written just before the task starts, from the interfaces that exist at that p
 - [x] **Task 19: List performance.** Files: `api/src/measure-list.ts` (`npm run measure:list`). Run against the
   seeded dev database; `npm run measure:list` exits non-zero above 300 ms p95 (LIST-11).
   Results, machine and method go into JOURNEY section 7.
-- [ ] **Model smoke test (needs Nikhil's key in `.env`; not part of `npm test`).**
+- [x] **Model smoke test (needs Nikhil's key in `.env`; not part of `npm test`).**
   `npm run smoke:model` checks each candidate free model for streamed tool-call deltas,
   several tool rounds while streaming, and the `models` fallback; picks one per D44 and logs
   the result in JOURNEY. If the key isn't there yet, building continues on the fake model.
