@@ -1,4 +1,4 @@
-import { DEFAULT_STATUSES, type ListQuery } from '@acme/shared';
+import { COUNTRY_NAMES, DEFAULT_STATUSES, type ListQuery } from '@acme/shared';
 import type pg from 'pg';
 import { CURRENCY_ORDER, PAY_STATS } from '../stats/peers.ts';
 
@@ -6,11 +6,14 @@ import { CURRENCY_ORDER, PAY_STATS } from '../stats/peers.ts';
 export const STATUS_SQL = `CASE WHEN e.hire_date > $1 THEN 'starting' WHEN e.leave_date <= $1 THEN 'left'
   WHEN e.leave_date IS NOT NULL THEN 'leaving' ELSE 'active' END`;
 
+// The list shows country names, so it sorts by them (codes are fixed constants, safe to inline).
+const COUNTRIES_BY_NAME = Object.entries(COUNTRY_NAMES).sort(([, a], [, b]) => a.localeCompare(b)).map(([code]) => `'${code}'`);
+
 const ORDER: Record<ListQuery['sort'], string[]> = {
   salary: ['s.salary'], // only reachable with one country filtered (one currency)
   name: ['e.last_name', 'e.first_name'],
   code: [],
-  country: ['s.country'],
+  country: [`array_position(ARRAY[${COUNTRIES_BY_NAME.join(', ')}], s.country)`],
   department: ['s.department'],
   role: ['s.role'],
   level: ['s.level'],

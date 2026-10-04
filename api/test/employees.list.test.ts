@@ -170,7 +170,7 @@ test('a bad list address answers with the message itself, for the page to show (
   expect(both).toContain('There\'s no country called "XX".');
 });
 
-test.fails('country sorts by the name shown, not the two-letter code (LIST-4)', async () => {
+test('country sorts by the name shown, not the two-letter code (LIST-4)', async () => {
   const { list } = await setup([
     { code: 'E000001', country: 'GB' }, // United Kingdom
     { code: 'E000002', country: 'IN' }, // India
