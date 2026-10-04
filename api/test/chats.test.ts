@@ -75,7 +75,7 @@ test('a reopened chat returns messages with their saved sources', async () => {
   ]);
 });
 
-test.fails('rejects questions over 2,000 characters', async () => {
+test('rejects questions over 2,000 characters', async () => {
   const { agent, chat, db } = await chatWith([]);
   const post = (question: unknown) => agent.post(`/api/chats/${chat.id}/messages`).send({ question });
   const long = await post('x'.repeat(2001));

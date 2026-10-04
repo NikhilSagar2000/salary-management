@@ -433,6 +433,7 @@ is done (hashes copied from `git log`).
 - Task 18 · green: `POST /api/chats/:id/messages` saves the question (the first one names the chat), streams the answer as server-sent events and saves it (AST-1).
 - Task 18 · test: over HTTP the answer streams step, tokens, sources, done; reopening the chat returns each answer with its saved sources, and later questions carry the earlier ones (AST-2, AST-3). Passed first run; not saving the sources made it fail.
 - Task 18 · red: questions must be 1–2,000 characters (AST-12).
+- Task 18 · green: a question must be 1–2,000 characters ("Type a question." / "Keep the question to 2,000 characters or fewer."); nothing is saved otherwise (AST-12).
 
 ---
 

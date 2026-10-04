@@ -1,4 +1,4 @@
-import { chatTitleSchema, MSG } from '@acme/shared';
+import { chatTitleSchema, MSG, questionSchema } from '@acme/shared';
 import { Router } from 'express';
 import type pg from 'pg';
 import type { Clock } from '../clock.ts';
@@ -35,7 +35,9 @@ export function assistantRoutes({ db, clock, model }: { db: pg.Pool; clock: Cloc
 
   router.post('/api/chats/:id/messages', async (req, res) => {
     const chatId = Number(req.params.id);
-    const question = typeof req.body?.question === 'string' ? req.body.question.trim() : '';
+    const parsed = questionSchema.safeParse(req.body);
+    if (!parsed.success) return fieldErrors(res, parsed.error.issues);
+    const { question } = parsed.data;
     if (!(await getChat(db, chatId))) return noChat(res);
     const history = await chatHistory(db, chatId);
     await saveQuestion(db, clock, chatId, question);

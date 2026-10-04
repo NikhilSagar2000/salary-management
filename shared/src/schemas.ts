@@ -172,3 +172,8 @@ export const overviewQuerySchema = z.object({ country: z.enum(COUNTRIES, { error
 export const chatTitleSchema = z.object({
   title: z.string({ error: MSG.chatTitle }).trim().min(1, { error: MSG.chatTitle }).max(80, { error: MSG.chatTitle }),
 });
+
+/** A question for the assistant (AST-12). */
+export const questionSchema = z.object({
+  question: z.string({ error: MSG.questionEmpty }).trim().min(1, { error: MSG.questionEmpty }).max(2000, { error: MSG.questionTooLong }),
+});
