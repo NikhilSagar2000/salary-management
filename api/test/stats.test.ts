@@ -28,3 +28,17 @@ test('median is percentile_cont rounded half away from zero', async () => {
   const [inr] = await stats('?country=IN');
   expect(inr.median).toBe(2000003); // odd count: the middle value
 });
+
+test.fails('never combines currencies', async () => {
+  const { stats } = await setup([
+    { code: 'E000001', country: 'JP', salary: 6000000 },
+    { code: 'E000002', country: 'IN', salary: 1500000 },
+    { code: 'E000003', country: 'US', salary: 130000 },
+    { code: 'E000004', country: 'US', salary: 150000 },
+  ]);
+  expect(await stats()).toEqual([
+    { currency: 'USD', median: 140000, min: 130000, max: 150000, headcount: 2 },
+    { currency: 'INR', median: 1500000, min: 1500000, max: 1500000, headcount: 1 },
+    { currency: 'JPY', median: 6000000, min: 6000000, max: 6000000, headcount: 1 },
+  ]);
+});
