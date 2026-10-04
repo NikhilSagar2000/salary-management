@@ -241,6 +241,19 @@ Then started phase 5.
 | 2026-10-04 | Task 17: Model client and answer loop | 8d0f613..2d7c754 |
 | 2026-10-04 | Task 18: Chats API and streaming | 2d7c754..403e4ae |
 | 2026-10-04 | Task 19: List performance (p95 ~100 ms) | 403e4ae..88e63df |
+| 2026-10-04 | Backend checkpoint; seed-test timeout fix | 88e63df..a65d523 |
+| 2026-10-04 | Task 20: Web shell (routes, sign-in, theme, skip link, API client) | a65d523..e221b2d |
+| 2026-10-04 | Task 21: Employee list page | e221b2d..9abe0df |
+| 2026-10-04 | Task 22: Employee page and change forms | 9abe0df..47a91e0 |
+| 2026-10-04 | Chrome check at 1568 and 390 px: phone filter drawer (LIST-10), skip link hidden | 47a91e0..4eecdf5 |
+| 2026-10-04 | Task 23: Add employee page | 4eecdf5..3eb1db7 |
+| 2026-10-04 | Task 24: Pay overview page | 8d7eaaa..4893829 |
+| 2026-10-04 | Task 25: Import page | 5342b43..9a1b3f9 |
+| 2026-10-04 | Task 26: Assistant page (and the heading fix found in the Chrome check) | 3c5cc59..ff057e3 |
+| 2026-10-04 | Task 27: API serves the web build; Playwright flows against a fake OpenRouter | b82dce7..19c0e7a |
+| 2026-10-05 | Task 28: Accessibility (axe fixes: contrast, button names; keyboard flows) | 979df51..3e609e7 |
+| 2026-10-05 | Task 29: CI workflow, checked locally on a fresh Postgres | d8ca412..a5a7ebd |
+| 2026-10-05 | Final whole-branch review (S2) | this commit (hash in next entry) |
 
 ### Build log
 
@@ -762,6 +775,180 @@ My checks of its evidence:
 - Payscale US Software Engineer: sample size 24,077 and last reviewed 2026-07-14
   **verified** in the page data; the 1–4-year and 5–9-year medians (95,107 / 110,646) were not
   found by my quick search of the embedded data: **unverified** by me.
+
+
+More places the AI was wrong during the UI and end-to-end tasks, and how each was caught:
+- The open chat's heading kept "New chat" after the first question named the chat in the
+  list. Caught in the Chrome check; fixed test-first (Task 26).
+- I planned an extra plugin to show model HTML as text; react-markdown already does that.
+  Caught by running the test without it; the plugin was dropped (Task 26).
+- My keyboard tests typed dates as month/day/year; Chromium on this Mac shows day/month/year,
+  so the typed dates were wrong and one change was saved in the past (in the throwaway
+  end-to-end database only). Caught by the failing test; a helper now learns the order first
+  (Task 28).
+- Several first end-to-end runs failed on test mechanics, not on the app (an ambiguous label,
+  reading the table before it refreshed, an import file that reused an email, which the app
+  rightly refused). Each was read from the failure output before changing the test.
+
+**S2: final whole-branch review** (general-purpose agent, Fable, background, 2026-10-05)
+
+```text
+You are a Senior Code Reviewer with expertise in software architecture, design patterns, and best practices. Your job is to review completed work against its plan or requirements and identify issues before they cascade.
+
+## What Was Implemented
+
+ACME Salary Management, built from an empty repository in /Users/nikhilsagar007/personal_work/salary-management: a web app for one HR manager to replace Excel salary sheets for 10,000 employees in six countries (six currencies, never mixed or converted). npm workspaces: `shared/` (Zod schemas, reference data, messages, formatting), `api/` (Node 24 running TypeScript directly via type stripping, Express 5, `pg`, Postgres 17), `web/` (React 19, Mantine 9, react-router, Vite), `e2e/` (Playwright against a fake OpenRouter). Features: single-password sign-in with sessions; employee list with server-side search, filters, sort, paging and URL state, per-currency pay stats; employee page with effective-dated job/pay/manager/country history (rows hold only what changed), optimistic concurrency (409 on stale saves), scheduled changes and cancelling them, leavers with undo; add employee; pay overview (department x level per country); CSV export (BOM, formula guard) and all-or-nothing CSV import with a preview; a deterministic 10,000-person seed; a read-only pay assistant (OpenRouter free model, four typed read-only tools, streamed answers over SSE, saved multi-chat history, server-built "Based on" sources); accessibility (axe clean, keyboard flows); a GitHub Actions workflow (not yet run: no push is approved).
+
+## Requirements / Plan
+
+- Plan: `tasks/todo.md` (tasks 1-29, criteria-to-tests map, per-task step plans). Its "Review focus" section, verbatim:
+
+  1. **Server timezone vs dates.** A hire date saved as `2026-03-01` must come back `2026-03-01` whatever the server's `TZ` (Task 1: run under `TZ=America/Los_Angeles` and `TZ=Asia/Tokyo`).
+  2. **Names with accents, apostrophes and hyphens** (`João`, `O'Brien`, `Müller-Lüdenscheidt`) must save, search, export and import intact (Tasks 11, 14, 15).
+  3. **Excel CSV quirks:** quoted fields with commas or line breaks, CRLF line endings, trailing blank lines, BOM must parse correctly (Task 15).
+  4. **Salary typed like a person types it:** `95,000`, `95000.50`, `-1`, `1e6`, blank or an extra zero beyond the maximum get a plain message, never a crash or a wrong number (Task 2).
+  5. **Filters that match nobody** show an empty-state message and no stats line, not an error (Tasks 11, 21).
+
+- Spec (binding authority): `docs/SPEC.md` (TIME-1 plus numbered acceptance criteria). Scope and exclusions: `docs/REQUIREMENTS.md`. Project rules: `CLAUDE.md`. Decision log and build log: `docs/JOURNEY.md`.
+- The executor's rulings (decisions made without asking) are the `Ruling:` lines in `.superpowers/sdd/todo/progress.md`; weigh them.
+- Items the executor already noticed and deferred to you, please judge each:
+  a. API test runs print pg's deprecation "Calling client.query() when the client is already executing a query" (17 times); the source has not been traced. Is there a real concurrent-query bug on a single client (for example inside a transaction)?
+  b. Date fields are native `<input type="date">`, whose parts follow the OS locale, while validation messages say "Enter the ... as YYYY-MM-DD."
+  c. The API does not run migrations on start; the dev database once lacked a migration. Deploy will need `npm run migrate` first.
+
+## Git Range to Review
+
+**Base:** 9fb5c05 (plan approved; everything after it is the build)
+**Head:** 7af7ed2
+
+A prepared package of the whole range (280 commits, about 860 KB) is at `.superpowers/sdd/todo/review-9fb5c05..7af7ed2.diff`. It is large: review in passes (for example api/src, then web/src, then shared and e2e, then tests), reading files directly where the diff is hard to follow, and say in your report that you did.
+
+```bash
+git diff --stat 9fb5c05..7af7ed2
+git diff 9fb5c05..7af7ed2 -- api/src
+```
+
+You may run the test suites to check claims, one at a time, never in parallel: `caffeinate -i npm test` (uses the local Docker Postgres on port 4734; it truncates only the `acme_test` database) and `caffeinate -i npm run e2e` (builds the web app and recreates only the `acme_e2e` database). Do not touch the `acme` database or any file.
+
+## The spec is a vision document
+
+The spec says what the software must do. It does not enumerate every input, environment, or condition the software will meet. For behavior the spec is silent on, judge by what a reasonable person using this software would expect: a reasonable person's expectation is a requirement, and a spec's silence is not permission. Grade such findings by their effect on that person, not by whether the spec mentions the trigger.
+
+## Declined to judge
+
+Before your verdict, list every behavior you considered and set aside as outside the plan or spec, one line each, with the reason. The executor rules on each line; nothing you set aside is dropped silently. An empty list means you set nothing aside.
+
+## Read-Only Review
+
+Your review is read-only on this checkout. Do not mutate the working tree, the index, HEAD, or branch state in any way. Use tools like `git show`, `git diff`, and `git log` to inspect history. If you need a working copy of a different revision, check it out into a separate temporary directory (e.g. `git worktree add /tmp/review-[SHA] [SHA]`) — never move HEAD on this checkout.
+
+## You Do Not Dispatch Subagents
+
+Do all of this review yourself. Never spawn a subagent to review part of the diff, and never spawn another reviewer for a second opinion. This process already provides every review seat the work gets; a reviewer you spawn duplicates one of them at full cost, and its verdict counts for nothing. If the diff feels too large for one pass, review it in passes yourself and say so in your report.
+
+## What to Check
+
+**Plan alignment:**
+- Does the implementation match the plan / requirements?
+- Are deviations justified improvements, or problematic departures?
+- Is all planned functionality present?
+
+**Code quality:**
+- Clean separation of concerns?
+- Proper error handling?
+- Type safety where applicable?
+- DRY without premature abstraction?
+- Edge cases handled?
+
+**Architecture:**
+- Sound design decisions?
+- Reasonable scalability and performance?
+- Security concerns? In particular: the assistant (prompt injection through data such as names, leave reasons or chat titles reaching the model as tool results; the model must only read, never write or run SQL; the API key must stay on the server), session and sign-in handling, CSV formula injection, and rendering of model output in the browser.
+- Integrates cleanly with surrounding code?
+
+**Testing:**
+- Tests verify real behavior, not mocks?
+- Edge cases covered?
+- Integration tests where they matter?
+- All tests passing?
+
+**Production readiness:**
+- Migration strategy if schema changed?
+- Backward compatibility considered?
+- Documentation complete?
+- No obvious bugs?
+
+## Calibration
+
+Categorize issues by actual severity. Not everything is Critical. Acknowledge what was done well before listing issues — accurate praise helps the implementer trust the rest of the feedback.
+
+If you find significant deviations from the plan, flag them specifically so the implementer can confirm whether the deviation was intentional. If you find issues with the plan itself rather than the implementation, say so.
+
+## Output Format
+
+### Strengths
+[What's well done? Be specific.]
+
+### Issues
+
+#### Critical (Must Fix)
+[Bugs, security issues, data loss risks, broken functionality]
+
+#### Important (Should Fix)
+[Architecture problems, missing features, poor error handling, test gaps]
+
+#### Minor (Nice to Have)
+[Code style, optimization opportunities, documentation polish]
+
+For each issue:
+- File:line reference
+- What's wrong
+- Why it matters
+- How to fix (if not obvious)
+
+### Recommendations
+[Improvements for code quality, architecture, or process]
+
+### Declined to judge
+[One line each, with the reason]
+
+### Assessment
+
+**Ready to merge?** [Yes | No | With fixes]
+
+**Reasoning:** [1-2 sentence technical assessment]
+
+## Critical Rules
+
+**DO:**
+- Categorize by actual severity
+- Be specific (file:line, not vague)
+- Explain WHY each issue matters
+- Acknowledge strengths
+- Give a clear verdict
+
+**DON'T:**
+- Say "looks good" without checking
+- Mark nitpicks as Critical
+- Give feedback on code you didn't actually read
+- Be vague ("improve error handling")
+- Avoid giving a clear verdict
+```
+
+Result (agent's summary, condensed): read the files at HEAD in five passes and ran both suites
+(154 unit and API, 22 end-to-end, all passed). No Critical issues. Important: "Cancelled on
+<date>" missing (EMP-11); CSV import has no reporting-loop check (CSV-5 → EMP-10); the API never
+runs migrations, so a fresh deploy would fail, and it starts without a password hash. Twelve
+Minor items, including the export link without the timezone, "Based on" links that drop hire,
+leave and manager filters, and the undo-leaving entry dated with the old leave date. It traced
+the pg deprecation warning to the test pool's on-connect `SET` (test-only). Verdict: ready with
+fixes.
+
+My checks and grading: I read each cited line before acting. Three Minor items were raised to
+Important by their effect on HR: the export's missing timezone (TIME-1; a US-based HR exporting
+in the late afternoon gets tomorrow's state), the broader-than-labelled "Based on" links
+(AST-8), and the undo entry's date (LEAVE-2). Six fixes in all, each test-first; the other nine
+Minor items are listed as deferred in the Phase 5 report.
 
 ---
 
