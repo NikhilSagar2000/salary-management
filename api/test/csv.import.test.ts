@@ -1,0 +1,34 @@
+import { expect, test } from 'vitest';
+import { insertPeople, signIn, testApp } from './helpers.ts';
+
+async function setup(people: Parameters<typeof insertPeople>[1] = []) {
+  const { app, db } = await testApp(); // today: 2026-10-01
+  await insertPeople(db, people);
+  const agent = await signIn(app);
+  const send = (path: string, csv: string) => agent.post(path).set('Content-Type', 'text/csv').send(csv);
+  return { db, preview: (csv: string) => send('/api/imports/preview', csv), commit: (csv: string) => send('/api/imports', csv) };
+}
+
+const HEADER = 'code,first_name,last_name,gender,work_email,country,department,role,level,salary,hire_date';
+const row = (n: number, extra = '') =>
+  `E${String(n).padStart(6, '0')},Ana${n},Silva,female,ana${n}@acme.example,BR,Engineering,Software Engineer,3,133000,2024-02-29${extra}`;
+
+test.fails('accepts comma or semicolon, BOM, any column order and header case', async () => {
+  const { preview } = await setup();
+  const comma = await preview([HEADER, row(1), row(2)].join('\n'));
+  expect(comma.status).toBe(200);
+  expect(comma.body.problems).toEqual([]);
+  expect(comma.body.rows).toHaveLength(2);
+  expect(comma.body.rows[0]).toEqual({
+    line: 2, code: 'E000001', firstName: 'Ana1', lastName: 'Silva', gender: 'female', workEmail: 'ana1@acme.example',
+    country: 'BR', currency: 'BRL', department: 'Engineering', role: 'Software Engineer', level: 3, salary: 133000,
+    hireDate: '2024-02-29', managerCode: null,
+  });
+  const semicolon = await preview('﻿' + [HEADER.replaceAll(',', ';'), row(1).replaceAll(',', ';')].join('\r\n'));
+  expect(semicolon.body.problems).toEqual([]);
+  expect(semicolon.body.rows[0].code).toBe('E000001');
+  const shuffled = await preview(['Salary,CODE,Hire_Date,first_name,last_name,gender,work_email,country,department,role,LEVEL',
+    '95000,E000009,2025-01-15,Lee,Kim,male,lee.kim@acme.example,US,Engineering,QA Engineer,L2'].join('\n'));
+  expect(shuffled.body.problems).toEqual([]);
+  expect(shuffled.body.rows[0]).toMatchObject({ code: 'E000009', salary: 95000, level: 2, currency: 'USD', hireDate: '2025-01-15' });
+});

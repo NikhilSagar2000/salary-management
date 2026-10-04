@@ -651,3 +651,23 @@ leave_date, leave_reason.
 - [x] Step 2: "prefixes formula-like cells with an apostrophe" (CSV-2).
 - [x] Step 3: "accented, apostrophe and comma names export intact" (review focus 2; quoting).
 - [x] Task check: `npm test`.
+
+### Task 15: CSV import
+
+Files: `api/src/csv/import.ts` (parse → check → save), routes, `api/test/csv.import.test.ts`,
+dependency `csv-parse` (RFC 4180 quoting; D63). `POST /api/imports/preview` and
+`POST /api/imports`, body = the CSV text (`text/csv`, ≤ 5 MB). Preview → `{ rows, problems }`,
+nothing saved. Import → re-runs every check inside one transaction; any problem saves nothing
+(400 with the problems), else 201 `{ imported }`. Problems are `{ line, column, message }`
+(line = file line, header is line 1). A leading `'` added by the export's formula guard is removed.
+
+- [ ] Step 1: "accepts comma or semicolon, BOM, any column order and header case" (CSV-3).
+- [ ] Step 2: "allows the export's status and leave columns only when empty" (CSV-3).
+- [ ] Step 3: "refuses files over 5 MB or 10,000 rows" (CSV-3).
+- [ ] Step 4: "quoted commas and line breaks, CRLF and trailing blank lines parse correctly" (review focus 3).
+- [ ] Step 5: "preview lists rows and every problem by line and column, saving nothing" (CSV-4).
+- [ ] Step 6: "applies the add-employee rules, ISO dates, manager from the database or the same file" (CSV-5).
+- [ ] Step 7: "a duplicate code or email in the database or file flags every row involved" (CSV-6).
+- [ ] Step 8: "import saves all rows in one transaction or none, re-checking at commit" (CSV-7).
+- [ ] Step 9: "reports an empty file, missing columns or an unreadable file plainly" (CSV-8).
+- [ ] Task check: `npm test`.

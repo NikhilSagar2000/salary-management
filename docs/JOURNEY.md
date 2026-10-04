@@ -376,6 +376,7 @@ is done (hashes copied from `git log`).
 - Task 14 · red: formula-like cells get an apostrophe (CSV-2).
 - Task 14 · green: cells starting with = + - @, tab or CR get a leading apostrophe so Excel shows them as text (CSV-2).
 - Task 14 · test: names with accents, apostrophes and commas export intact (commas quoted) (review focus 2). Passed first run; removing the quoting made it fail.
+- Task 15 · red: import preview accepts comma or semicolon files, BOM, any column order and header case (CSV-3); D63 adds `csv-parse`.
 
 ---
 
@@ -448,6 +449,7 @@ accepted when Nikhil approved the plan (P4).
 | D60 | Seed pay spread | Market p25/p75 would push ~0.5–12% of people past SEED-8's limits | – | Half the market log-spread (one company is narrower than the market, per the research note), truncated to 0.7–1.4× band, so only the ~30 listed outliers pass 1.8× / 0.55× | Lets SEED-8 hold exactly | C |
 | D61 | Seed same-job gender gap | Q29 "small gap, varies by country" | – | Women and non-binary staff × (1 − gap): US 1% (Payscale), DE 6% (Destatis adjusted), JP 12% (midpoint of the research's 10–15%); GB 4%, BR 6%, IN 8% are **my estimates** (no official adjusted figure) | Research says use estimates where none exist | C |
 | D62 | Seed organisation mix and history | SEED-9 "looks real" | – | Departments: Engineering 40%, Sales 15%, Customer Support 12%, Marketing 7%, Operations 7%, Product 6%, Finance 5%, Design 4%, HR 4%. Levels L1–L7: 12/22/26/20/12/6/2% within each role's range. Gender 42% female, 56% male, 2% non-binary. Hire dates 2012–2026 skewed to recent years; raise every 1 April (US/GB 3–5%, DE 2–4%, JP 1–3%, IN 7–11%, BR 5–9%); promotion every 2–4 years (+8–15%); about 12% leavers, about 1% relocations | Plausible tech-company shape; all **my estimates**, for Nikhil to adjust | C |
+| D63 | CSV parsing library | Import must handle Excel CSV quoting | Hand-written parser · `csv-parse` | `csv-parse` (RFC 4180, BOM, quoted commas and line breaks, CRLF) | Quoting edge cases are where hand-written CSV parsers break; one well-tested dependency | C |
 
 ---
 
