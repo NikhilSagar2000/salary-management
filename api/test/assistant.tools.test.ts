@@ -38,3 +38,21 @@ test('query_employees filters any field, caps at 200 rows and reports the total'
   const hired = await tool('query_employees', { filters: { hiredFrom: '2019-01-01', hiredTo: '2019-12-31', search: 'priya' } });
   expect((hired.result as { rows: { code: string }[] }).rows.map((r) => r.code)).toEqual(['E000901']);
 });
+
+test.fails('get_employee returns the full history', async () => {
+  const { tool, db } = await setup([{ code: 'E000001', firstName: 'Ana', lastName: 'Silva', country: 'BR', salary: 133000, hireDate: '2024-02-29' }]);
+  await db.query(`INSERT INTO job_changes (employee_id, effective_date, level, salary, currency, note) VALUES (1, '2025-04-01', 4, 150000, 'BRL', 'Promotion to L4')`);
+  const { result, sources } = await tool('get_employee', { code: 'E000001' });
+  expect(result).toMatchObject({
+    code: 'E000001', firstName: 'Ana', lastName: 'Silva', status: 'active',
+    current: { country: 'BR', level: 4, salary: 150000, currency: 'BRL' },
+    timeline: [
+      { type: 'change', date: '2024-02-29', hire: true },
+      { type: 'change', date: '2025-04-01', note: 'Promotion to L4', changes: [
+        { field: 'level', from: 3, to: 4 }, { field: 'salary', from: { amount: 133000, currency: 'BRL' }, to: { amount: 150000, currency: 'BRL' } },
+      ] },
+    ],
+  });
+  expect(sources).toEqual([{ kind: 'person', code: 'E000001', name: 'Ana Silva' }]);
+  expect((await tool('get_employee', { code: 'E000999' })).result).toEqual({ error: 'No employee with code E000999.' });
+});
