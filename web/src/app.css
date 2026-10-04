@@ -2,7 +2,8 @@
 .skip-link {
   position: absolute;
   left: 8px;
-  top: -40px;
+  top: 0;
+  transform: translateY(-200%);
   z-index: 1000;
   padding: 8px 12px;
   background: var(--mantine-color-body);
@@ -11,5 +12,5 @@
   border-radius: var(--mantine-radius-sm);
 }
 .skip-link:focus {
-  top: 8px;
+  transform: translateY(8px);
 }

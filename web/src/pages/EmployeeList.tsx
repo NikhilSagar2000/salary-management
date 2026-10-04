@@ -3,10 +3,10 @@ import {
   type Currency,
 } from '@acme/shared';
 import {
-  Alert, Anchor, Badge, Button, Group, MultiSelect, NumberInput, Pagination, Paper, Select, SimpleGrid, Skeleton, Stack, Table, Text,
+  Alert, Anchor, Badge, Button, Drawer, Group, MultiSelect, NumberInput, Pagination, Paper, Select, SimpleGrid, Skeleton, Stack, Table, Text,
   TextInput, Title, UnstyledButton,
 } from '@mantine/core';
-import { useDebouncedCallback } from '@mantine/hooks';
+import { useDebouncedCallback, useDisclosure, useMediaQuery } from '@mantine/hooks';
 import { IconArrowDown, IconArrowUp, IconDownload, IconPlus } from '@tabler/icons-react';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
@@ -74,7 +74,44 @@ export function EmployeeList() {
     }
   }, [urlQ]);
   const sort = params.get('sort') ?? 'name';
+  const phone = useMediaQuery('(max-width: 47.99em)');
+  const [filtersOpen, { open: openFilters, close: closeFilters }] = useDisclosure();
+  const activeFilters = ['country', 'department', 'role', 'level', 'gender', 'status', 'salaryMin', 'salaryMax'].filter((k) => params.get(k)).length;
   const dir = params.get('dir') ?? 'asc';
+
+  const searchField = (
+    <TextInput
+      label="Search"
+      placeholder="Name, email or code"
+      value={search}
+      onChange={(e) => {
+        setSearch(e.currentTarget.value);
+        pushSearch(e.currentTarget.value);
+      }}
+    />
+  );
+  const filterFields = (
+    <>
+      <MultiSelect label="Country" data={COUNTRIES.map((c) => ({ value: c, label: COUNTRY_NAMES[c] }))} value={list('country')} onChange={setList('country')} clearable />
+      <MultiSelect label="Department" data={[...DEPARTMENTS]} value={list('department')} onChange={setList('department')} clearable searchable />
+      <MultiSelect label="Role" data={[...ROLE_NAMES]} value={list('role')} onChange={setList('role')} clearable searchable />
+      <MultiSelect label="Level" data={LEVELS.map((l) => ({ value: String(l), label: `L${l}` }))} value={list('level')} onChange={setList('level')} clearable />
+      <MultiSelect label="Gender" data={GENDERS.map((g) => ({ value: g, label: label(g) }))} value={list('gender')} onChange={setList('gender')} clearable />
+      <MultiSelect
+        label="Status"
+        data={STATUSES.map((s) => ({ value: s, label: label(s) }))}
+        value={params.get('status') ? list('status') : [...DEFAULT_STATUSES]}
+        onChange={setList('status')}
+      />
+      <Group grow align="flex-start" gap="xs">
+        <NumberInput label="Salary from" disabled={!oneCountry} min={1} thousandSeparator="," allowDecimal={false}
+          value={params.get('salaryMin') ?? ''} onChange={(v) => update({ salaryMin: v === '' ? null : String(v) })} />
+        <NumberInput label="Salary to" disabled={!oneCountry} min={1} thousandSeparator="," allowDecimal={false}
+          value={params.get('salaryMax') ?? ''} onChange={(v) => update({ salaryMax: v === '' ? null : String(v) })} />
+      </Group>
+    </>
+  );
+  const salaryNote = !oneCountry && <Text size="sm" c="dimmed">{MSG.salaryNeedsOneCountry}</Text>;
 
   return (
     <Stack gap="md">
@@ -88,35 +125,30 @@ export function EmployeeList() {
         </Group>
       </Group>
 
-      <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="sm">
-        <TextInput
-          label="Search"
-          placeholder="Name, email or code"
-          value={search}
-          onChange={(e) => {
-            setSearch(e.currentTarget.value);
-            pushSearch(e.currentTarget.value);
-          }}
-        />
-        <MultiSelect label="Country" data={COUNTRIES.map((c) => ({ value: c, label: COUNTRY_NAMES[c] }))} value={list('country')} onChange={setList('country')} clearable />
-        <MultiSelect label="Department" data={[...DEPARTMENTS]} value={list('department')} onChange={setList('department')} clearable searchable />
-        <MultiSelect label="Role" data={[...ROLE_NAMES]} value={list('role')} onChange={setList('role')} clearable searchable />
-        <MultiSelect label="Level" data={LEVELS.map((l) => ({ value: String(l), label: `L${l}` }))} value={list('level')} onChange={setList('level')} clearable />
-        <MultiSelect label="Gender" data={GENDERS.map((g) => ({ value: g, label: label(g) }))} value={list('gender')} onChange={setList('gender')} clearable />
-        <MultiSelect
-          label="Status"
-          data={STATUSES.map((s) => ({ value: s, label: label(s) }))}
-          value={params.get('status') ? list('status') : [...DEFAULT_STATUSES]}
-          onChange={setList('status')}
-        />
-        <Group grow align="flex-start" gap="xs">
-          <NumberInput label="Salary from" disabled={!oneCountry} min={1} thousandSeparator="," allowDecimal={false}
-            value={params.get('salaryMin') ?? ''} onChange={(v) => update({ salaryMin: v === '' ? null : String(v) })} />
-          <NumberInput label="Salary to" disabled={!oneCountry} min={1} thousandSeparator="," allowDecimal={false}
-            value={params.get('salaryMax') ?? ''} onChange={(v) => update({ salaryMax: v === '' ? null : String(v) })} />
-        </Group>
-      </SimpleGrid>
-      {!oneCountry && <Text size="sm" c="dimmed">{MSG.salaryNeedsOneCountry}</Text>}
+      {phone ? (
+        <>
+          <Group align="flex-end" gap="xs" wrap="nowrap">
+            <div style={{ flex: 1 }}>{searchField}</div>
+            <Button variant="default" onClick={openFilters}>{activeFilters ? `Filters (${activeFilters})` : 'Filters'}</Button>
+          </Group>
+          {/* LIST-10: on a phone the filters live in a drawer, so results start on the first screen. */}
+          <Drawer opened={filtersOpen} onClose={closeFilters} title="Filters" position="bottom" size="85%">
+            <Stack gap="sm">
+              {filterFields}
+              {salaryNote}
+              <Button onClick={closeFilters}>Show results</Button>
+            </Stack>
+          </Drawer>
+        </>
+      ) : (
+        <>
+          <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="sm">
+            {searchField}
+            {filterFields}
+          </SimpleGrid>
+          {salaryNote}
+        </>
+      )}
 
       {error && <Alert color="red" role="alert">{error}</Alert>}
       {!data && !error && <Skeleton h={320} aria-label="Loading employees" />}

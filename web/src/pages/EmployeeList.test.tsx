@@ -109,7 +109,7 @@ test('export downloads the current filter', async () => {
   );
 });
 
-test.fails('on a phone the filters open in a drawer', async () => {
+test('on a phone the filters open in a drawer', async () => {
   setPhone();
   signedInWith();
   renderApp('/employees?country=BR');
