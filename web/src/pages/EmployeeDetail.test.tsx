@@ -1,11 +1,11 @@
-import { screen, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { expect, test } from 'vitest';
 import { fakeApi } from '../test/fakeApi.ts';
 import { detailResponse } from '../test/fixtures.ts';
 import { renderApp } from '../test/render.tsx';
 
-const open = (detail = detailResponse(), extra = {}) => {
+const open = (detail = detailResponse(), extra: Parameters<typeof fakeApi>[0] = {}) => {
   const calls = fakeApi({
     'GET /api/session': () => ({ status: 200, body: { signedIn: true } }),
     'GET /api/employees/E000123': () => ({ status: 200, body: detail }),
@@ -85,4 +85,32 @@ test('invalid fields show their messages and focus the first', async () => {
   expect(calls.find((c) => c.method === 'PATCH')!.body).toEqual({
     version: 4, firstName: 'Anna', lastName: 'Silva', gender: 'female', workEmail: 'taken@acme.example',
   });
+});
+
+test.fails('a 409 keeps the typed input and offers Reload', async () => {
+  let version = 4;
+  const calls = open(undefined, {
+    'GET /api/employees/E000123': () => ({ status: 200, body: detailResponse({ version }) }),
+    'PATCH /api/employees/E000123': ({ body }) => {
+      if ((body as { version: number }).version !== version) {
+        return { status: 409, body: { error: 'Someone changed this employee after you opened the page. Reload to see the latest, then make your change again.' } };
+      }
+      return { status: 200, body: { code: 'E000123', version: version + 1 } };
+    },
+  });
+  await userEvent.click(await screen.findByRole('button', { name: 'Edit details' }));
+  const dialog = await screen.findByRole('dialog', { name: 'Edit details' });
+  version = 5; // someone else saved meanwhile
+  await userEvent.clear(within(dialog).getByLabelText('Last name'));
+  await userEvent.type(within(dialog).getByLabelText('Last name'), 'Souza');
+  await userEvent.click(within(dialog).getByRole('button', { name: 'Save' }));
+
+  expect(await within(dialog).findByRole('alert')).toHaveTextContent('Someone changed this employee after you opened the page.');
+  expect(within(dialog).getByLabelText('Last name')).toHaveValue('Souza');
+  await userEvent.click(within(dialog).getByRole('button', { name: 'Reload' }));
+  await waitFor(() => expect(within(dialog).queryByRole('alert')).not.toBeInTheDocument());
+  expect(within(dialog).getByLabelText('Last name')).toHaveValue('Souza'); // still there after reloading
+  await userEvent.click(within(dialog).getByRole('button', { name: 'Save' }));
+  await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  expect(calls.filter((c) => c.method === 'PATCH').map((c) => (c.body as { version: number }).version)).toEqual([4, 5]);
 });
