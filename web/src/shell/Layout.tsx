@@ -1,6 +1,7 @@
-import { AppShell, Burger, Group, NavLink, Text } from '@mantine/core';
+import { AppShell, Burger, Button, Group, NavLink, Text } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { NavLink as RouterLink, Outlet } from 'react-router';
+import { NavLink as RouterLink, Outlet, useNavigate } from 'react-router';
+import { api } from '../api.ts';
 import { ThemeToggle } from './ThemeToggle.tsx';
 
 const LINKS = [
@@ -12,6 +13,11 @@ const LINKS = [
 
 export function Layout() {
   const [opened, { toggle, close }] = useDisclosure();
+  const navigate = useNavigate();
+  const signOut = async () => {
+    await api('/api/session', { method: 'DELETE' }).catch(() => {});
+    navigate('/signin', { replace: true });
+  };
   return (
     <AppShell header={{ height: 56 }} navbar={{ width: 200, breakpoint: 'sm', collapsed: { mobile: !opened } }} padding="md">
       <a className="skip-link" href="#main">Skip to main content</a>
@@ -21,7 +27,10 @@ export function Layout() {
             <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" aria-label="Menu" />
             <Text fw={600}>ACME Pay</Text>
           </Group>
-          <ThemeToggle />
+          <Group gap="xs">
+            <ThemeToggle />
+            <Button variant="subtle" color="gray" onClick={signOut}>Sign out</Button>
+          </Group>
         </Group>
       </AppShell.Header>
       <AppShell.Navbar p="xs" aria-label="Main">

@@ -272,7 +272,7 @@ is written just before the task starts, from the interfaces that exist at that p
 
 ### UI (load `design-taste-frontend` first)
 
-- [ ] **Task 20: Web shell.** Vite + Mantine app, routes, API client, sign-in page, theme
+- [x] **Task 20: Web shell.** Vite + Mantine app, routes, API client, sign-in page, theme
   toggle, skip link. Tests: `web/src/test/shell.test.tsx` › "signed-out visit goes to sign-in
   and returns afterwards" (AUTH-5) · "theme follows the device and the toggle is remembered"
   (UI-1) · "a failed request shows a plain message" (UI-4) · "every API request sends the browser's
@@ -746,10 +746,10 @@ Vite on 4731 proxies `/api` to 4732. Accent teal, radius "sm", system fonts, lig
 device with a remembered toggle. Every API call goes through `api.ts` (sends `X-Timezone`,
 turns errors into plain messages, sends a signed-out user to `/signin?next=…`).
 
-- [ ] Step 1 (chore): `web` workspace, Vite, Mantine, Vitest + Testing Library + jsdom; root
+- [x] Step 1 (chore): `web` workspace, Vite, Mantine, Vitest + Testing Library + jsdom; root
   `npm test` runs it; the empty app renders.
-- [ ] Step 2: "signed-out visit goes to sign-in and returns afterwards" (AUTH-5).
-- [ ] Step 3: "theme follows the device and the toggle is remembered" (UI-1).
-- [ ] Step 4: "a failed request shows a plain message" (UI-4).
-- [ ] Step 5: "every API request sends the browser's timezone" (TIME-1).
-- [ ] Task check: `npm test`; `npm run build -w web`.
+- [x] Step 2: "signed-out visit goes to sign-in and returns afterwards" (AUTH-5).
+- [x] Step 3: "theme follows the device and the toggle is remembered" (UI-1).
+- [x] Step 4: "a failed request shows a plain message" (UI-4).
+- [x] Step 5: "every API request sends the browser's timezone" (TIME-1).
+- [x] Task check: `npm test`; `npm run build -w web`.
