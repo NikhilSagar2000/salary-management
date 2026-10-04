@@ -119,3 +119,24 @@ test('applies the add-employee rules, ISO dates, manager from the database or th
     ['E000001', 'E000500'], ['E000002', 'E000001'], ['E000007', null],
   ]);
 });
+
+test.fails('a duplicate code or email in the database or file flags every row involved', async () => {
+  const { preview } = await setup([{ code: 'E000500', workEmail: 'taken@acme.example' }]);
+  const res = await preview([
+    HEADER,
+    row(1),
+    'E000500,Bea,Costa,female,bea@acme.example,BR,Engineering,Software Engineer,3,133000,2024-02-29', // code in the database
+    'E000003,Caio,Lima,male,TAKEN@acme.example,BR,Engineering,Software Engineer,3,133000,2024-02-29', // email in the database
+    row(1).replace('ana1@', 'ana-one@'), // same code as line 2
+    'E000005,Davi,Rocha,male,ana1@acme.example,BR,Engineering,Software Engineer,3,133000,2024-02-29', // same email as line 2
+  ].join('\n'));
+  expect(res.body.problems).toEqual([
+    { line: 2, column: 'code', message: 'E000001 appears more than once in the file (lines 2 and 5).' },
+    { line: 2, column: 'work_email', message: 'ana1@acme.example appears more than once in the file (lines 2 and 6).' },
+    { line: 3, column: 'code', message: 'E000500 is already used.' },
+    { line: 4, column: 'work_email', message: 'That work email is already used.' },
+    { line: 5, column: 'code', message: 'E000001 appears more than once in the file (lines 2 and 5).' },
+    { line: 6, column: 'work_email', message: 'ana1@acme.example appears more than once in the file (lines 2 and 6).' },
+  ]);
+  expect(res.body.rows).toEqual([]);
+});
