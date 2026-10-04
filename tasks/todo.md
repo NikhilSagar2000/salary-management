@@ -277,7 +277,7 @@ is written just before the task starts, from the interfaces that exist at that p
   and returns afterwards" (AUTH-5) · "theme follows the device and the toggle is remembered"
   (UI-1) · "a failed request shows a plain message" (UI-4) · "every API request sends the browser's
   timezone" (TIME-1).
-- [ ] **Task 21: Employee list page.** Tests: `EmployeeList.test.tsx` › "salary controls are
+- [x] **Task 21: Employee list page.** Tests: `EmployeeList.test.tsx` › "salary controls are
   disabled with the note unless one country is chosen" (LIST-5) · "search, filters, sort and
   page are read from and written to the URL" (LIST-6) · "rows show the listed columns"
   (LIST-8) · "stats line per currency above the list" (LIST-9) · "no matches shows the empty
@@ -762,10 +762,10 @@ Search (debounced), multi-select filters, salary range enabled only for one coun
 column headers (`aria-sort`), pagination and page size, the stats line per currency, empty
 state, Export link with the current filters, Add employee. Phone: cards instead of the table.
 
-- [ ] Step 1: "salary controls are disabled with the note unless one country is chosen" (LIST-5).
-- [ ] Step 2: "search, filters, sort and page are read from and written to the URL" (LIST-6).
-- [ ] Step 3: "rows show the listed columns" (LIST-8).
-- [ ] Step 4: "stats line per currency above the list" (LIST-9).
-- [ ] Step 5: "no matches shows the empty state and no stats" (review focus 5).
-- [ ] Step 6: "export downloads the current filter" (CSV-1).
-- [ ] Task check: `npm test`.
+- [x] Step 1: "salary controls are disabled with the note unless one country is chosen" (LIST-5).
+- [x] Step 2: "search, filters, sort and page are read from and written to the URL" (LIST-6).
+- [x] Step 3: "rows show the listed columns" (LIST-8).
+- [x] Step 4: "stats line per currency above the list" (LIST-9).
+- [x] Step 5: "no matches shows the empty state and no stats" (review focus 5).
+- [x] Step 6: "export downloads the current filter" (CSV-1).
+- [x] Task check: `npm test`.
