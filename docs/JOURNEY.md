@@ -485,6 +485,7 @@ is done (hashes copied from `git log`).
 - Task 21 · green: above the list, one line per currency with median, min, max and headcount for the whole filtered set (LIST-9).
 - Task 21 · red: no matches shows a plain empty state with Clear filters, and no table or stats (review focus 5).
 - Task 21 · green: when nothing matches, the list says so plainly with a Clear filters button, and shows no table or stats (review focus 5).
+- Task 21 · red: the search box follows the URL when it changes elsewhere (Clear filters, back/forward) (LIST-6).
 
 ---
 

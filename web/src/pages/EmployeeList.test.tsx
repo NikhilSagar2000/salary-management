@@ -91,3 +91,11 @@ test('no matches shows the empty state and no stats', async () => {
   await userEvent.click(screen.getByRole('button', { name: 'Clear filters' }));
   expect(screen.getByTestId('location')).toHaveTextContent(/^\/employees$/);
 });
+
+test.fails('the search box follows the URL when it changes elsewhere', async () => {
+  signedInWith(listResponse({ rows: [], total: 0, stats: [] }));
+  renderApp('/employees?q=zz');
+  expect(await screen.findByLabelText('Search')).toHaveValue('zz');
+  await userEvent.click(screen.getByRole('button', { name: 'Clear filters' }));
+  expect(screen.getByLabelText('Search')).toHaveValue('');
+});
