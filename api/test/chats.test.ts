@@ -74,3 +74,13 @@ test('a reopened chat returns messages with their saved sources', async () => {
     ['user', 'Who works in the US?'], ['assistant', 'One person: Ana Silva.'], ['user', 'Anyone else?'],
   ]);
 });
+
+test.fails('rejects questions over 2,000 characters', async () => {
+  const { agent, chat, db } = await chatWith([]);
+  const post = (question: unknown) => agent.post(`/api/chats/${chat.id}/messages`).send({ question });
+  const long = await post('x'.repeat(2001));
+  expect(long.status).toBe(400);
+  expect(long.body.fields).toEqual({ question: 'Keep the question to 2,000 characters or fewer.' });
+  expect((await post('   ')).body.fields).toEqual({ question: 'Type a question.' });
+  expect((await db.query('SELECT count(*)::int AS n FROM chat_messages')).rows[0].n).toBe(0);
+});
