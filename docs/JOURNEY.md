@@ -439,6 +439,7 @@ is done (hashes copied from `git log`).
 - Task 18 · red: Stop saves the partial answer as "stopped" (AST-12).
 - Task 18 · green: closing the stream (Stop) aborts the model and saves the partial answer as "stopped"; the chat is free again at once (AST-12).
 - Task 18 · red: a rate limit or an unavailable model sends a plain error event, keeps the question and saves the message (AST-14, AST-15).
+- Task 18 · green: a rate limit becomes an `error` event "The free AI model limit has been reached…", any other model failure "The assistant isn't available right now…"; the question stays saved, the message is saved as the reply, and the rest of the app keeps working (AST-14, AST-15).
 
 ---
 

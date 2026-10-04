@@ -4,7 +4,7 @@ import type pg from 'pg';
 import type { Clock } from '../clock.ts';
 import { fieldErrors } from '../http.ts';
 import { chatHistory, createChat, deleteChat, getChat, listChats, renameChat, saveAnswer, saveQuestion } from './chats.ts';
-import type { ModelFn } from './model.ts';
+import { ModelError, type ModelFn } from './model.ts';
 import { answerQuestion, type AnswerEvent } from './run.ts';
 
 export function assistantRoutes({ db, clock, model }: { db: pg.Pool; clock: Clock; model: ModelFn }) {
@@ -72,8 +72,16 @@ export function assistantRoutes({ db, clock, model }: { db: pg.Pool; clock: Cloc
       const result = await answerQuestion({ model, db, today: res.locals.today, history, question, signal: stop.signal, onEvent: send });
       await saveAnswer(db, clock, chatId, { content: result.text, sources: result.sources, basedOnData: result.basedOnData, status: 'complete' });
     } catch (err) {
-      if (!stop.signal.aborted) throw err;
-      await saveAnswer(db, clock, chatId, { content: partial, sources: null, basedOnData: null, status: 'stopped' });
+      if (stop.signal.aborted) {
+        await saveAnswer(db, clock, chatId, { content: partial, sources: null, basedOnData: null, status: 'stopped' });
+      } else {
+        // AST-14/15: say what happened in plain words; the question stays saved and the rest of the app is unaffected.
+        const kind = err instanceof ModelError ? err.kind : 'unavailable';
+        if (!(err instanceof ModelError)) console.error(err);
+        const message = kind === 'rate_limited' ? MSG.rateLimited : MSG.assistantUnavailable;
+        res.write(`event: error\ndata: ${JSON.stringify({ kind, message })}\n\n`);
+        await saveAnswer(db, clock, chatId, { content: message, sources: null, basedOnData: null, status: 'error', errorKind: kind });
+      }
     }
     res.end();
   }

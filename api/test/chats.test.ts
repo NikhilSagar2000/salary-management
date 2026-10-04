@@ -151,7 +151,7 @@ test('stopping saves the partial answer as Stopped', async () => {
   }
 });
 
-test.fails('rate limit keeps the question and saves the free-limit message', async () => {
+test('rate limit keeps the question and saves the free-limit message', async () => {
   const failing = (err: Error): ModelFn => async function* () { throw err; };
   for (const [err, kind, message] of [
     [new ModelError('rate_limited', '429'), 'rate_limited', 'The free AI model limit has been reached. Try again later; everything else in the app still works.'],
