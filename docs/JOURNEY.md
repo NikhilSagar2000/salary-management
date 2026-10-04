@@ -465,6 +465,7 @@ is done (hashes copied from `git log`).
 - Phase 5 checkpoint: backend complete (Tasks 1–19). Timeline rows added per task; D65 (UI look and exclusions), D66 (serving the web app), D67 (unknown fields ignored).
 - Fix: seed tests get a 60 s timeout. The checksum test reseeds 10,000 people (3 s idle, 7 s on a throttled laptop); on timeout the abandoned reseed left the tables half-written and four later seed tests failed.
 - Task 20 · chore: `web` workspace — Vite on 4731 (proxy `/api` to 4732), React 19, Mantine 9 (teal accent, "sm" radius, system fonts, light/dark from the device), Tabler icons, Vitest with jsdom and Testing Library; root `npm test` type-checks and runs it.
+- Task 20 · red: a signed-out visit goes to sign-in and returns to the page asked for (AUTH-5); fake fetch and app render helpers; web uses bundler module resolution.
 
 ---
 
