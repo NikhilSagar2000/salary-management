@@ -314,7 +314,7 @@ is written just before the task starts, from the interfaces that exist at that p
   limit message appears and other pages keep working" (AST-14) · "the browser never calls
   openrouter.ai" (AST-17) · `import.spec.ts` › "export, then import new rows with a preview"
   (CSV-1, CSV-4, CSV-7) · `secrets.spec.ts` › "the built web bundle holds no secret" (AUTH-6).
-- [ ] **Task 28: Accessibility.** Tests: `a11y.spec.ts` › "no serious or critical axe problems
+- [x] **Task 28: Accessibility.** Tests: `a11y.spec.ts` › "no serious or critical axe problems
   on every screen, light and dark, desktop and phone" (A11Y-1) · `keyboard.spec.ts` › one test
   per flow: sign in; search, filter and open; add; job change; leave and undo; import; ask
   (A11Y-2) · "focus is visible, skip link works, errors are announced" (A11Y-3).
