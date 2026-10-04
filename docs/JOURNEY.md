@@ -351,6 +351,7 @@ is done (hashes copied from `git log`).
 - Task 12 · red: one stats line per currency, in country order (STATS-1).
 - Task 12 · green: stats lines are ordered by country (USD, INR, GBP, EUR, BRL, JPY), one per currency (STATS-1).
 - Task 12 · red: stats count active and leaving people, never starting ones, and leavers only when the filter includes them (STATS-2, LEAVE-6).
+- Task 12 · green: list stats leave out people who haven't started; leavers count only when the status filter includes them (STATS-2, LEAVE-6).
 
 ---
 

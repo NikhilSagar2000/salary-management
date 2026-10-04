@@ -43,7 +43,7 @@ test('never combines currencies', async () => {
   ]);
 });
 
-test.fails('counts active and leaving, not starting; left only when asked', async () => {
+test('counts active and leaving, not starting; left only when asked', async () => {
   const { stats, agent } = await setup([
     { code: 'E000001', country: 'US', salary: 100000 }, // active
     { code: 'E000002', country: 'US', salary: 200000, leaveDate: '2026-12-31' }, // leaving

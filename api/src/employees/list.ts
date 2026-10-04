@@ -37,7 +37,11 @@ export async function listEmployees(db: pg.Pool, q: ListQuery, today: string) {
   anyOf(`(${STATUS_SQL})`, q.status);
   if (q.salaryMin !== undefined) where.push(`s.salary >= ${param(q.salaryMin)}`);
   if (q.salaryMax !== undefined) where.push(`s.salary <= ${param(q.salaryMax)}`);
-  const from = `FROM employees e JOIN current_state($1) s ON s.employee_id = e.id ${where.length ? `WHERE ${where.join(' AND ')}` : ''}`;
+  const fromWhere = (extra: string[] = []) => {
+    const all = [...where, ...extra];
+    return `FROM employees e JOIN current_state($1) s ON s.employee_id = e.id ${all.length ? `WHERE ${all.join(' AND ')}` : ''}`;
+  };
+  const from = fromWhere();
   const total = (await db.query(`SELECT count(*) AS n ${from}`, params)).rows[0].n as number;
   const { rows } = await db.query(
     `SELECT e.code, e.first_name AS "firstName", e.last_name AS "lastName", s.country, s.currency, s.department, s.role,
@@ -45,7 +49,7 @@ export async function listEmployees(db: pg.Pool, q: ListQuery, today: string) {
      ${from} ORDER BY ${orderBy(q)} LIMIT ${q.pageSize} OFFSET ${(q.page - 1) * q.pageSize}`,
     params,
   );
-  const { rows: stats } = await db.query(`SELECT s.currency, ${PAY_STATS} ${from} GROUP BY s.currency ORDER BY ${CURRENCY_ORDER}`, params);
+  const { rows: stats } = await db.query(`SELECT s.currency, ${PAY_STATS} ${fromWhere([`(${STATUS_SQL}) <> 'starting'`])} GROUP BY s.currency ORDER BY ${CURRENCY_ORDER}`, params);
   return { rows, total, page: q.page, pageSize: q.pageSize, stats };
 }
 
