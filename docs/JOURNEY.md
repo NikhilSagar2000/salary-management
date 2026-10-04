@@ -362,6 +362,7 @@ is done (hashes copied from `git log`).
 - Task 13 · test: all 10,000 full names differ, and each first and last name comes from the hire country's list for that gender (gender-neutral list for non-binary people) (SEED-3). Passed first run; two mutations (no uniqueness check; male names for non-binary people) each failed it.
 - Task 13 · test: codes run E000001–E010000 and work emails are unique, plain ASCII (SEED-4). Passed first run; starting codes at E000000 made it fail.
 - Task 13 · test: no seeded date is after 2026-09-30 and hires start in 2012 (SEED-5). Passed first run; letting 2026 hires run to 31 Dec made it fail.
+- Task 13 · test: `band()` matches hand-worked research values, and every country/role/level group of 20+ people has a median within ±15% of its band (SEED-6). Passed first run; mutations (no level multiplier in `band()`; generator pricing everyone at L3) each failed it.
 
 ---
 

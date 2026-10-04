@@ -1,6 +1,7 @@
 import type pg from 'pg';
 import { beforeAll, expect, test } from 'vitest';
 import { generateSeed, SEED_ANCHOR, type Seed } from '../src/seed/generate.ts';
+import { band } from '../src/seed/bands.ts';
 import { NAMES } from '../src/seed/names.ts';
 import { writeSeed } from '../src/seed/write.ts';
 import { testApp } from './helpers.ts';
@@ -73,4 +74,28 @@ test('no date after 2026-09-30, hires from 2012', () => {
   const hires = seed.employees.map((e) => e.hireDate).sort();
   expect(hires[0]! >= '2012-01-01').toBe(true);
   expect(hires[0]! < '2012-12-31').toBe(true); // the company has people from its first year
+});
+
+test('group medians within ±15% of the researched bands', async () => {
+  // band() against values worked out by hand from docs/research/pay-bands.md
+  expect(band('US', 'Software Engineer', 'Engineering', 3)).toBe(131000);
+  expect(Math.round(band('US', 'Software Engineer', 'Engineering', 4))).toBe(168990); // × 1.29
+  expect(Math.round(band('IN', 'Engineering Manager', 'Engineering', 5))).toBe(5290000); // EM figure is an L5 value
+  expect(Math.round(band('IN', 'Engineering Manager', 'Engineering', 6))).toBe(6524948); // × 3.54 / 2.87
+  expect(Math.round(band('JP', 'Accountant', 'Finance', 2))).toBe(3822300); // × 0.93
+  expect(Math.round(band('GB', 'Recruiter', 'HR', 7))).toBe(101640); // other departments × 2.42
+
+  const { rows } = await db.query(
+    `SELECT s.country, s.role, s.department, s.level, percentile_cont(0.5) WITHIN GROUP (ORDER BY s.salary) AS median, count(*)::int AS n
+     FROM employee_state($1) s JOIN employees e ON e.id = s.employee_id
+     WHERE e.hire_date <= $1 AND (e.leave_date IS NULL OR e.leave_date > $1)
+     GROUP BY 1, 2, 3, 4 HAVING count(*) >= 20`,
+    [SEED_ANCHOR],
+  );
+  expect(rows.length).toBeGreaterThan(40);
+  for (const g of rows) {
+    const ratio = g.median / band(g.country, g.role, g.department, g.level);
+    expect(ratio, `${g.country} ${g.role} L${g.level} (n=${g.n})`).toBeGreaterThan(0.85);
+    expect(ratio, `${g.country} ${g.role} L${g.level} (n=${g.n})`).toBeLessThan(1.15);
+  }
 });
