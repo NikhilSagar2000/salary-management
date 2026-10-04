@@ -39,7 +39,7 @@ test('query_employees filters any field, caps at 200 rows and reports the total'
   expect((hired.result as { rows: { code: string }[] }).rows.map((r) => r.code)).toEqual(['E000901']);
 });
 
-test.fails('get_employee returns the full history', async () => {
+test('get_employee returns the full history', async () => {
   const { tool, db } = await setup([{ code: 'E000001', firstName: 'Ana', lastName: 'Silva', country: 'BR', salary: 133000, hireDate: '2024-02-29' }]);
   await db.query(`INSERT INTO job_changes (employee_id, effective_date, level, salary, currency, note) VALUES (1, '2025-04-01', 4, 150000, 'BRL', 'Promotion to L4')`);
   const { result, sources } = await tool('get_employee', { code: 'E000001' });

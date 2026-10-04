@@ -1,7 +1,8 @@
 // The pay assistant's tools (AST-4, AST-5): read-only, typed arguments, no SQL from the model.
-import { COUNTRIES, COUNTRY_NAMES, CURRENCY, DEPARTMENTS, formatMoney, GENDERS, ROLE_NAMES, SORTS, STATUSES } from '@acme/shared';
+import { COUNTRIES, COUNTRY_NAMES, CURRENCY, DEPARTMENTS, formatMoney, GENDERS, MSG, ROLE_NAMES, SORTS, STATUSES } from '@acme/shared';
 import type pg from 'pg';
 import { z } from 'zod';
+import { employeeDetail } from '../employees/detail.ts';
 import { listFilter, STATUS_SQL, type Filters } from '../employees/list.ts';
 
 export type Source = { kind: 'group'; label: string; query: string; headcount: number } | { kind: 'person'; code: string; name: string };
@@ -104,8 +105,17 @@ async function queryEmployees(db: pg.Pool, today: string, args: z.infer<typeof q
   };
 }
 
+const getEmployeeSchema = z.object({ code }).strict();
+
+async function getEmployee(db: pg.Pool, today: string, args: z.infer<typeof getEmployeeSchema>): Promise<ToolResult> {
+  const detail = await employeeDetail(db, args.code, today);
+  if (!detail) return { result: { error: MSG.noEmployee(args.code) }, sources: [] };
+  return { result: detail, sources: [{ kind: 'person', code: detail.code, name: `${detail.firstName} ${detail.lastName}` }] };
+}
+
 const TOOLS_BY_NAME = {
   query_employees: { schema: queryEmployeesSchema, run: queryEmployees },
+  get_employee: { schema: getEmployeeSchema, run: getEmployee },
 } as const;
 
 /** Runs one tool call from the model. Never throws for bad input: the error goes back to the model. */
@@ -113,6 +123,6 @@ export async function runTool(db: pg.Pool, today: string, name: string, args: un
   const tool = TOOLS_BY_NAME[name as keyof typeof TOOLS_BY_NAME];
   const parsed = tool.schema.safeParse(args);
   if (!parsed.success) return { result: { error: parsed.error.message }, sources: [] };
-  return tool.run(db, today, parsed.data);
+  return (tool.run as (db: pg.Pool, today: string, args: unknown) => Promise<ToolResult>)(db, today, parsed.data);
 }
 
