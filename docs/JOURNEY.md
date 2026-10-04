@@ -353,6 +353,7 @@ is done (hashes copied from `git log`).
 - Task 12 · red: stats count active and leaving people, never starting ones, and leavers only when the filter includes them (STATS-2, LEAVE-6).
 - Task 12 · green: list stats leave out people who haven't started; leavers count only when the status filter includes them (STATS-2, LEAVE-6).
 - Task 12 · red: pay overview grid for one country (STATS-3).
+- Task 12 · green: `GET /api/pay-overview?country=` returns department × level cells (median, min, max, headcount) for people employed today, in department then level order (STATS-3).
 
 ---
 

@@ -6,6 +6,7 @@ import type { ErrorRequestHandler } from 'express';
 import { requestTimezone, todayIn, type Clock } from './clock.ts';
 import { employeeRoutes } from './employees/routes.ts';
 import { FieldProblem, sendFieldErrors } from './http.ts';
+import { statsRoutes } from './stats/routes.ts';
 
 export type Config = { passwordHash: string; production: boolean };
 
@@ -33,6 +34,7 @@ export function createApp(deps: { db: pg.Pool; clock: Clock; config: Config }) {
     res.clearCookie(SESSION_COOKIE, { path: '/' }).status(204).end();
   });
   app.use(employeeRoutes(deps));
+  app.use(statsRoutes(deps));
   app.use('/api', (_req, res) => {
     res.status(404).json({ error: 'Not found.' });
   });

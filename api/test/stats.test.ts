@@ -56,7 +56,7 @@ test('counts active and leaving, not starting; left only when asked', async () =
   expect(await stats('?status=starting')).toEqual([]);
 });
 
-test.fails('overview gives department × level cells for one country', async () => {
+test('overview gives department × level cells for one country', async () => {
   const { agent } = await setup([
     { code: 'E000001', country: 'US', department: 'Sales', role: 'Account Executive', level: 2, salary: 80000 },
     { code: 'E000002', country: 'US', level: 3, salary: 120000 },

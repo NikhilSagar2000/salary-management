@@ -163,3 +163,6 @@ export const listQuerySchema = z.object({
   if (usesSalary && q.country?.length !== 1) ctx.addIssue({ code: 'custom', path: ['country'], message: MSG.salaryNeedsOneCountry });
 });
 export type ListQuery = z.infer<typeof listQuerySchema>;
+
+/** Pay overview query: one country at a time. */
+export const overviewQuerySchema = z.object({ country: z.enum(COUNTRIES, { error: MSG.country }) });
