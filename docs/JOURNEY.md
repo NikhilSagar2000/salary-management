@@ -419,6 +419,7 @@ is done (hashes copied from `git log`).
 - Task 17 · test: an answer that used no tool is flagged `basedOnData: false` with empty sources (AST-9). Passed first run (the loop tracks tool use since step 1); forcing the flag to true made it fail.
 - Task 17 · red: the model gets at most the last 20 earlier messages (AST-13).
 - Task 17 · green: each question carries at most the last 20 earlier messages (AST-13).
+- Task 17 · red: OpenRouter client parses streamed tool-call deltas split across chunks; tests use a local fake OpenRouter server.
 
 ---
 

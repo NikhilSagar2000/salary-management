@@ -17,3 +17,9 @@ export class ModelError extends Error {
     this.kind = kind;
   }
 }
+
+export function openRouterModel(_cfg: { baseUrl: string; apiKey: string; models: string[]; timeoutMs?: number }): ModelFn {
+  return async function* () {
+    throw new ModelError('unavailable', 'not implemented');
+  };
+}

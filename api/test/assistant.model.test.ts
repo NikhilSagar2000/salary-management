@@ -1,0 +1,68 @@
+import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
+import type { AddressInfo } from 'node:net';
+import { afterEach, expect, test } from 'vitest';
+import { ModelError, openRouterModel, type ModelEvent } from '../src/assistant/model.ts';
+
+const servers: { close: () => void }[] = [];
+afterEach(() => servers.splice(0).forEach((s) => s.close()));
+
+/** A local stand-in for OpenRouter: each test decides how it answers. */
+async function fakeOpenRouter(handle: (req: IncomingMessage, res: ServerResponse, body: string) => void) {
+  const requests: { url: string; headers: IncomingMessage['headers']; body: string }[] = [];
+  const server = createServer((req, res) => {
+    let body = '';
+    req.on('data', (c) => (body += c));
+    req.on('end', () => {
+      requests.push({ url: req.url!, headers: req.headers, body });
+      handle(req, res, body);
+    });
+  });
+  await new Promise<void>((r) => server.listen(0, '127.0.0.1', r));
+  servers.push({ close: () => { server.closeAllConnections(); server.close(); } });
+  return { baseUrl: `http://127.0.0.1:${(server.address() as AddressInfo).port}/api/v1`, requests };
+}
+
+async function collect(events: AsyncIterable<ModelEvent>) {
+  const out: ModelEvent[] = [];
+  for await (const e of events) out.push(e);
+  return out;
+}
+const request = { messages: [{ role: 'user' as const, content: 'hi' }], tools: [], signal: new AbortController().signal };
+
+test.fails('parses streamed tool-call deltas across chunks', async () => {
+  const sse = [
+    ': OPENROUTER PROCESSING',
+    'data: {"choices":[{"delta":{"role":"assistant","content":null,"tool_calls":[{"index":0,"id":"call_1","type":"function","function":{"name":"aggregate","arguments":""}}]}}]}',
+    'data: {"choices":[{"delta":{"tool_calls":[{"index":0,"function":{"arguments":"{\\"metric\\":"}}]}}]}',
+    'data: {"choices":[{"delta":{"tool_calls":[{"index":0,"function":{"arguments":"\\"salary\\"}"}}]}}]}',
+    'data: {"choices":[{"delta":{"tool_calls":[{"index":1,"id":"call_2","type":"function","function":{"name":"get_employee","arguments":"{\\"code\\":\\"E000001\\"}"}}]}}]}',
+    'data: {"choices":[{"delta":{},"finish_reason":"tool_calls"}]}',
+    'data: [DONE]',
+    '',
+  ].join('\n');
+  const { baseUrl, requests } = await fakeOpenRouter((_req, res) => {
+    res.writeHead(200, { 'content-type': 'text/event-stream' });
+    for (let i = 0; i < sse.length; i += 37) res.write(sse.slice(i, i + 37)); // split mid-line and mid-JSON
+    res.end();
+  });
+  const model = openRouterModel({ baseUrl, apiKey: 'test-key', models: ['primary/model:free', 'backup/model:free'] });
+  expect(await collect(model({ ...request, tools: [{ type: 'function', function: { name: 'aggregate', description: 'd', parameters: {} } }] }))).toEqual([
+    { type: 'tool_call', id: 'call_1', name: 'aggregate', args: { metric: 'salary' } },
+    { type: 'tool_call', id: 'call_2', name: 'get_employee', args: { code: 'E000001' } },
+    { type: 'done' },
+  ]);
+  expect(requests[0]!.url).toBe('/api/v1/chat/completions');
+  expect(requests[0]!.headers.authorization).toBe('Bearer test-key');
+  expect(JSON.parse(requests[0]!.body)).toMatchObject({
+    model: 'primary/model:free', models: ['primary/model:free', 'backup/model:free'], stream: true, messages: request.messages,
+    tools: [{ type: 'function', function: { name: 'aggregate' } }],
+  });
+
+  const { baseUrl: textUrl } = await fakeOpenRouter((_req, res) => {
+    res.writeHead(200, { 'content-type': 'text/event-stream' });
+    res.end('data: {"choices":[{"delta":{"content":"The median "}}]}\n\ndata: {"choices":[{"delta":{"content":"is 110,000."},"finish_reason":"stop"}]}\n\ndata: [DONE]\n\n');
+  });
+  expect(await collect(openRouterModel({ baseUrl: textUrl, apiKey: 'k', models: ['m'] })(request))).toEqual([
+    { type: 'token', text: 'The median ' }, { type: 'token', text: 'is 110,000.' }, { type: 'done' },
+  ]);
+});
