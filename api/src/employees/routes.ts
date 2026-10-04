@@ -4,6 +4,7 @@ import type pg from 'pg';
 import { fieldErrors, sendFieldErrors, sendStaleOrMissing } from '../http.ts';
 import { createEmployee, duplicateField, nextCode } from './create.ts';
 import { addChange, cancelChange } from './changes.ts';
+import { employeeDetail } from './detail.ts';
 import { updateDetails } from './details.ts';
 import { markLeaving, undoLeaving } from './leave.ts';
 
@@ -23,6 +24,15 @@ export function employeeRoutes({ db }: { db: pg.Pool }) {
 
   router.get('/api/employees/next-code', async (_req, res) => {
     res.json({ code: await nextCode(db) });
+  });
+
+  router.get('/api/employees/:code', async (req, res) => {
+    const detail = await employeeDetail(db, req.params.code, res.locals.today);
+    if (!detail) {
+      res.status(404).json({ error: MSG.noEmployee(req.params.code) });
+      return;
+    }
+    res.json(detail);
   });
 
   router.post('/api/employees', async (req, res) => {

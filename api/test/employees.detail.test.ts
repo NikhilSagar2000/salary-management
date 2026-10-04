@@ -14,7 +14,7 @@ async function setup() {
   return { agent, db, hire };
 }
 
-test.fails('returns status, current job and pay against peers', async () => {
+test('returns status, current job and pay against peers', async () => {
   const { agent, hire } = await setup();
   // Peers: BR Software Engineer L3 — salaries 100k, 120k, 133k (Ana), 140k → median 126,500
   await hire({ salary: 100000 });
