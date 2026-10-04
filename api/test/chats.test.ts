@@ -1,3 +1,4 @@
+import { createServer } from 'node:http';
 import { expect, test } from 'vitest';
 import { ModelError, type ModelFn } from '../src/assistant/model.ts';
 import { asText, insertPeople, PASSWORD, scriptedModel, sseEvents, signIn, testApp } from './helpers.ts';
@@ -169,5 +170,33 @@ test('rate limit keeps the question and saves the free-limit message', async () 
       expect.objectContaining({ role: 'assistant', content: message, status: 'error', errorKind: kind }),
     ]);
     expect((await agent.get('/api/employees')).status).toBe(200); // the rest of the app keeps working
+  }
+});
+
+test.fails('the key is never sent to the browser, and free requests left are reported', async () => {
+  const KEY = 'sk-or-v1-NEVER-IN-A-RESPONSE';
+  const keyServer = createServer((req, res) => {
+    const authorised = req.headers.authorization === `Bearer ${KEY}`;
+    res.writeHead(authorised ? 200 : 401, { 'content-type': 'application/json' });
+    res.end(JSON.stringify(authorised ? { data: { free_model_daily_requests: { used: 8, limit: 50, remaining: 42 } } } : { error: 'no' }));
+  });
+  await new Promise<void>((r) => keyServer.listen(0, '127.0.0.1', r));
+  try {
+    const baseUrl = `http://127.0.0.1:${(keyServer.address() as import('node:net').AddressInfo).port}/api/v1`;
+    const { model } = scriptedModel([[{ type: 'token', text: 'Hello.' }, { type: 'done' }]]);
+    const { app } = await testApp({ model, openRouter: { baseUrl, apiKey: KEY } });
+    const agent = await signIn(app);
+    const status = await agent.get('/api/assistant/status');
+    expect(status.body).toEqual({ freeRequestsLeft: 42 });
+    const chat = (await agent.post('/api/chats').send({})).body;
+    const bodies = [
+      JSON.stringify(status.headers), status.text,
+      (await agent.get('/api/chats')).text,
+      (await agent.post(`/api/chats/${chat.id}/messages`).send({ question: 'Hi' }).buffer(true).parse(asText)).body,
+      (await agent.get(`/api/chats/${chat.id}`)).text,
+    ];
+    for (const body of bodies) expect(body).not.toContain(KEY);
+  } finally {
+    keyServer.close();
   }
 });
