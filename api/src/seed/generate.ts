@@ -118,7 +118,8 @@ export function generateSeed(): Seed {
 
   const outliers = placeOutliers(rng, people.filter((p) => p.leaveDate === null || p.leaveDate > SEED_ANCHOR));
 
-  const changes = people.flatMap(history);
+  const managers = assignManagers(rng, people);
+  const changes = people.flatMap((p) => withManagers(history(p), managers.get(p.code)!));
   const employees = people.map(({ code, firstName, lastName, gender, workEmail, hireDate, leaveDate, leaveReason }) => ({
     code, firstName, lastName, gender, workEmail, hireDate, leaveDate, leaveReason,
   }));
@@ -262,4 +263,70 @@ function placeOutliers(rng: Rng, employed: Person[]): string[] {
     chosen.push(p);
   }
   return chosen.map((p) => p.code).sort();
+}
+
+// ---- managers (SEED-10) ----
+const levelOn = (p: Person, day: number) => p.hireLevel + p.events.filter((e) => e.kind === 'promotion' && e.day <= day).length;
+const countryOn = (p: Person, day: number) => {
+  const move = p.events.find((e) => e.kind === 'move' && e.day <= day);
+  return move?.kind === 'move' ? move.to : p.hireCountry;
+};
+const employedOn = (p: Person, day: number) => toDays(p.hireDate) <= day && (p.leaveDate === null || toDays(p.leaveDate) > day);
+
+/** Days after `day` on which `m` stops being able to manage someone: leaving or moving country. */
+const managerEnds = (m: Person) => [
+  ...(m.leaveDate ? [toDays(m.leaveDate)] : []),
+  ...m.events.filter((e) => e.kind === 'move').map((e) => e.day),
+];
+
+/**
+ * Each person's manager over time: the most junior employee who outranks them in the same country and
+ * department. Re-chosen on hire, on their promotions and moves, and when the manager leaves or moves,
+ * so a manager is always employed, more senior (no loops possible) and in the same place.
+ */
+function assignManagers(rng: Rng, people: Person[]) {
+  const pools = new Map<string, Person[]>();
+  for (const p of people) {
+    const places = new Set([p.hireCountry, ...p.events.filter((e) => e.kind === 'move').map((e) => (e as { to: Country }).to)]);
+    for (const c of places) pools.set(`${c}|${p.department}`, [...(pools.get(`${c}|${p.department}`) ?? []), p]);
+  }
+  const valid = (m: Person, p: Person, day: number) =>
+    m !== p && employedOn(m, day) && countryOn(m, day) === countryOn(p, day) && levelOn(m, day) > levelOn(p, day);
+  const choose = (p: Person, day: number): Person | null => {
+    const candidates = (pools.get(`${countryOn(p, day)}|${p.department}`) ?? []).filter((m) => valid(m, p, day));
+    if (!candidates.length) return null;
+    const lowest = Math.min(...candidates.map((m) => levelOn(m, day)));
+    return pick(rng, candidates.filter((m) => levelOn(m, day) === lowest));
+  };
+
+  const result = new Map<string, { day: number; managerCode: string | null }[]>();
+  for (const p of people) {
+    const end = p.leaveDate ? toDays(p.leaveDate) - 1 : toDays(SEED_ANCHOR);
+    const checks = [toDays(p.hireDate), ...p.events.filter((e) => e.kind !== 'raise').map((e) => e.day)];
+    const out: { day: number; managerCode: string | null }[] = [];
+    let current: Person | null = null;
+    while (checks.length) {
+      checks.sort((a, b) => a - b);
+      const day = checks.shift()!;
+      if (day > end) break;
+      if (out.length && current && valid(current, p, day)) continue;
+      const next = choose(p, day);
+      if (!out.length || next !== current) out.push({ day, managerCode: next?.code ?? null });
+      current = next;
+      if (current) for (const stop of managerEnds(current)) if (stop > day && stop <= end) checks.push(stop);
+    }
+    result.set(p.code, out);
+  }
+  return result;
+}
+
+/** Puts the manager on the hire change and adds a change for each later manager switch (after other changes that day). */
+function withManagers(changes: SeedChange[], managers: { day: number; managerCode: string | null }[]): SeedChange[] {
+  const [hire, ...rest] = managers;
+  changes[0] = { ...changes[0]!, managerSet: true, managerCode: hire?.managerCode ?? null };
+  const extra = rest.map((m): SeedChange => ({
+    code: changes[0]!.code, effectiveDate: fromDays(m.day), country: null, department: null, role: null, level: null,
+    managerSet: true, managerCode: m.managerCode, salary: null, currency: null, note: 'New manager',
+  }));
+  return [...changes, ...extra].sort((a, b) => (a.effectiveDate < b.effectiveDate ? -1 : a.effectiveDate > b.effectiveDate ? 1 : 0));
 }

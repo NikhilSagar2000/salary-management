@@ -186,7 +186,7 @@ test('every person starts with a hire change; raises, promotions, relocations wi
   for (const e of leavers) expect(left.get(e.code), e.code).toBe(e.leaveDate);
 });
 
-test.fails('managers employed, more senior, no loops', async () => {
+test('managers employed, more senior, no loops', async () => {
   // On a sample of dates, every manager in force is employed that day, in the same country and department, and more senior.
   for (const date of ['2014-06-30', '2018-03-15', '2021-11-01', '2024-04-02', SEED_ANCHOR]) {
     const { rows } = await db.query(

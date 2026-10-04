@@ -369,6 +369,7 @@ is done (hashes copied from `git log`).
 - Task 13 · red: realistic history — hire change first, raises, promotions, relocations with new-currency salaries, leavers with leave events (SEED-9).
 - Task 13 · green: seeded careers — hire change, a raise every 1 April after nine months, promotions every 2–4 years, ~1% moves to another country (with pay in the new currency), ~12% leavers with "left" events; today's pay comes from the band and earlier pay is worked back from it (SEED-9). Measured: 58,829 changes (41,540 raises, 7,185 promotions, 104 moves), 1,093 leavers, 30 outliers.
 - Task 13 · red: managers are employed, in the same country and department, more senior, with no loops (SEED-10).
+- Task 13 · green: managers — each person reports to the most junior colleague who outranks them in the same country and department; re-chosen on hire, promotions and moves and when the manager leaves or moves, so managers are always employed, more senior and loop-free (SEED-10).
 
 ---
 
