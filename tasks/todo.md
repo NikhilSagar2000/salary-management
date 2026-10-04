@@ -293,7 +293,7 @@ is written just before the task starts, from the interfaces that exist at that p
   follow the role" (EMP-2) · "shows each field's message next to it" (EMP-3).
 - [x] **Task 24: Pay overview page.** Tests: `PayOverview.test.tsx` › "one country at a time,
   empty cells show —, a cell opens the matching list" (STATS-3).
-- [ ] **Task 25: Import page.** Tests: `Import.test.tsx` › "preview shows rows and problems by
+- [x] **Task 25: Import page.** Tests: `Import.test.tsx` › "preview shows rows and problems by
   row and column" (CSV-4) · "Import is enabled only with no problems and shows the result"
   (CSV-7).
 - [ ] **Task 26: Assistant page.** Tests: `Assistant.test.tsx` › "chat list, rename, and
