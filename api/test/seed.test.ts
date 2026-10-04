@@ -122,7 +122,7 @@ test("women's median below men's by the country's gap", async () => {
   }
 });
 
-test.fails('about 30 listed outliers and nobody else beyond the limits', async () => {
+test('about 30 listed outliers and nobody else beyond the limits', async () => {
   const { rows } = await db.query(
     `WITH s AS (
        SELECT e.code, s.country, s.role, s.level, s.salary

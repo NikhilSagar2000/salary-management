@@ -110,6 +110,8 @@ export function generateSeed(): Seed {
   people.sort((a, b) => (a.hireDate < b.hireDate ? -1 : a.hireDate > b.hireDate ? 1 : 0));
   people.forEach((p, i) => (p.code = `E${String(i + 1).padStart(6, '0')}`));
 
+  const outliers = placeOutliers(rng, people.filter((p) => p.hireDate <= SEED_ANCHOR && (p.leaveDate === null || p.leaveDate > SEED_ANCHOR)));
+
   const changes: SeedChange[] = people.map((p) => ({
     code: p.code, effectiveDate: p.hireDate, country: p.country, department: p.department, role: p.role, level: p.level,
     managerSet: true, managerCode: null, salary: p.salary, currency: CURRENCY[p.country], note: null,
@@ -117,5 +119,49 @@ export function generateSeed(): Seed {
   const employees = people.map(({ code, firstName, lastName, gender, workEmail, hireDate, leaveDate, leaveReason }) => ({
     code, firstName, lastName, gender, workEmail, hireDate, leaveDate, leaveReason,
   }));
-  return { employees, changes, leaveEvents: [], outliers: [] };
+  return { employees, changes, leaveEvents: [], outliers };
+}
+
+const OUTLIER_COUNT = 30;
+const peerKey = (p: Person) => `${p.country}|${p.role}|${p.level}`;
+
+function medianOf(xs: number[]): number {
+  const s = [...xs].sort((a, b) => a - b);
+  const m = s.length / 2;
+  return s.length % 2 ? s[Math.floor(m)]! : (s[m - 1]! + s[m]! ) / 2;
+}
+
+function peerMedians(people: Person[]) {
+  const groups = new Map<string, number[]>();
+  for (const p of people) groups.set(peerKey(p), [...(groups.get(peerKey(p)) ?? []), p.salary]);
+  return new Map([...groups].map(([k, xs]) => [k, { median: medianOf(xs), n: xs.length }]));
+}
+
+/**
+ * SEED-8: keeps everyone within 0.6–1.7× their peer median (country, role, level), then pays ~30 people
+ * from peer groups of 20+ far from it: half above 2×, half below 0.5×. Returns their codes.
+ */
+function placeOutliers(rng: Rng, employed: Person[]): string[] {
+  for (let pass = 0; pass < 3; pass++) {
+    const medians = peerMedians(employed);
+    for (const p of employed) {
+      const { median } = medians.get(peerKey(p))!;
+      const currency = CURRENCY[p.country];
+      if (p.salary < 0.6 * median) p.salary = roundPay(0.6 * median, currency);
+      if (p.salary > 1.7 * median) p.salary = roundPay(1.7 * median, currency);
+    }
+  }
+  const medians = peerMedians(employed);
+  const usedGroups = new Set<string>();
+  const chosen: Person[] = [];
+  for (const p of shuffle(rng, employed.filter((p) => medians.get(peerKey(p))!.n >= 20))) {
+    if (chosen.length === OUTLIER_COUNT) break;
+    if (usedGroups.has(peerKey(p))) continue;
+    usedGroups.add(peerKey(p));
+    const high = chosen.length % 2 === 0;
+    const factor = high ? between(rng, 2.0, 2.4) : between(rng, 0.4, 0.48);
+    p.salary = roundPay(medians.get(peerKey(p))!.median * factor, CURRENCY[p.country]);
+    chosen.push(p);
+  }
+  return chosen.map((p) => p.code).sort();
 }
