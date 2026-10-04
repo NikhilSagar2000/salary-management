@@ -574,6 +574,7 @@ is done (hashes copied from `git log`).
 - Minor fix 4 · green: sign-in follows next only when it is a path on this site (starts with one slash, not // or /\\); anything else goes to the employee list.
 - Minor fix 5 · red: the search box takes at most 100 characters, the search's own limit (longer text gave a vague "Some fields need fixing.").
 - Minor fix 5 · green: the search box stops at 100 characters.
+- Minor fix 6 · red: when someone is saved while an import runs, the import lists the clash as a problem instead of failing with a server error (CSV-7).
 
 ---
 

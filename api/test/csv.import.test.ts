@@ -208,3 +208,22 @@ test('rows that manage each other in a circle are refused, on every row in the c
   expect((await commit(csv)).status).toBe(400);
   expect((await db.query('SELECT count(*)::int AS n FROM employees')).rows[0].n).toBe(0);
 });
+
+test.fails('someone saved while an import runs: the import lists the problem instead of failing (CSV-7)', async () => {
+  const { commit, db } = await setup();
+  const other = await db.connect();
+  try {
+    await other.query('BEGIN');
+    await other.query(
+      "INSERT INTO employees (code, first_name, last_name, gender, work_email, hire_date) VALUES ('E000001', 'Bo', 'Lee', 'male', 'bo@acme.example', '2024-01-01')",
+    );
+    const pending = commit([HEADER, row(1)].join('\n')).then((r) => r); // sends now; blocks behind the open insert
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    await other.query('COMMIT');
+    const res = await pending;
+    expect(res.status).toBe(400);
+    expect(res.body.problems).toEqual([{ line: 2, column: 'code', message: 'E000001 is already used.' }]);
+  } finally {
+    other.release();
+  }
+});
