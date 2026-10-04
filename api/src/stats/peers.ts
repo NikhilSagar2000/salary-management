@@ -17,3 +17,6 @@ export async function peerStats(db: pg.Pool, date: string, job: { country: strin
   );
   return rows[0].headcount ? (rows[0] as { currency: string; median: number; min: number; max: number; headcount: number }) : null;
 }
+
+/** SQL: order currencies as the countries are listed (US, IN, GB, DE, BR, JP). */
+export const CURRENCY_ORDER = "array_position(ARRAY['USD','INR','GBP','EUR','BRL','JPY'], s.currency)";

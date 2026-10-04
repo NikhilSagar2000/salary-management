@@ -349,6 +349,7 @@ is done (hashes copied from `git log`).
 - Task 12 · green: the list response includes `stats` (median, min, max, headcount per currency) for the whole filtered set, not just the page (LIST-9).
 - Task 12 · test: median 100,000.5 shows as 100,001 (half away from zero), odd counts take the middle value (STATS-1). Passed first run; dropping the `::numeric` cast (Postgres then rounds half to even) made it fail.
 - Task 12 · red: one stats line per currency, in country order (STATS-1).
+- Task 12 · green: stats lines are ordered by country (USD, INR, GBP, EUR, BRL, JPY), one per currency (STATS-1).
 
 ---
 

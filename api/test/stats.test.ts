@@ -29,7 +29,7 @@ test('median is percentile_cont rounded half away from zero', async () => {
   expect(inr.median).toBe(2000003); // odd count: the middle value
 });
 
-test.fails('never combines currencies', async () => {
+test('never combines currencies', async () => {
   const { stats } = await setup([
     { code: 'E000001', country: 'JP', salary: 6000000 },
     { code: 'E000002', country: 'IN', salary: 1500000 },
