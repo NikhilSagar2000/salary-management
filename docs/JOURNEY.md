@@ -509,6 +509,7 @@ is done (hashes copied from `git log`).
 - Task 23 · green: Add employee page: the code is pre-filled from the next free code and can be changed; roles follow the department and levels follow the role, and a choice that no longer fits clears; the shared rules check every field before sending and the server's messages (such as a used code) land on their fields (EMP-1, EMP-2, EMP-3). The role, level, gender and country choice lists are now shared with the change forms. The red test's last check was loosened to 'contains', because the code field also carries help text.
 - Task 24 · red: Pay overview shows one country at a time as departments × levels, empty cells show —, and a cell opens the list filtered to that country, department and level (STATS-3).
 - Task 24 · green: Pay overview: a Country choice kept in the URL; on wide screens a department × level table (median as a link to the filtered list, range and headcount below, — when empty); below 1200 px one block per department listing its levels, so nothing scrolls sideways (STATS-3, UI-3). Checked in Chrome with seeded data at 1568 px and 390 px.
+- Task 25 · red: Import page: the preview shows the rows as they'll be saved and every problem by row and column, with nothing saved (CSV-4); Import is enabled only with no problems, a problem found at import time saves nothing and is listed, and success says how many were imported (CSV-7).
 
 ---
 
