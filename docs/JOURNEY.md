@@ -579,6 +579,7 @@ is done (hashes copied from `git log`).
 - Minor fix 7 · red: a missing date asks for the date ("Enter the hire date."); only a badly written one names the format. Date fields in the app always send YYYY-MM-DD, so people only ever saw the format message for an empty field.
 - Minor fix 7 · green: an empty or missing date gives "Enter the <field>."; a date written another way (only possible in a CSV file) gives "Enter the <field> as YYYY-MM-DD."
 - Minor fix 8 · red: an import duplicate shows on every row at once, even when one of the rows has problems of its own (CSV-6).
+- Minor fix 8 · green: the duplicate check reads every row's code and email, including rows that fail other checks (empty values skipped), so all clashes show in one preview.
 
 ---
 

@@ -228,7 +228,7 @@ test('someone saved while an import runs: the import lists the problem instead o
   }
 });
 
-test.fails('a duplicate shows at once, even when the other row has problems of its own (CSV-6)', async () => {
+test('a duplicate shows at once, even when the other row has problems of its own (CSV-6)', async () => {
   const { preview } = await setup();
   const res = await preview([HEADER, row(1), 'E000001,Bea,Costa,female,not-an-email,BR,Engineering,Software Engineer,3,133000,2024-02-29'].join('\n'));
   const twice = 'E000001 appears more than once in the file (lines 2 and 3).';
