@@ -108,7 +108,14 @@ export function EmployeeList() {
 
       {error && <Alert color="red" role="alert">{error}</Alert>}
       {!data && !error && <Skeleton h={320} aria-label="Loading employees" />}
-      {data && (
+      {data && data.total === 0 && (
+        <Stack align="flex-start" gap="xs" py="xl">
+          <Text fw={600}>No employees match these filters.</Text>
+          <Text size="sm" c="dimmed">Try a shorter search, fewer filters, or include people who have left.</Text>
+          <Button variant="default" onClick={() => setParams(new URLSearchParams())}>Clear filters</Button>
+        </Stack>
+      )}
+      {data && data.total > 0 && (
         <>
           <PaySummary stats={data.stats} />
           <EmployeeCards rows={data.rows} />

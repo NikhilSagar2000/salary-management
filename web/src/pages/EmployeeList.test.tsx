@@ -82,7 +82,7 @@ test('stats line per currency above the list', async () => {
   ]);
 });
 
-test.fails('no matches shows the empty state and no stats', async () => {
+test('no matches shows the empty state and no stats', async () => {
   signedInWith(listResponse({ rows: [], total: 0, stats: [] }));
   renderApp('/employees?country=JP&q=zz');
   expect(await screen.findByText('No employees match these filters.')).toBeInTheDocument();
