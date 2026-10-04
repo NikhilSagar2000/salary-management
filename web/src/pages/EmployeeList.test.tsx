@@ -105,7 +105,7 @@ test('export downloads the current filter', async () => {
   signedInWith(listResponse({ total: 200 }));
   renderApp('/employees?country=US&department=Sales&sort=hireDate&dir=desc&page=3&pageSize=50');
   expect(await screen.findByRole('link', { name: 'Export CSV' })).toHaveAttribute(
-    'href', '/api/employees.csv?country=US&department=Sales&sort=hireDate&dir=desc',
+    'href', `/api/employees.csv?country=US&department=Sales&sort=hireDate&dir=desc&tz=${encodeURIComponent(Intl.DateTimeFormat().resolvedOptions().timeZone)}`,
   );
 });
 
@@ -121,7 +121,7 @@ test('on a phone the filters open in a drawer', async () => {
   expect(within(drawer).getByLabelText('Salary from')).toBeEnabled();
 });
 
-test.fails("the export link carries the browser's timezone", async () => {
+test("the export link carries the browser's timezone", async () => {
   signedInWith();
   renderApp('/employees?country=US');
   const href = (await screen.findByRole('link', { name: 'Export CSV' })).getAttribute('href')!;

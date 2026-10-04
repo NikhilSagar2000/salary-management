@@ -190,8 +190,9 @@ function exportQuery(params: URLSearchParams) {
   const q = new URLSearchParams(params);
   q.delete('page');
   q.delete('pageSize');
-  const s = q.toString();
-  return s ? `?${s}` : '';
+  // A download link can't send the X-Timezone header (TIME-1).
+  q.set('tz', Intl.DateTimeFormat().resolvedOptions().timeZone);
+  return `?${q}`;
 }
 
 function EmployeeTable(props: { rows: Row[]; sort: string; dir: string; canSortSalary: boolean; onSort: (key: string) => void }) {

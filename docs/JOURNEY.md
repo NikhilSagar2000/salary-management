@@ -544,6 +544,7 @@ is done (hashes copied from `git log`).
 - Final review fix 3 · red: the server applies migrations to an empty database before it listens, and refuses to start without APP_PASSWORD_HASH, saying why (deploy readiness).
 - Final review fix 3 · green: the API applies pending migrations before it listens (a fresh Neon database works on first start) and exits with a plain message when APP_PASSWORD_HASH is empty, instead of starting a server nobody can sign in to.
 - Final review fix 4 · red: the CSV export link carries the browser's timezone as ?tz=, and the API uses it when no X-Timezone header comes (a plain link can't send headers), so status and current pay follow HR's date (TIME-1).
+- Final review fix 4 · green: the export link adds tz=<browser timezone>; the API reads the X-Timezone header, or ?tz= when there is no header, through the same validation (unknown zones fall back to UTC) (TIME-1).
 
 ---
 

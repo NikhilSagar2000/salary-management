@@ -20,9 +20,9 @@ export function createApp(deps: { db: pg.Pool; clock: Clock; config: Config; mod
   // Render puts one proxy in front; trust it so req.ip is the browser's address.
   if (deps.config.production) app.set('trust proxy', 1);
   app.use(express.json());
-  // "Today" is the date in the browser's timezone (TIME-1).
+  // "Today" is the date in the browser's timezone (TIME-1); a plain link (the CSV download) sends it as ?tz=.
   app.use((req, res, next) => {
-    res.locals.timezone = requestTimezone(req.get('X-Timezone'));
+    res.locals.timezone = requestTimezone(req.get('X-Timezone') ?? (typeof req.query.tz === 'string' ? req.query.tz : undefined));
     res.locals.today = todayIn(deps.clock, res.locals.timezone);
     next();
   });

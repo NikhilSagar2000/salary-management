@@ -50,7 +50,7 @@ test('accented, apostrophe and comma names export intact', async () => {
   expect(rows[4]!.startsWith('E000004,João,Gonçalves,')).toBe(true);
 });
 
-test.fails("a plain download link can give the browser's timezone as ?tz= (TIME-1)", async () => {
+test("a plain download link can give the browser's timezone as ?tz= (TIME-1)", async () => {
   const { app, db } = await testApp({ now: '2026-10-01T20:00:00Z' }); // already 2 Oct in Tokyo
   await insertPeople(db, [{ code: 'E000001', hireDate: '2026-10-02' }]);
   const agent = await signIn(app);
