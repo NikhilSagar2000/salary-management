@@ -588,6 +588,7 @@ is done (hashes copied from `git log`).
 - Phase 6 QA fix 1 · green: list, export and pay-overview addresses with bad values answer 400 with the messages themselves as the error (fields kept), so the page shows e.g. "Page size must be 25, 50 or 100, not \"1000\"." (LIST-5, LIST-7, UI-4). The QA script's date check is fixed (it compared Date objects).
 - Phase 6 QA fix 2 · red (found by QA, LIST-4): country sorts by the name shown (Germany, India, United Kingdom, United States), not the two-letter code, which put United Kingdom between Germany and India.
 - Phase 6 QA fix 2 · green: the list's country sort orders by the English country name (from COUNTRY_NAMES), so the column reads alphabetically; export and the assistant's tool share the same order.
+- Phase 6 · results so far: sign-in, list, employee page, the three change dialogs and add employee run in Chrome and by API/SQL (e2e/qa-api.ts, e2e/qa-shots.ts); two fixes already made (bad list addresses, country sort); more findings queued for one fix batch.
 
 ---
 

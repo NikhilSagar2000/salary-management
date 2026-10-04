@@ -28,10 +28,10 @@ JPY/INR amounts, loading, empty and error states, reload, and Back.
 | S2 | Employee list, desktop | Filters, stats line, table columns, sorting arrows, paging, page size, empty state, loading, a bad URL value's message | | |
 | S3 | Employee list, phone | Cards, Filters (n) button and drawer, no sideways scroll, Export and Add buttons fit | | |
 | S4 | Employee page | Facts, current job and pay, peers line, manager (has-left flag), reports, history newest first, dark mode, long names | | |
-| S5 | Edit details dialog | Pre-filled values, messages, save, Escape and Close, Back after closing | | |
-| S6 | Change job or pay dialog | Starts from current job, roles follow department, salary currency follows country, scheduled change, messages | | |
+| S5 | Edit details dialog | pass | Pre-filled, case-blind email clash message, save, Escape closes |
+| S6 | Change job or pay dialog | pass | Starts from the current job; messages under the right fields; scheduled change and cancel work. Found: level list ignores the role (Add employee filters it) |
 | S7 | Mark as leaving / Undo | Future and past leave dates, header and actions while leaving and after leaving, undo | | |
-| S8 | Add employee | Suggested code, field order, choices follow each other, messages, success lands on the new page | | |
+| S8 | Add employee | pass | Layout, choices follow each other, messages, success lands on the new page. Found: corrected fields keep their red message until the next submit |
 | S9 | Pay overview | Six countries (widest amounts in JPY and INR), dashes, cell links, phone blocks | | |
 | S10 | Import | Instructions, preview with problems, preview clean, import, result link, phone width | | |
 | S11 | Assistant | New chat, ask, steps and streaming, Based on, Stop, rename, delete, reload mid-answer, phone list/chat, free requests left | | |
@@ -42,7 +42,7 @@ JPY/INR amounts, loading, empty and error states, reload, and Back.
 
 | Id | How run | Steps | Expected | Result | Notes |
 |---|---|---|---|---|---|
-| TIME-1 | API, browser | Hire someone dated tomorrow-in-Tokyo; read status with `X-Timezone` UTC vs Asia/Tokyo; export link has `tz=` | Status follows the header's date; unknown zone → UTC | | |
+| TIME-1 | API, browser | Hire someone dated tomorrow-in-Tokyo; read status with `X-Timezone` UTC vs Asia/Tokyo; export link has `tz=` | pass | API: hire dated today in Kiritimati is active there, starting in Pago Pago, UTC rules for unknown/missing zones; export link carries tz= (fixed in phase 5) |
 | AUTH-1 | API | Call each `/api` route group without a cookie | pass | API: 12 routes 401 signed out; health 200 (e2e/qa-api.ts) |
 | AUTH-2 | browser, API | Sign in; read the cookie flags; wrong password | pass | API: cookie HttpOnly, SameSite=Lax, Max-Age 604800, no Secure outside production; browser: wrong password message |
 | AUTH-3 | API | Six wrong passwords in a row (run last: it locks this IP out for 15 min) | 6th answers 429 "Too many tries. Wait 15 minutes and try again." | | |
@@ -50,38 +50,38 @@ JPY/INR amounts, loading, empty and error states, reload, and Back.
 | AUTH-5 | browser | Open `/pay?country=DE` signed out, sign in | pass | Browser: /pay?country=DE signed out → sign-in → back on Germany's pay overview |
 | AUTH-6 | API, files | Search responses, the server log and the built bundle for the hash, token hashes and key | pass | API: no hash, token, stored token hash or key in 5 responses or the server log; bundle by e2e/secrets.spec.ts |
 | LIST-1 | API | Default, 50 and 100 page sizes; total count | pass | API: 25/50/100 rows, same total 8,907; pageSize=30 → 400 |
-| LIST-2 | browser | Search "muller", "jose", part of an email, part of a code | Accent-blind matches | | |
-| LIST-3 | browser | Two countries + one department; default status; add Left | OR within, AND across; leavers only when asked | | |
-| LIST-4 | browser | Each sortable column, both directions | Sorted; ties by code | | |
-| LIST-5 | browser, API | Salary controls with 0/1/2 countries; API salary sort without one country | Disabled with the note; API 400 with the message | | |
-| LIST-6 | browser | Filter, search, sort, page 2; reload; copy link to a new tab; back/forward | Same view each time | | |
-| LIST-7 | browser, API | `pageSize=1000`, `country=XX` | 400 naming the value; the page shows it | | |
-| LIST-8 | browser | Read a row | Code, name, country, department, role, level, salary with currency, hire date, status | | |
-| LIST-9 | browser, SQL | Stats line for a filter; compare a median with SQL | One line per currency; starting people not counted | | |
+| LIST-2 | browser | Search "muller", "jose", part of an email, part of a code | pass | Browser: "muller" → 8 incl. Heike Müller; API: "jose" → 41 incl. José Almeida; code and email parts match; each search ~0.1 s |
+| LIST-3 | browser | Two countries + one department; default status; add Left | pass | US+IN with Engineering → 2,090, only those; adding Left → 2,339 with leavers counted in stats; Left only → 249 |
+| LIST-4 | browser | Each sortable column, both directions | fail → fixed | Every key and direction sorted with ties by code, but Country sorted by code (United Kingdom between Germany and India). Fixed test-first: 9a934d6 → 5915bdb |
+| LIST-5 | browser, API | Salary controls with 0/1/2 countries; API salary sort without one country | fail → fixed | API answered the generic "Some fields need fixing."; now the salary message itself (e03c66e → f94f725). UI: salary boxes disabled with the note (seen at 1440) |
+| LIST-6 | browser | Filter, search, sort, page 2; reload; copy link to a new tab; back/forward | pass | Browser: page 2 + Brazil + hire-date sort survive reload; Back returns to the previous view; e2e list.spec.ts covers copied link |
+| LIST-7 | browser, API | `pageSize=1000`, `country=XX` | fail → fixed | The page showed "Some fields need fixing." for pageSize=1000; now the message naming the value (e03c66e → f94f725); browser re-check below |
+| LIST-8 | browser | Read a row | pass | Row: code, name, country, department, role, level, salary with currency, hire date, status badge |
+| LIST-9 | browser, SQL | Stats line for a filter; compare a median with SQL | pass | One line per currency above the list; with Left added, leavers counted; Inês (starting) listed, not counted (20 listed, 19 in stats) |
 | LIST-10 | browser | 390 px | Cards, filter drawer, no sideways scroll | | |
 | LIST-11 | tests | `npm run measure:list` (Task 19) | pass | Automated tests pass (see Steps) |
-| EMP-1 | browser | Open Add employee | Next free code pre-filled; editable; bad or used code refused | | |
-| EMP-2 | browser | Add with every field; currency shown from country | Saved; manager optional | | |
-| EMP-3 | browser | Submit empty; then bad values | A message under each field; first invalid field focused | | |
-| EMP-4 | browser | Open the new person | Hire change dated on the hire date in history | | |
-| EMP-5 | browser, API | Look for edit controls; PATCH code or hire date | Read-only text; API 400 with the message | | |
-| EMP-6 | browser | Edit name, gender, email | Saved in place | | |
-| EMP-7 | browser | Change before hire date; change with nothing changed; change level only | Refused / refused / saved, other fields kept | | |
-| EMP-8 | browser | Role not in department; level outside the role | Refused naming the problem | | |
-| EMP-9 | browser | Move country without salary; with salary; move with a later salary scheduled | Refused / saved in new currency / refused naming the later change | | |
-| EMP-10 | browser | Manager: self, unknown code, starting person, a report of this person | Each refused in plain words | | |
-| EMP-11 | browser | Schedule a change, cancel it; try to cancel a past change | "Cancelled on <date>"; no cancel on past changes | | |
+| EMP-1 | browser | Open Add employee | pass | Pre-filled E090951 (highest + 1 after the QA script's E090950); E000001 → "E000001 is already used."; custom E090960 saved |
+| EMP-2 | browser | Add with every field; currency shown from country | pass | Roles follow department (4 Engineering roles), levels follow role (L5–L7 for Engineering Manager), salary hint shows BRL, "95,000" accepted as 95000, manager optional |
+| EMP-3 | browser | Submit empty; then bad values | pass | Empty submit: a message under every field, focus on First name; email "Anthony.Adams@ACME.example" → already used |
+| EMP-4 | browser | Open the new person | pass | Inês D'Ávila-Ferreira saved; history shows the hire on 1 Jan 2027 with every field |
+| EMP-5 | browser, API | Look for edit controls; PATCH code or hire date | pass | API 400 with the message for code and hire date; page shows both as plain text, no field |
+| EMP-6 | browser | Edit name, gender, email | pass | Edit details: last name and email saved in place; header updated |
+| EMP-7 | browser | Change before hire date; change with nothing changed; change level only | pass | Nothing changed → "Change at least one of country, department, role, level, manager or salary."; before hire → "can't be dated before the hire date (6 Jun 2012)"; level-only scheduled change kept the other fields |
+| EMP-8 | browser | Role not in department; level outside the role | pass | L6 for Sales Development Representative → "Sales Development Representative goes from L1 to L3." |
+| EMP-9 | browser | Move country without salary; with salary; move with a later salary scheduled | pass | Move without salary → "Moving to another country needs a salary in the new currency."; with a later USD raise → "A salary change on 1 Jan 2027 is in USD; cancel it before moving this person to Germany."; after cancelling it, saved as USD 51,100 → EUR 48,000 |
+| EMP-10 | browser | Manager: self, unknown code, starting person, a report of this person | pass | Browser: self → "Someone can't be their own manager.", E999999 → "No employee with code E999999."; API: starting manager, left manager → "… isn't employed on 15 Nov 2026.", loop → "That would make a reporting loop." |
+| EMP-11 | browser | Schedule a change, cancel it; try to cancel a past change | pass | Scheduled change cancelled → "Cancelled on 5 Oct 2026", struck through; no Cancel on past changes. Found: the hire of a starting person also offers Cancel (see S4) |
 | EMP-12 | SQL, API | `UPDATE`/`DELETE` on job_changes and leave_events; look for edit routes | pass | API: no route (404); SQL: UPDATE/DELETE on job_changes and leave_events refused ("History can't be edited/deleted.") |
-| EMP-13 | browser | Two tabs on one person; save in one, then in the other | 409 message, typed input kept, Reload works | | |
+| EMP-13 | browser | Two tabs on one person; save in one, then in the other | pass | Saved from another session, then from the page: the 409 message, typed name kept, Reload, save succeeded |
 | EMP-14 | browser | Person with manager who left, reports, scheduled and cancelled changes | All shown as described | | |
-| LEAVE-1 | browser | Leave date before hire date; reason over 500 characters; valid | Refused / refused / saved | | |
+| LEAVE-1 | browser | Leave date before hire date; reason over 500 characters; valid | pass | Before hire → "The leave date can't be before the hire date (6 Jun 2012)."; incomplete date → "Enter the leave date."; 15 Nov 2026 with a reason saved (Leaving). Reason over 500 characters: the box stops at 500 (API limit covered by leave.test.ts) |
 | LEAVE-2 | browser | Undo leaving | Leave date and reason cleared; both events in history with their dates | | |
 | LEAVE-3 | browser, API | Person who has left: page actions; API writes | Only Undo shown; writes refused with the message | | |
 | LEAVE-4 | API | `DELETE /api/employees/<code>` | pass | API: DELETE → 404; person still there |
-| LEAVE-5 | browser | Leaving with a later scheduled change; undo | "Won't apply"; applies again after undo | | |
-| LEAVE-6 | browser | Default list and stats; add Left to status | Leavers out, then in | | |
+| LEAVE-5 | browser | Leaving with a later scheduled change; undo | pass | Move on 1 Dec 2026 showed "Won't apply (after leave date)" while leaving 15 Nov; applied again after undo |
+| LEAVE-6 | browser | Default list and stats; add Left to status | pass | Default list leaves leavers out (2,090); adding Left adds 249 to list and stats |
 | STATS-1 | SQL, browser | One peer group's median by hand vs the page | pass | SQL by hand vs page: IN Software Engineer L3 median 1,486,500, headcount 166, INR only |
-| STATS-2 | browser | Starting person in a filter | Listed, not counted | | |
+| STATS-2 | browser | Starting person in a filter | pass | BR Engineering Manager L5: 20 listed incl. Inês (starting), headcount 19 |
 | STATS-3 | browser | Pay overview cells, dashes, cell link | As described | | |
 | STATS-4 | browser, SQL | A relocated person | pass | E000029 moved IN → US: listed and counted in US only |
 | AST-1 | browser | New chat, list order, rename (empty, 81 characters, valid), delete with confirm | As described; title from the first question, 60 characters | | |
