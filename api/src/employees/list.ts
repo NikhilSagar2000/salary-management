@@ -6,7 +6,8 @@ export const STATUS_SQL = `CASE WHEN e.hire_date > $1 THEN 'starting' WHEN e.lea
   WHEN e.leave_date IS NOT NULL THEN 'leaving' ELSE 'active' END`;
 
 /** One page of the employee list plus the total match count. Filtering, sorting and paging happen in Postgres. */
-const ORDER: Record<Exclude<ListQuery['sort'], 'salary'>, string[]> = {
+const ORDER: Record<ListQuery['sort'], string[]> = {
+  salary: ['s.salary'], // only reachable with one country filtered (one currency)
   name: ['e.last_name', 'e.first_name'],
   code: [],
   country: ['s.country'],
@@ -33,6 +34,8 @@ export async function listEmployees(db: pg.Pool, q: ListQuery, today: string) {
   anyOf('s.level', q.level);
   anyOf('e.gender', q.gender);
   anyOf(`(${STATUS_SQL})`, q.status);
+  if (q.salaryMin !== undefined) where.push(`s.salary >= ${param(q.salaryMin)}`);
+  if (q.salaryMax !== undefined) where.push(`s.salary <= ${param(q.salaryMax)}`);
   const from = `FROM employees e JOIN current_state($1) s ON s.employee_id = e.id ${where.length ? `WHERE ${where.join(' AND ')}` : ''}`;
   const total = (await db.query(`SELECT count(*) AS n ${from}`, params)).rows[0].n as number;
   const { rows } = await db.query(
@@ -44,7 +47,7 @@ export async function listEmployees(db: pg.Pool, q: ListQuery, today: string) {
 
 /** ORDER BY for the chosen column and direction; ties always by code, so paging is stable. */
 function orderBy(q: ListQuery) {
-  const columns = q.sort === 'salary' ? [] : ORDER[q.sort];
+  const columns = ORDER[q.sort];
   const dir = q.dir === 'desc' ? 'DESC' : 'ASC';
   return [...columns.map((c) => `${c} ${dir}`), `e.code ${q.sort === 'code' ? dir : 'ASC'}`].join(', ');
 }

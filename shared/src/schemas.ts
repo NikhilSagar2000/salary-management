@@ -140,7 +140,12 @@ export const listQuerySchema = z.object({
   status: csvOf(STATUSES, 'status').transform((s) => s ?? DEFAULT_STATUSES),
   sort: z.enum(SORTS, { error: (i) => MSG.unknownValue('sort', String(i.input)) }).default('name'),
   dir: z.enum(['asc', 'desc'], { error: (i) => MSG.unknownValue('sort direction', String(i.input)) }).default('asc'),
+  salaryMin: salarySchema.optional(),
+  salaryMax: salarySchema.optional(),
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().pipe(z.union([z.literal(25), z.literal(50), z.literal(100)])).default(25),
+}).superRefine((q, ctx) => {
+  const usesSalary = q.sort === 'salary' || q.salaryMin !== undefined || q.salaryMax !== undefined;
+  if (usesSalary && q.country?.length !== 1) ctx.addIssue({ code: 'custom', path: ['country'], message: MSG.salaryNeedsOneCountry });
 });
 export type ListQuery = z.infer<typeof listQuerySchema>;

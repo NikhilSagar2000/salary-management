@@ -98,7 +98,7 @@ test('sorts by each column both ways, ties broken by code', async () => {
   expect(await order('hireDate', 'desc')).toEqual([1, 3, 2]);
 });
 
-test.fails('salary sort and range need exactly one country', async () => {
+test('salary sort and range need exactly one country', async () => {
   const { list } = await setup([
     { code: 'E000001', country: 'US', salary: 90000 },
     { code: 'E000002', country: 'US', salary: 150000 },
