@@ -78,3 +78,22 @@ test('default status filter hides people who have left', async () => {
   expect(await sorted('?status=active,left')).toEqual(['E000001', 'E000004']);
   expect(await sorted('?status=starting')).toEqual(['E000002']);
 });
+
+test.fails('sorts by each column both ways, ties broken by code', async () => {
+  const { list } = await setup([
+    { code: 'E000001', lastName: 'Costa', country: 'BR', department: 'Sales', role: 'Account Executive', level: 2, hireDate: '2021-05-01' },
+    { code: 'E000002', lastName: 'Abe', country: 'JP', department: 'Engineering', level: 5, hireDate: '2019-01-01' },
+    { code: 'E000003', lastName: 'Costa', country: 'US', department: 'Engineering', level: 3, hireDate: '2021-05-01' },
+  ]);
+  const order = async (sort: string, dir: string) => codes(await list(`?sort=${sort}&dir=${dir}`)).map((c) => Number(c.slice(-1)));
+  expect(await order('name', 'asc')).toEqual([2, 1, 3]);
+  expect(await order('name', 'desc')).toEqual([1, 3, 2]);
+  expect(await order('code', 'desc')).toEqual([3, 2, 1]);
+  expect(await order('country', 'asc')).toEqual([1, 2, 3]);
+  expect(await order('country', 'desc')).toEqual([3, 2, 1]);
+  expect(await order('department', 'asc')).toEqual([2, 3, 1]);
+  expect(await order('role', 'desc')).toEqual([2, 3, 1]);
+  expect(await order('level', 'desc')).toEqual([2, 3, 1]);
+  expect(await order('hireDate', 'asc')).toEqual([2, 1, 3]);
+  expect(await order('hireDate', 'desc')).toEqual([1, 3, 2]);
+});
