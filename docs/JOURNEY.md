@@ -434,6 +434,7 @@ is done (hashes copied from `git log`).
 - Task 18 · test: over HTTP the answer streams step, tokens, sources, done; reopening the chat returns each answer with its saved sources, and later questions carry the earlier ones (AST-2, AST-3). Passed first run; not saving the sources made it fail.
 - Task 18 · red: questions must be 1–2,000 characters (AST-12).
 - Task 18 · green: a question must be 1–2,000 characters ("Type a question." / "Keep the question to 2,000 characters or fewer."); nothing is saved otherwise (AST-12).
+- Task 18 · red: only one answer streams per chat at a time (AST-12); watched the second question hang on the held model.
 
 ---
 

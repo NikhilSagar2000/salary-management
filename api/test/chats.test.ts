@@ -1,4 +1,5 @@
 import { expect, test } from 'vitest';
+import type { ModelFn } from '../src/assistant/model.ts';
 import { asText, insertPeople, scriptedModel, sseEvents, signIn, testApp } from './helpers.ts';
 
 test('creates, lists newest first, renames (1–80 characters) and deletes chats', async () => {
@@ -83,4 +84,36 @@ test('rejects questions over 2,000 characters', async () => {
   expect(long.body.fields).toEqual({ question: 'Keep the question to 2,000 characters or fewer.' });
   expect((await post('   ')).body.fields).toEqual({ question: 'Type a question.' });
   expect((await db.query('SELECT count(*)::int AS n FROM chat_messages')).rows[0].n).toBe(0);
+});
+
+/** A model that waits until the test lets it answer. */
+function heldModel() {
+  let release!: () => void;
+  let begin!: () => void;
+  const gate = new Promise<void>((r) => (release = r));
+  const begun = new Promise<void>((r) => (begin = r));
+  const model: ModelFn = async function* ({ signal }) {
+    begin();
+    yield { type: 'token', text: 'Partial ' };
+    await Promise.race([gate, new Promise((_, reject) => signal.addEventListener('abort', () => reject(signal.reason)))]);
+    yield { type: 'token', text: 'answer.' };
+    yield { type: 'done' };
+  };
+  return { model, release, begun };
+}
+
+test.fails('refuses a second answer while one streams', async () => {
+  const held = heldModel();
+  const { app } = await testApp({ model: held.model });
+  const agent = await signIn(app);
+  const chat = (await agent.post('/api/chats').send({})).body;
+  const first = agent.post(`/api/chats/${chat.id}/messages`).send({ question: 'First?' }).buffer(true).parse(asText).then((r) => r);
+  await held.begun;
+  const second = await agent.post(`/api/chats/${chat.id}/messages`).send({ question: 'Second?' });
+  expect(second.status).toBe(409);
+  expect(second.body).toEqual({ error: 'Wait for the current answer to finish, or stop it.' });
+  held.release();
+  expect((await first).status).toBe(200);
+  const other = (await agent.post('/api/chats').send({})).body; // other chats are not blocked
+  expect((await agent.post(`/api/chats/${other.id}/messages`).send({ question: 'Hi?' }).buffer(true).parse(asText)).status).toBe(200);
 });
