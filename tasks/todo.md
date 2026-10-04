@@ -154,7 +154,7 @@ is written just before the task starts, from the interfaces that exist at that p
   `clock.test.ts` › "today follows the X-Timezone header, falling back to UTC for a missing
   or unknown zone" (TIME-1) ·
   `setup.test.ts` › "test set-up refuses OpenRouter's real base URL" (AST-18).
-- [ ] **Task 2: Reference data, shared schemas, formatting.** Files: `shared/src/*`.
+- [x] **Task 2: Reference data, shared schemas, formatting.** Files: `shared/src/*`.
   Tests: `shared/test/schemas.test.ts` › "employee schema requires each field with a plain
   message" (EMP-2, EMP-3) · "role must belong to the department and the level be allowed"
   (EMP-2) · "salary accepts only whole numbers from 1 to the maximum, with a plain message for
@@ -405,20 +405,20 @@ Files: `shared/package.json`, `shared/src/{reference,messages,schemas,format,ind
 Levels are numbers 1–7 (shown "L3"). Test expectations are hand-written literals, never
 imported from `messages.ts`.
 
-- [ ] Step 1: `schemas.test.ts` › "employee schema requires each field with a plain message":
+- [x] Step 1: `schemas.test.ts` › "employee schema requires each field with a plain message":
   parsing `{}` gives one message per field: code, first name, last name, gender, work email,
   hire date, country, department, role, level, salary.
-- [ ] Step 2: `schemas.test.ts` › "role must belong to the department and the level be
+- [x] Step 2: `schemas.test.ts` › "role must belong to the department and the level be
   allowed": Software Engineer in Sales → "Software Engineer isn't a role in Sales.";
   Sales Development Representative at L5 → "Sales Development Representative goes from L1 to L3."
-- [ ] Step 3: `schemas.test.ts` › "salary accepts only whole numbers from 1 to the maximum,
+- [x] Step 3: `schemas.test.ts` › "salary accepts only whole numbers from 1 to the maximum,
   with a plain message for separators, decimals, negatives and exponents": table of inputs
   (`95000`, `'95000'` ok; `'95,000'`, `'95000.50'`, `95000.5`, `-1`, `0`, `'1e6'`, `''`,
   `10000000001`) → literal messages.
-- [ ] Step 4: `schemas.test.ts` › "dates must be real calendar dates written YYYY-MM-DD":
+- [x] Step 4: `schemas.test.ts` › "dates must be real calendar dates written YYYY-MM-DD":
   `2026-02-30`, `04/10/2026`, `2026-4-1` refused; `2024-02-29` accepted.
-- [ ] Step 5: `format.test.ts` › "money shows currency code and separators; dates like 4 Oct
+- [x] Step 5: `format.test.ts` › "money shows currency code and separators; dates like 4 Oct
   2026": `formatMoney(128000,'USD')` → `USD 128,000`; `formatMoney(1550000,'INR')` →
   `INR 1,550,000`; `formatMoney(6070000,'JPY')` → `JPY 6,070,000`; `formatDate('2026-10-04')`
   → `4 Oct 2026` under any `TZ`.
-- [ ] Task check: `npm test` and `npm run typecheck` pass.
+- [x] Task check: `npm test` and `npm run typecheck` pass.

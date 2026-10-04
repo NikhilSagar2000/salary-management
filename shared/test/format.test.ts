@@ -1,7 +1,7 @@
 import { expect, test } from 'vitest';
 import { formatDate, formatMoney } from '../src/format.ts';
 
-test.fails('money shows currency code and separators; dates like 4 Oct 2026', () => {
+test('money shows currency code and separators; dates like 4 Oct 2026', () => {
   expect(formatMoney(128000, 'USD')).toBe('USD 128,000');
   expect(formatMoney(1550000, 'INR')).toBe('INR 1,550,000');
   expect(formatMoney(6070000, 'JPY')).toBe('JPY 6,070,000');

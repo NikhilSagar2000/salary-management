@@ -254,6 +254,7 @@ is done (hashes copied from `git log`).
 - Task 2 · red: calendar date test.
 - Task 2 · green: `isoDate(field)` accepts only real calendar dates written YYYY-MM-DD.
 - Task 2 · red: money and date formatting test (UI-2).
+- Task 2 · green: `formatMoney` ("USD 128,000") and `formatDate` ("4 Oct 2026", timezone-proof) (UI-2). Checked the API can import `@acme/shared` under Node type stripping.
 
 ---
 
