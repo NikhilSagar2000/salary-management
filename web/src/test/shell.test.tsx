@@ -48,3 +48,22 @@ test('theme follows the device and the toggle is remembered', async () => {
   expect(scheme()).toBe('light');
   expect(screen.getByRole('button', { name: 'Switch to dark theme' })).toBeInTheDocument();
 });
+
+test.fails('a failed request shows a plain message', async () => {
+  let fail: 'server' | 'network' | null = 'server';
+  fakeApi({
+    'GET /api/session': () => {
+      if (fail === 'server') return { status: 500, body: { error: 'Something went wrong on our side. Try again in a minute.' } };
+      if (fail === 'network') throw new TypeError('Failed to fetch');
+      return { status: 200, body: { signedIn: true } };
+    },
+  });
+  renderApp('/employees');
+  expect(await screen.findByRole('alert')).toHaveTextContent('Something went wrong on our side. Try again in a minute.');
+  fail = 'network';
+  await userEvent.click(screen.getByRole('button', { name: 'Try again' }));
+  expect(await screen.findByRole('alert')).toHaveTextContent("Can't reach the server. Check your connection and try again.");
+  fail = null;
+  await userEvent.click(screen.getByRole('button', { name: 'Try again' }));
+  expect(await screen.findByRole('heading', { name: 'Employees' })).toBeInTheDocument();
+});
