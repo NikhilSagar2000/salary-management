@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import pg from 'pg';
 import request from 'supertest';
 import { expect, test } from 'vitest';
+import { createPool } from '../src/db.ts';
 import { migrate } from '../src/migrate.ts';
 import { testApp, testDbUrl, testPool } from './helpers.ts';
 
@@ -28,6 +29,21 @@ test('migrations apply once and are recorded', async () => {
     expect(recorded.rows.map((r) => r.name)).toEqual(['001_first.sql', '002_second.sql']);
     expect((await db.query('SELECT count(*)::int AS n FROM things')).rows[0].n).toBe(1);
   } finally {
+    await db.end();
+  }
+});
+
+test.fails('dates round-trip unchanged under any server timezone', async () => {
+  const original = process.env.TZ;
+  const db = createPool(testDbUrl());
+  try {
+    for (const tz of ['America/Los_Angeles', 'Asia/Tokyo']) {
+      process.env.TZ = tz;
+      const { rows } = await db.query("SELECT '2026-03-01'::date AS d");
+      expect(rows[0].d).toBe('2026-03-01');
+    }
+  } finally {
+    process.env.TZ = original;
     await db.end();
   }
 });
