@@ -90,3 +90,41 @@ test('query_changes classifies kinds and caps at 200', async () => {
   expect((raises.result as { rows: unknown[] }).rows).toHaveLength(200);
   expect(raises.sources[0]).toEqual({ kind: 'group', label: 'Everyone · raise · 2025-04-01 to 2025-04-01', query: '', headcount: 231 });
 });
+
+test.fails('aggregate computes exact stats split by currency', async () => {
+  const { tool, db } = await setup([
+    { code: 'E000001', country: 'US', level: 3, salary: 100000, gender: 'female' },
+    { code: 'E000002', country: 'US', level: 3, salary: 120000, gender: 'male' },
+    { code: 'E000003', country: 'US', level: 4, salary: 150000, gender: 'female', hireDate: '2026-03-01' },
+    { code: 'E000004', country: 'IN', level: 3, salary: 1500000, gender: 'male' },
+    { code: 'E000005', country: 'IN', level: 3, salary: 1700000, gender: 'female' },
+    { code: 'E000006', country: 'US', level: 3, salary: 999999, leaveDate: '2025-12-31' }, // left: not counted
+  ]);
+  const salary = await tool('aggregate', { metric: 'salary', groupBy: ['country', 'level'] });
+  expect(salary.result).toEqual({
+    groups: [
+      { country: 'US', level: 3, currency: 'USD', median: 110000, min: 100000, max: 120000, headcount: 2 },
+      { country: 'US', level: 4, currency: 'USD', median: 150000, min: 150000, max: 150000, headcount: 1 },
+      { country: 'IN', level: 3, currency: 'INR', median: 1600000, min: 1500000, max: 1700000, headcount: 2 },
+    ],
+  });
+  expect(salary.sources[0]).toEqual({ kind: 'group', label: 'United States · Level 3', query: 'country=US&level=3', headcount: 2 });
+
+  const mixed = await tool('aggregate', { metric: 'salary', groupBy: ['gender'] });
+  expect(mixed.result).toEqual({
+    groups: [
+      { gender: 'female', currency: 'USD', median: 125000, min: 100000, max: 150000, headcount: 2 },
+      { gender: 'male', currency: 'USD', median: 120000, min: 120000, max: 120000, headcount: 1 },
+      { gender: 'female', currency: 'INR', median: 1700000, min: 1700000, max: 1700000, headcount: 1 },
+      { gender: 'male', currency: 'INR', median: 1500000, min: 1500000, max: 1500000, headcount: 1 },
+    ],
+  });
+  const before = await tool('aggregate', { metric: 'headcount', groupBy: ['country'], asOf: '2026-01-01' });
+  expect(before.result).toEqual({ groups: [{ country: 'US', headcount: 2 }, { country: 'IN', headcount: 2 }] });
+
+  await db.query(`INSERT INTO job_changes (employee_id, effective_date, salary, currency) VALUES (1, '2025-04-01', 110000, 'USD'), (2, '2025-04-01', 126000, 'USD'), (4, '2025-04-01', 1650000, 'INR')`);
+  const raises = await tool('aggregate', { metric: 'raise_pct', groupBy: ['country'], from: '2025-01-01', to: '2025-12-31' });
+  expect(raises.result).toEqual({
+    groups: [{ country: 'US', median: 7.5, min: 5, max: 10, count: 2 }, { country: 'IN', median: 10, min: 10, max: 10, count: 1 }],
+  });
+});
