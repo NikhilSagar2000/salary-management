@@ -25,3 +25,16 @@ test('employee schema requires each field with a plain message', () => {
     salary: 'Enter the salary as a whole number, like 95000.',
   });
 });
+
+const valid = {
+  code: 'E000123', firstName: 'Ana', lastName: 'Silva', gender: 'female', workEmail: 'ana.silva@acme.example',
+  hireDate: '2024-02-29', country: 'BR', department: 'Engineering', role: 'Software Engineer', level: 3, salary: 133000,
+};
+
+test.fails('role must belong to the department and the level be allowed', () => {
+  expect(errorsOf(valid)).toEqual({});
+  expect(errorsOf({ ...valid, department: 'Sales' })).toEqual({ role: "Software Engineer isn't a role in Sales." });
+  expect(errorsOf({ ...valid, department: 'Sales', role: 'Sales Development Representative', level: 5 })).toEqual({
+    level: 'Sales Development Representative goes from L1 to L3.',
+  });
+});

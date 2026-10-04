@@ -247,6 +247,7 @@ is done (hashes copied from `git log`).
 - Task 1 done: commits ff7947b..666d9d9.
 - Task 2 · red: shared reference data (countries, currencies, 19 roles with level ranges, genders) and the required-fields test (`schemas.test.ts`); D57 corrects the role count.
 - Task 2 · green: `employeeCreateSchema` with one plain message per missing field, messages kept in `shared/src/messages.ts`.
+- Task 2 · red: role/department/level combination test.
 
 ---
 
