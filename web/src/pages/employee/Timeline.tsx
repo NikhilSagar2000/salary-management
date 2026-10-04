@@ -28,7 +28,7 @@ export function Timeline({ entries, action }: { entries: Detail['timeline']; act
                 {e.type === 'change' && e.scheduled && !e.cancelled && <Badge variant="light" color="blue">{e.hire ? 'Starts' : 'Scheduled'}</Badge>}
                 {e.type === 'change' && e.cancelled && <Badge variant="light" color="gray">Cancelled{e.cancelledOn && ` on ${formatDate(e.cancelledOn)}`}</Badge>}
                 {e.type === 'change' && e.wontApply && <Badge variant="light" color="yellow">Won't apply (after leave date)</Badge>}
-                {e.type === 'left' && <Badge variant="light" color="gray">Leaves</Badge>}
+                {e.type === 'left' && <Badge variant="light" color="gray">{e.undone ? 'Leave cancelled' : e.scheduled ? 'Leaves' : 'Left'}</Badge>}
                 {e.type === 'undone' && <Badge variant="light">Leaving undone</Badge>}
               </Group>
               {e.type === 'change' &&
@@ -38,7 +38,7 @@ export function Timeline({ entries, action }: { entries: Detail['timeline']; act
                   </Text>
                 ))}
               {e.type === 'change' && e.note && <Text size="sm" c="dimmed">{e.note}</Text>}
-              {e.type === 'left' && e.reason && <Text size="sm" c="dimmed">{e.reason}</Text>}
+              {e.type === 'left' && e.reason && <Text size="sm" c="dimmed" td={e.undone ? 'line-through' : undefined}>{e.reason}</Text>}
             </Stack>
             {e.type === 'change' && action?.(e)}
           </Group>

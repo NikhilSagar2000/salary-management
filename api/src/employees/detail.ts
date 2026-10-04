@@ -84,9 +84,11 @@ async function timeline(db: Db, employeeId: number, today: string, timezone: str
     };
   });
   const { rows: events } = await db.query('SELECT id, kind, leave_date, reason, created_at FROM leave_events WHERE employee_id = $1 ORDER BY id', [employeeId]);
-  const leaves = events.map((ev) =>
+  // A leave is undone when an undo was recorded after it.
+  const undoneAfter = (i: number) => events.slice(i + 1).some((later) => later.kind === 'undone');
+  const leaves = events.map((ev, i) =>
     ev.kind === 'left'
-      ? { type: 'left' as const, date: ev.leave_date as string, reason: ev.reason }
+      ? { type: 'left' as const, date: ev.leave_date as string, reason: ev.reason, scheduled: ev.leave_date > today, undone: undoneAfter(i) }
       : { type: 'undone' as const, date: dateIn(ev.created_at, timezone) }, // LEAVE-2: the day it was undone
   );
   // Stable sort by date keeps changes before leave events on the same day.

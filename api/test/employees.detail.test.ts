@@ -80,7 +80,7 @@ test("timeline lists each change with from → to, and marks scheduled, cancelle
       type: 'change', date: '2025-01-01', hire: false, note: 'Promotion', scheduled: false, cancelled: false, cancelledOn: null, wontApply: false,
       changes: [{ field: 'level', from: 3, to: 4 }, { field: 'salary', from: brl(133000), to: brl(145000) }],
     },
-    { type: 'left', date: '2026-12-31', reason: 'Moving abroad' },
+    { type: 'left', date: '2026-12-31', reason: 'Moving abroad', scheduled: true, undone: false },
     {
       type: 'change', date: '2027-01-01', hire: false, note: null, scheduled: true, cancelled: true, cancelledOn: '2026-10-01', wontApply: false,
       changes: [{ field: 'salary', from: brl(145000), to: brl(150000) }],
@@ -119,7 +119,7 @@ test("undoing leaving is dated the day it was undone, in HR's timezone (LEAVE-2)
   expect(await events('Asia/Tokyo')).toEqual([{ type: 'undone', date: '2026-10-02' }, { type: 'left', date: '2026-12-31' }]);
 });
 
-test.fails('a leave event says whether it is still ahead and whether it was undone (LEAVE-2)', async () => {
+test('a leave event says whether it is still ahead and whether it was undone (LEAVE-2)', async () => {
   const { app } = await testApp(); // today: 2026-10-01
   const agent = await signIn(app);
   await agent.post('/api/employees').send(newEmployee);
@@ -128,6 +128,6 @@ test.fails('a leave event says whether it is still ahead and whether it was undo
   expect(await leaves()).toEqual([{ type: 'left', date: '2026-12-31', reason: 'Moving abroad', scheduled: true, undone: false }]);
   await agent.post('/api/employees/E000123/undo-leave').send({ version: 2 });
   expect(await leaves()).toEqual([{ type: 'left', date: '2026-12-31', reason: 'Moving abroad', scheduled: true, undone: true }]);
-  await agent.post('/api/employees/E000123/leave').send({ version: 3, leaveDate: '2026-09-30', reason: null });
+  await agent.post('/api/employees/E000123/leave').send({ version: 3, leaveDate: '2026-09-30' });
   expect((await leaves()).find((e: { date: string }) => e.date === '2026-09-30')).toEqual({ type: 'left', date: '2026-09-30', reason: null, scheduled: false, undone: false });
 });

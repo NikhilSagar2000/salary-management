@@ -212,7 +212,7 @@ test("a starting person's hire can't be cancelled, so it offers no Cancel", asyn
   expect(within(item!).queryByRole('button', { name: /^Cancel/ })).not.toBeInTheDocument();
 });
 
-test.fails('leave events read Left, Leaves or Leave cancelled', async () => {
+test('leave events read Left, Leaves or Leave cancelled', async () => {
   const left = (date: string, scheduled: boolean, undone: boolean) => ({ type: 'left', date, reason: 'Moving abroad', scheduled, undone });
   open(detailResponse({ timeline: [left('2025-05-31', false, false), left('2026-12-31', true, true), left('2027-03-31', true, false)] }));
   const items = within(await screen.findByRole('list', { name: 'History' })).getAllByRole('listitem');

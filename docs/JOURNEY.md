@@ -595,6 +595,7 @@ is done (hashes copied from `git log`).
 - Phase 6 QA fix 4 · red (found by QA, EMP-11): a starting person's hire reads "Starts" and offers no Cancel (the server refuses to cancel a hire).
 - Phase 6 QA fix 4 · green: a hire dated after today reads "Starts" and has no Cancel; other scheduled changes keep "Scheduled" and Cancel.
 - Phase 6 QA fix 5 · red (found by QA, LEAVE-2): a leave event says whether it is still ahead and whether it was later undone; the page reads Left, Leaves or Leave cancelled (an undone leave used to read "Leaves" as if it would happen).
+- Phase 6 QA fix 5 · green: leave events carry scheduled (date after today) and undone (an undo recorded after them); the page shows Left, Leaves or Leave cancelled, striking through an undone leave's reason. The red test's third leave sent reason null, which the leave rules refuse; it now leaves the reason out.
 
 ---
 
