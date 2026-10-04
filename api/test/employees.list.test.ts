@@ -97,3 +97,20 @@ test('sorts by each column both ways, ties broken by code', async () => {
   expect(await order('hireDate', 'asc')).toEqual([2, 1, 3]);
   expect(await order('hireDate', 'desc')).toEqual([1, 3, 2]);
 });
+
+test.fails('salary sort and range need exactly one country', async () => {
+  const { list } = await setup([
+    { code: 'E000001', country: 'US', salary: 90000 },
+    { code: 'E000002', country: 'US', salary: 150000 },
+    { code: 'E000003', country: 'US', salary: 120000 },
+    { code: 'E000004', country: 'IN', salary: 2500000 },
+  ]);
+  const ONE_COUNTRY = 'Choose one country to sort or filter by salary, because salaries are in different currencies.';
+  for (const q of ['?sort=salary', '?country=US,IN&sort=salary', '?salaryMin=100000', '?country=US,IN&salaryMax=200000']) {
+    const res = await list(q);
+    expect(res.status, q).toBe(400);
+    expect(res.body.fields, q).toEqual({ country: ONE_COUNTRY });
+  }
+  expect(codes(await list('?country=US&sort=salary&dir=desc'))).toEqual(['E000002', 'E000003', 'E000001']);
+  expect(codes(await list('?country=US&salaryMin=100000&salaryMax=150000&sort=salary'))).toEqual(['E000003', 'E000002']);
+});

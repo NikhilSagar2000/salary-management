@@ -338,6 +338,7 @@ is done (hashes copied from `git log`).
 - Task 11 · green: status filter (starting/active/leaving/left as of today); default hides people who have left (LIST-3, LEAVE-6).
 - Task 11 · red: sort by each column both ways (LIST-4).
 - Task 11 · green: sort by name (last, first), code, country, department, role, level or hire date, either direction, ties by code (LIST-4).
+- Task 11 · red: salary sort/range only with exactly one country (LIST-5).
 
 ---
 
