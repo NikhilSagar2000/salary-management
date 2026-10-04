@@ -1,4 +1,4 @@
-import type { EmployeeCreate } from '@acme/shared';
+import { CURRENCY, type EmployeeCreate } from '@acme/shared';
 import type pg from 'pg';
 
 export async function nextCode(db: pg.Pool): Promise<string> {
@@ -14,10 +14,27 @@ export function duplicateField(err: unknown, e: { code: string }): Record<string
   return null;
 }
 
+/** Saves the person and their hire change (every field set, dated on the hire date) together. */
 export async function createEmployee(db: pg.Pool, e: EmployeeCreate) {
-  await db.query(
-    `INSERT INTO employees (code, first_name, last_name, gender, work_email, hire_date) VALUES ($1, $2, $3, $4, $5, $6)`,
-    [e.code, e.firstName, e.lastName, e.gender, e.workEmail, e.hireDate],
-  );
+  const client = await db.connect();
+  try {
+    await client.query('BEGIN');
+    const { rows } = await client.query(
+      `INSERT INTO employees (code, first_name, last_name, gender, work_email, hire_date)
+       VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
+      [e.code, e.firstName, e.lastName, e.gender, e.workEmail, e.hireDate],
+    );
+    await client.query(
+      `INSERT INTO job_changes (employee_id, effective_date, country, department, role, level, manager_set, manager_id, salary, currency)
+       VALUES ($1, $2, $3, $4, $5, $6, true, NULL, $7, $8)`,
+      [rows[0].id, e.hireDate, e.country, e.department, e.role, e.level, e.salary, CURRENCY[e.country]],
+    );
+    await client.query('COMMIT');
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  } finally {
+    client.release();
+  }
   return { code: e.code, version: 1 };
 }

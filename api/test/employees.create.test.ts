@@ -26,7 +26,7 @@ test('rejects a malformed or used code', async () => {
   expect(used.body).toEqual({ error: 'Some fields need fixing.', fields: { code: 'E000123 is already used.' } });
 });
 
-test.fails('creates an employee with currency from the country', async () => {
+test('creates an employee with currency from the country', async () => {
   const { app, db } = await testApp();
   const agent = await signIn(app);
   const res = await agent.post('/api/employees').send(newEmployee);
@@ -38,7 +38,7 @@ test.fails('creates an employee with currency from the country', async () => {
   expect(rows).toEqual([{ country: 'BR', salary: 133000, currency: 'BRL' }]);
 });
 
-test.fails('saves the hire change dated on the hire date', async () => {
+test('saves the hire change dated on the hire date', async () => {
   const { app, db } = await testApp();
   const agent = await signIn(app);
   await agent.post('/api/employees').send({ ...newEmployee, country: 'JP', salary: '6070000' });

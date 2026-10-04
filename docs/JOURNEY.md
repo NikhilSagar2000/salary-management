@@ -277,6 +277,7 @@ is done (hashes copied from `git log`).
 - Task 5 · red: malformed/used code test (EMP-1).
 - Task 5 · green: a code already in use gets "E000123 is already used." on the code field.
 - Task 5 · red: hire change tests (EMP-2, EMP-4); money reads back as JS numbers.
+- Task 5 · green: create saves the person and the hire change (all fields, currency from country, dated on the hire date) in one transaction; bigint values read as JS numbers.
 
 ---
 
