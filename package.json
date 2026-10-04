@@ -4,7 +4,8 @@
   "type": "module",
   "workspaces": [
     "shared",
-    "api"
+    "api",
+    "web"
   ],
   "engines": {
     "node": ">=24"
@@ -17,6 +18,7 @@
     "dev:api": "npm run dev -w api",
     "hash-password": "npm run hash-password -w api --silent",
     "seed": "npm run seed -w api --",
-    "measure:list": "npm run measure:list -w api --silent"
+    "measure:list": "npm run measure:list -w api --silent",
+    "dev:web": "npm run dev -w web"
   }
 }

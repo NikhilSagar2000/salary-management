@@ -736,3 +736,20 @@ is saved when it ends as `complete`, `stopped` (connection closed; partial text 
 - [x] Step 7: "rate limit keeps the question and saves the free-limit message" (AST-14, AST-15).
 - [x] Step 8: "the key is never sent to the browser" (AST-17) and `/api/assistant/status` (AST-16).
 - [x] Task check: `npm test`.
+
+### Task 20: Web shell
+
+Files: `web/{package.json,vite.config.ts,tsconfig.json,index.html,postcss.config.cjs}`,
+`web/src/{main.tsx,App.tsx,api.ts,theme.ts}`, `web/src/shell/{Layout,SignIn,RequireSession}.tsx`,
+`web/src/test/{setup.ts,shell.test.tsx}`. React 19 + Mantine 9 + React Router + Tabler icons;
+Vite on 4731 proxies `/api` to 4732. Accent teal, radius "sm", system fonts, light/dark from the
+device with a remembered toggle. Every API call goes through `api.ts` (sends `X-Timezone`,
+turns errors into plain messages, sends a signed-out user to `/signin?next=…`).
+
+- [ ] Step 1 (chore): `web` workspace, Vite, Mantine, Vitest + Testing Library + jsdom; root
+  `npm test` runs it; the empty app renders.
+- [ ] Step 2: "signed-out visit goes to sign-in and returns afterwards" (AUTH-5).
+- [ ] Step 3: "theme follows the device and the toggle is remembered" (UI-1).
+- [ ] Step 4: "a failed request shows a plain message" (UI-4).
+- [ ] Step 5: "every API request sends the browser's timezone" (TIME-1).
+- [ ] Task check: `npm test`; `npm run build -w web`.
