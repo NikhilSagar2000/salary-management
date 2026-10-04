@@ -583,6 +583,7 @@ is done (hashes copied from `git log`).
 - Minor fix 8 · green: the duplicate check reads every row's code and email, including rows that fail other checks (empty values skipped), so all clashes show in one preview.
 - Nine minor fixes done (Q41); 173 unit and API tests and 22 end-to-end tests pass. Phase 6 (manual QA) starts.
 - Phase 6 · plan: docs/QA.md with 13 screen cases and one row per criterion (86), each saying how it is run (browser, API, SQL, automated tests only, or not run); the fake OpenRouter gains QA switches ([500], [no tools], [html], [slow]).
+- Phase 6 QA fix 1 · red (found by QA, LIST-5/LIST-7): a bad list address answers with the specific message itself; the page showed only "Some fields need fixing." for it.
 
 ---
 
