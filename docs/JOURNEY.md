@@ -380,6 +380,7 @@ is done (hashes copied from `git log`).
 - Task 15 · green: `POST /api/imports/preview` reads comma- or semicolon-separated CSV (BOM allowed, any column order, any header case, `L3` or `3` for level) and returns the rows as they would be saved, checked with the shared employee rules (CSV-3).
 - Task 15 · red: export's currency/status/leave columns allowed only when matching or empty (CSV-3).
 - Task 15 · green: a currency column must match the country, and the export's status/leave columns must be empty (CSV-3).
+- Task 15 · red: files over 5 MB or 10,000 rows are refused plainly (CSV-3).
 
 ---
 

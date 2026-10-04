@@ -46,3 +46,16 @@ test("allows the export's status and leave columns only when empty", async () =>
     { line: 4, column: 'leave_reason', message: 'Leave this column empty: import only adds new employees.' },
   ]);
 });
+
+test.fails('refuses files over 5 MB or 10,000 rows', async () => {
+  const { preview } = await setup();
+  const big = await preview(`${HEADER}\n${'x'.repeat(5 * 1024 * 1024 + 1)}`);
+  expect(big.status).toBe(413);
+  expect(big.body).toEqual({ error: 'The file is larger than 5 MB. Split it into smaller files and import each one.' });
+  const many = await preview([HEADER, ...Array.from({ length: 10_001 }, (_, i) => row(i + 1))].join('\n'));
+  expect(many.status).toBe(200);
+  expect(many.body.rows).toEqual([]);
+  expect(many.body.problems).toEqual([
+    { line: 0, column: '', message: 'The file has 10,001 rows; one import can take at most 10,000. Split it into smaller files.' },
+  ]);
+});
