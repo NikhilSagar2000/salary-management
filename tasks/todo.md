@@ -288,7 +288,7 @@ is written just before the task starts, from the interfaces that exist at that p
   peers' position, manager flag, reports and the history timeline" (EMP-14) · "cancel appears
   only on scheduled changes" (EMP-11) · "after leaving only Undo is offered" (LEAVE-3) · "save
   button can't submit twice".
-- [ ] **Task 23: Add employee page.** Tests: `AddEmployee.test.tsx` › "pre-fills the
+- [x] **Task 23: Add employee page.** Tests: `AddEmployee.test.tsx` › "pre-fills the
   suggested code, editable" (EMP-1) · "role choices follow the department, level choices
   follow the role" (EMP-2) · "shows each field's message next to it" (EMP-3).
 - [ ] **Task 24: Pay overview page.** Tests: `PayOverview.test.tsx` › "one country at a time,
