@@ -124,3 +124,22 @@ test('a cancelled scheduled change stays in history and stops applying', async (
   const { rows } = await db.query('SELECT salary, cancelled_at IS NOT NULL AS cancelled FROM job_changes WHERE id = $1', [id]);
   expect(rows).toEqual([{ salary: 150000, cancelled: true }]);
 });
+
+test.fails('refuses to cancel a change dated today or earlier', async () => {
+  const { app, db } = await testApp({ now: '2026-10-01T20:00:00Z' }); // 1 Oct in UTC, 2 Oct in Tokyo
+  const agent = await signIn(app);
+  await agent.post('/api/employees').send(newEmployee);
+  await agent.post('/api/employees/E000123/changes').send({ version: 1, effectiveDate: '2025-01-01', level: 4 });
+  await agent.post('/api/employees/E000123/changes').send({ version: 2, effectiveDate: '2026-10-02', salary: 140000 });
+  const [past, tomorrow] = (await db.query('SELECT id FROM job_changes ORDER BY id OFFSET 1')).rows.map((r) => r.id);
+  const cancel = (id: number, version: number, tz?: string) => {
+    const req = agent.post(`/api/employees/E000123/changes/${id}/cancel`);
+    if (tz) req.set('X-Timezone', tz);
+    return req.send({ version });
+  };
+  const old = await cancel(past, 3);
+  expect(old.status).toBe(400);
+  expect(old.body.fields).toEqual({ form: 'Only scheduled changes can be cancelled. Fix a past change by adding a new one.' });
+  expect((await cancel(tomorrow, 3, 'Asia/Tokyo')).body.fields).toEqual({ form: 'Only scheduled changes can be cancelled. Fix a past change by adding a new one.' });
+  expect((await cancel(tomorrow, 3, 'Europe/London')).status).toBe(200);
+});

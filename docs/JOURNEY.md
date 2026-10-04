@@ -305,6 +305,7 @@ is done (hashes copied from `git log`).
 - Root `npm test` now type-checks first, so code Node can't run never reaches a commit (lesson from the Task 7 fix).
 - Task 8 · red: cancel a scheduled change (EMP-11).
 - Task 8 · green: `POST /api/employees/:code/changes/:id/cancel` marks a change cancelled (kept in history) and re-checks the timeline (EMP-11).
+- Task 8 · red: only scheduled changes can be cancelled, "today" from `X-Timezone` (EMP-11, TIME-1).
 
 ---
 
