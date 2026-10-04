@@ -39,7 +39,9 @@ export async function listEmployees(db: pg.Pool, q: ListQuery, today: string) {
   const from = `FROM employees e JOIN current_state($1) s ON s.employee_id = e.id ${where.length ? `WHERE ${where.join(' AND ')}` : ''}`;
   const total = (await db.query(`SELECT count(*) AS n ${from}`, params)).rows[0].n as number;
   const { rows } = await db.query(
-    `SELECT e.code ${from} ORDER BY ${orderBy(q)} LIMIT ${q.pageSize} OFFSET ${(q.page - 1) * q.pageSize}`,
+    `SELECT e.code, e.first_name AS "firstName", e.last_name AS "lastName", s.country, s.currency, s.department, s.role,
+       s.level, s.salary, e.hire_date AS "hireDate", e.leave_date AS "leaveDate", ${STATUS_SQL} AS status
+     ${from} ORDER BY ${orderBy(q)} LIMIT ${q.pageSize} OFFSET ${(q.page - 1) * q.pageSize}`,
     params,
   );
   return { rows, total, page: q.page, pageSize: q.pageSize };

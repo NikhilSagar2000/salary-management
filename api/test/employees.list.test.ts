@@ -133,7 +133,7 @@ test('rejects invalid query values naming the value', async () => {
   }
 });
 
-test.fails('rows carry current job, salary with currency, hire date and status', async () => {
+test('rows carry current job, salary with currency, hire date and status', async () => {
   const { list, db } = await setup([
     { code: 'E000001', firstName: 'Ana', lastName: 'Silva', country: 'BR', salary: 133000, hireDate: '2024-02-29' },
     { code: 'E000002', firstName: 'Kenji', lastName: 'Sato', country: 'JP', salary: 6070000, hireDate: '2026-12-01' },
