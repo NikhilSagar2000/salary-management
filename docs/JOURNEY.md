@@ -474,6 +474,7 @@ is done (hashes copied from `git log`).
 - Task 20 · green: if the session check fails (server error or no connection) the page shows the plain message and a Try again button (UI-4).
 - Task 20 · red: every API request carries the browser's IANA timezone (TIME-1).
 - Task 20 · green: every API call sends `X-Timezone` with the browser's IANA zone (TIME-1).
+- Task 20 · red: Sign out ends the session and returns to sign-in (AUTH-4 in the UI).
 
 ---
 

@@ -77,3 +77,18 @@ test("every API request sends the browser's timezone", async () => {
   expect(zone).toBeTruthy();
   expect(calls.map((c) => c.headers.get('x-timezone'))).toEqual([zone, zone]);
 });
+
+test.fails('sign out ends the session and returns to sign-in', async () => {
+  let signedIn = true;
+  const calls = fakeApi({
+    'GET /api/session': () => (signedIn ? { status: 200, body: { signedIn: true } } : { status: 401, body: { error: 'Please sign in.' } }),
+    'DELETE /api/session': () => {
+      signedIn = false;
+      return { status: 204 };
+    },
+  });
+  renderApp('/employees');
+  await userEvent.click(await screen.findByRole('button', { name: 'Sign out' }));
+  expect(await screen.findByRole('heading', { name: 'Sign in' })).toBeInTheDocument();
+  expect(calls.some((c) => c.method === 'DELETE' && c.url.pathname === '/api/session')).toBe(true);
+});
