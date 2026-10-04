@@ -64,3 +64,13 @@ export function jobProblems(job: { department: string; role: string; level: numb
   }
   return [];
 }
+
+/** Editing personal details in place; `version` is the one the page loaded (EMP-13). */
+export const employeeDetailsSchema = z.object({
+  version: z.number().int().positive(),
+  firstName: text(MSG.firstName).optional(),
+  lastName: text(MSG.lastName).optional(),
+  gender: z.enum(GENDERS, { error: MSG.gender }).optional(),
+  workEmail: z.email({ error: MSG.workEmail }).optional(),
+});
+export type EmployeeDetails = z.infer<typeof employeeDetailsSchema>;

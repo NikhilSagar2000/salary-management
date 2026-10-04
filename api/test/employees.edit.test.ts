@@ -8,7 +8,7 @@ async function withEmployee() {
   return { agent, db };
 }
 
-test.fails('edits first name, last name, gender and email in place', async () => {
+test('edits first name, last name, gender and email in place', async () => {
   const { agent, db } = await withEmployee();
   await agent.post('/api/employees').send({ ...newEmployee, code: 'E000200', workEmail: 'taken@acme.example' });
   const changes = { firstName: 'Anna', lastName: 'Souza', gender: 'non_binary', workEmail: 'anna.souza@acme.example' };
