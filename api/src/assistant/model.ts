@@ -94,3 +94,7 @@ async function* readStream(body: ReadableStream<Uint8Array>, onData: () => void)
   }
   yield { type: 'done' };
 }
+
+export async function freeRequestsLeft(_cfg: { baseUrl: string; apiKey: string }): Promise<number | null> {
+  return -1;
+}

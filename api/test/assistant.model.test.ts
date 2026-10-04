@@ -1,7 +1,7 @@
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import { afterEach, expect, test } from 'vitest';
-import { ModelError, openRouterModel, type ModelEvent } from '../src/assistant/model.ts';
+import { freeRequestsLeft, ModelError, openRouterModel, type ModelEvent } from '../src/assistant/model.ts';
 
 const servers: { close: () => void }[] = [];
 afterEach(() => servers.splice(0).forEach((s) => s.close()));
@@ -114,4 +114,18 @@ test('network error, 5xx and a 60 s timeout become unavailable', async () => {
   const { baseUrl: slow } = await fakeOpenRouter(() => setTimeout(() => stop.abort(), 50));
   const err = await failure(openRouterModel({ baseUrl: slow, apiKey: 'k', models: ['m'] })({ ...request, signal: stop.signal }));
   expect((err as Error).name).toBe('AbortError');
+});
+
+test.fails("reads free requests left from OpenRouter's key info", async () => {
+  const { baseUrl, requests } = await fakeOpenRouter((_req, res) => {
+    res.writeHead(200, { 'content-type': 'application/json' });
+    res.end(JSON.stringify({ data: { label: 'k', is_free_tier: true, free_model_daily_requests: { used: 13, limit: 50, remaining: 37 } } }));
+  });
+  expect(await freeRequestsLeft({ baseUrl, apiKey: 'test-key' })).toBe(37);
+  expect(requests[0]!.url).toBe('/api/v1/key');
+  expect(requests[0]!.headers.authorization).toBe('Bearer test-key');
+
+  const { baseUrl: noField } = await fakeOpenRouter((_req, res) => res.writeHead(200).end('{"data":{"label":"k"}}'));
+  expect(await freeRequestsLeft({ baseUrl: noField, apiKey: 'k' })).toBeNull();
+  expect(await freeRequestsLeft({ baseUrl: 'http://127.0.0.1:9/api/v1', apiKey: 'k' })).toBeNull();
 });

@@ -425,6 +425,7 @@ is done (hashes copied from `git log`).
 - Task 17 · green: OpenRouter 429s — as an HTTP status or an error inside the stream — throw `ModelError("rate_limited")` (AST-14).
 - Task 17 · red: network errors, 5xx and 60 s without data become `unavailable`; a deliberate stop stays an abort (AST-15).
 - Task 17 · green: network errors, non-2xx answers and 60 s without data (measured from the last data, so long answers keep streaming) throw `ModelError("unavailable")`; a stop from the caller stays an AbortError (AST-15).
+- Task 17 · red: free model requests left today, read from OpenRouter's key info (AST-16).
 
 ---
 
