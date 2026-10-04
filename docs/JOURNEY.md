@@ -300,6 +300,7 @@ is done (hashes copied from `git log`).
 - Task 7 · green: the timeline check also refuses any date where the salary's currency differs from the country's, naming the stranded salary change (EMP-9).
 - Task 7 · red: manager rules on changes and on create (EMP-10).
 - Task 7 · green: managers (on changes and on create) must exist, not be the person, be employed on the date, and not make a reporting loop on that date; `managerCode: null` clears the manager (EMP-10).
+- Task 7 · test: out-of-date job change gets 409 (EMP-13); passed first run, a mutation dropping the version check made it fail.
 
 ---
 

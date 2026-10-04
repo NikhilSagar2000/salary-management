@@ -7,6 +7,8 @@ const STALE = 'Someone changed this employee after you opened the page. Reload t
 const writes = {
   details: (agent: Awaited<ReturnType<typeof signIn>>, version: number) =>
     agent.patch('/api/employees/E000123').send({ version, firstName: `Name${version}` }),
+  'job change': (agent: Awaited<ReturnType<typeof signIn>>, version: number) =>
+    agent.post('/api/employees/E000123/changes').send({ version, effectiveDate: '2025-01-01', level: 4 }),
 };
 
 test.each(Object.entries(writes))('an old version gets 409 and nothing changes (%s)', async (_name, write) => {
