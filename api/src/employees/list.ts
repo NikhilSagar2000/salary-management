@@ -1,5 +1,6 @@
 import type { ListQuery } from '@acme/shared';
 import type pg from 'pg';
+import { PAY_STATS } from '../stats/peers.ts';
 
 /** SQL: a person's status on date $1 (matches statusOn in detail.ts). */
 export const STATUS_SQL = `CASE WHEN e.hire_date > $1 THEN 'starting' WHEN e.leave_date <= $1 THEN 'left'
@@ -44,7 +45,8 @@ export async function listEmployees(db: pg.Pool, q: ListQuery, today: string) {
      ${from} ORDER BY ${orderBy(q)} LIMIT ${q.pageSize} OFFSET ${(q.page - 1) * q.pageSize}`,
     params,
   );
-  return { rows, total, page: q.page, pageSize: q.pageSize };
+  const { rows: stats } = await db.query(`SELECT s.currency, ${PAY_STATS} ${from} GROUP BY s.currency`, params);
+  return { rows, total, page: q.page, pageSize: q.pageSize, stats };
 }
 
 /** ORDER BY for the chosen column and direction; ties always by code, so paging is stable. */

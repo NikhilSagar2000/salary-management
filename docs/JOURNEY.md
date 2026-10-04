@@ -346,6 +346,7 @@ is done (hashes copied from `git log`).
 - Task 11 · green: list rows carry name, current country/currency, department, role, level, salary, hire and leave dates and status (LIST-8).
 - Task 11 · test: filters that match nobody (or a page past the end) give an empty page with the total, not an error (review focus 5); mutation-checked. `Status` type now comes from `@acme/shared`.
 - Task 12 · red: list stats summary for the whole filtered set (LIST-9).
+- Task 12 · green: the list response includes `stats` (median, min, max, headcount per currency) for the whole filtered set, not just the page (LIST-9).
 
 ---
 
