@@ -14,7 +14,7 @@ const open = (detail = detailResponse(), extra = {}) => {
   return calls;
 };
 
-test.fails('code and hire date are read-only', async () => {
+test('code and hire date are read-only', async () => {
   open();
   expect(await screen.findByRole('heading', { name: 'Ana Silva' })).toBeInTheDocument();
   const facts = screen.getByRole('list', { name: 'Employee facts' });

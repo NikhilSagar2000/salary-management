@@ -489,6 +489,7 @@ is done (hashes copied from `git log`).
 - Task 21 · green: the search box follows the URL when it changes elsewhere (Clear filters, back/forward) without overwriting what is being typed (LIST-6).
 - Task 21 · test: Export CSV links to `/api/employees.csv` with the current filters and sort but no paging, so the file has every matching row (CSV-1). Passed first run; keeping the page parameter made it fail.
 - Task 22 · red: the employee page shows code and hire date as read-only facts (EMP-5).
+- Task 22 · green: employee page with name, status and read-only facts (code, hire date, email, gender, leave date) (EMP-5).
 
 ---
 
