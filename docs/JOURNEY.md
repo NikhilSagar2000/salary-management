@@ -392,6 +392,7 @@ is done (hashes copied from `git log`).
 - Task 15 · green: a code or work email already in the database, or repeated in the file, is a problem on every row involved, naming the lines (CSV-6).
 - Task 15 · red: import saves all rows in one transaction or none, re-checking at commit (CSV-7).
 - Task 15 · green: `POST /api/imports` re-runs every check inside one transaction and saves all rows (people + hire changes, managers resolved from the file or the database) or nothing, answering 400 with the problems (CSV-7).
+- Task 15 · red: whole-file problems in plain words — empty file, header only, missing or unknown columns, unclosed quote, an Excel workbook instead of CSV (CSV-8).
 
 ---
 

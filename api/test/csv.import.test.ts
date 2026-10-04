@@ -176,3 +176,26 @@ test('import saves all rows in one transaction or none, re-checking at commit', 
   expect(raced.body.problems).toEqual([{ line: 3, column: 'code', message: 'E000007 is already used.' }]);
   expect(await count()).toBe(5);
 });
+
+test.fails('reports an empty file, missing columns or an unreadable file plainly', async () => {
+  const { preview } = await setup();
+  const fileProblem = async (csv: string) => {
+    const res = await preview(csv);
+    expect(res.status).toBe(200);
+    expect(res.body.rows).toEqual([]);
+    return res.body.problems;
+  };
+  const whole = (message: string) => [{ line: 0, column: '', message }];
+  expect(await fileProblem('')).toEqual(whole('The file is empty.'));
+  expect(await fileProblem(`${HEADER}\n`)).toEqual(whole('The file has a header row but no employees under it.'));
+  expect(await fileProblem('code,first_name\nE000001,Ana')).toEqual(
+    whole('The file is missing these columns: last_name, gender, work_email, country, department, role, level, salary, hire_date.'),
+  );
+  expect(await fileProblem(`${HEADER},bonus\n${row(1, ',5000')}`)).toEqual(whole("The file has columns the app doesn't use: bonus."));
+  expect(await fileProblem(`${HEADER}\nE000001,"Ana,Silva,female`)).toEqual(
+    whole("The file couldn't be read: a quote opened on line 2 is never closed."),
+  );
+  expect(await fileProblem('PK\u0003\u0004\u0014\u0000binary')).toEqual(
+    whole('This looks like an Excel workbook, not a CSV file. In Excel choose File › Save As › CSV UTF-8, then import that file.'),
+  );
+});
