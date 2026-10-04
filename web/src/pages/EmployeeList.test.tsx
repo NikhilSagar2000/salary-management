@@ -68,33 +68,17 @@ test('rows show the listed columns, as a table and as phone cards', async () => 
   expect(within(anaCard!).getByRole('link', { name: 'Ana Silva' })).toHaveAttribute('href', '/employees/E000123');
 });
 
-test('stats line per currency above the list', async () => {
-  signedInWith(listResponse({
-    stats: [
-      { currency: 'USD', median: 128000, min: 62000, max: 410000, headcount: 2914 },
-      { currency: 'INR', median: 1550000, min: 480000, max: 9800000, headcount: 1 },
-    ],
-  }));
-  renderApp('/employees');
-  const summary = await screen.findByRole('list', { name: 'Pay for these employees' });
-  expect(within(summary).getAllByRole('listitem').map((li) => li.textContent)).toEqual([
-    'USD: median 128,000, min 62,000, max 410,000, 2,914 people',
-    'INR: median 1,550,000, min 480,000, max 9,800,000, 1 person',
-  ]);
-});
-
-test('no matches shows the empty state and no stats', async () => {
-  signedInWith(listResponse({ rows: [], total: 0, stats: [] }));
+test('no matches shows the empty state', async () => {
+  signedInWith(listResponse({ rows: [], total: 0 }));
   renderApp('/employees?country=JP&q=zz');
   expect(await screen.findByText('No employees match these filters.')).toBeInTheDocument();
   expect(screen.queryByRole('table')).not.toBeInTheDocument();
-  expect(screen.queryByRole('list', { name: 'Pay for these employees' })).not.toBeInTheDocument();
   await userEvent.click(screen.getByRole('button', { name: 'Clear filters' }));
   expect(screen.getByTestId('location')).toHaveTextContent(/^\/employees$/);
 });
 
 test('the search box follows the URL when it changes elsewhere', async () => {
-  signedInWith(listResponse({ rows: [], total: 0, stats: [] }));
+  signedInWith(listResponse({ rows: [], total: 0 }));
   renderApp('/employees?q=zz');
   expect(await screen.findByLabelText('Search')).toHaveValue('zz');
   await userEvent.click(screen.getByRole('button', { name: 'Clear filters' }));
@@ -134,7 +118,7 @@ test('the search box takes at most 100 characters, as the search does', async ()
   expect(await screen.findByLabelText('Search')).toHaveAttribute('maxlength', '100');
 });
 
-test.fails('the list shows no pay summary (removed, D71)', async () => {
+test('the list shows no pay summary (removed, D71)', async () => {
   signedInWith();
   renderApp('/employees');
   await screen.findByRole('table');

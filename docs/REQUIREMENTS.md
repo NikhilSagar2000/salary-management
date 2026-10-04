@@ -20,8 +20,7 @@ Countries and currencies: US USD · IN INR · GB GBP · DE EUR · BR BRL · JP J
 2. **Find employees.** Search by name, email or code; filter by country, department, role,
    level, gender and status (starting, active, leaving, left); sort; page. All done by the
    server; the list's state lives in the URL. Salary sort and salary-range filter only when
-   exactly one country is selected. Above the list: median, min, max and headcount per
-   currency for the current filter. Phone shows cards instead of a table.
+   exactly one country is selected. Phone shows cards instead of a table.
 3. **Add and change employees.** Validated forms. Code (`E000001`, next free code
    suggested) and hire date can't change after creation. Personal details (name, gender,
    email) are edited in place. Job, pay, manager and country changes are new history entries
@@ -29,10 +28,10 @@ Countries and currencies: US USD · IN INR · GB GBP · DE EUR · BR BRL · JP J
    edited. A relocation must set a salary in the new currency. A save from an out-of-date
    page is refused with a plain message.
 4. **Record leavers.** Mark someone as leaving or left (date, optional reason) and undo it.
-   Leavers are hidden by default, left out of pay statistics unless asked for, and read-only
+   Leavers are hidden by default, left out of pay statistics, and read-only
    apart from undo. Nothing about an employee is ever deleted.
-5. **Pay statistics.** Median with min, max and headcount, always per currency: on the list,
-   on each employee's page (their pay against peers: same country, role and level) and on a
+5. **Pay statistics.** Median with min, max and headcount, always per currency: on each
+   employee's page (their pay against peers: same country, role and level) and on a
    pay overview page (department × level per country, each cell opening the matching list).
 6. **Ask about pay.** ChatGPT-style chats, saved, renamed and deleted. Answers stream in
    word by word. The model reads data only through read-only tools (search people, read one

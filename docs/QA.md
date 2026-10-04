@@ -77,7 +77,7 @@ JPY/INR amounts, loading, empty and error states, reload, and Back.
 | LIST-6 | browser | Filter, search, sort, page 2; reload; copy link to a new tab; back/forward | pass | Browser: page 2 + Brazil + hire-date sort survive reload; Back returns to the previous view; e2e list.spec.ts covers copied link |
 | LIST-7 | browser, API | `pageSize=1000`, `country=XX` | fail → fixed | The page showed "Some fields need fixing." for pageSize=1000; now 'Page size must be 25, 50 or 100, not "1000".' (e03c66e → f94f725); rechecked in Chrome |
 | LIST-8 | browser | Read a row | pass | Row: code, name, country, department, role, level, salary with currency, hire date, status badge |
-| LIST-9 | browser, SQL | Stats line for a filter; compare a median with SQL | pass | One line per currency above the list; with Left added, leavers counted; Inês (starting) listed, not counted (20 listed, 19 in stats) |
+| LIST-9 | browser, SQL | Stats line for a filter; compare a median with SQL | removed (P7, D71) | Passed in QA (one line per currency, starting not counted); afterwards Nikhil removed the summary ("we dont need this"). The page shows none (test: "the list shows no pay summary") |
 | LIST-10 | browser | 390 px | pass | 390: cards, Filters drawer, no sideways scroll (screenshots + e2e phone.spec) |
 | LIST-11 | tests | `npm run measure:list` (Task 19) | pass | Automated tests pass (see Steps) |
 | EMP-1 | browser | Open Add employee | pass | Pre-filled E090951 (highest + 1 after the QA script's E090950); E000001 → "E000001 is already used."; custom E090960 saved |

@@ -102,7 +102,7 @@ test('after sign-in, a next address on another site is ignored', async () => {
         signedIn = true;
         return { status: 204 };
       },
-      'GET /api/employees': () => ({ status: 200, body: { rows: [], total: 0, page: 1, pageSize: 25, stats: [] } }),
+      'GET /api/employees': () => ({ status: 200, body: { rows: [], total: 0, page: 1, pageSize: 25 } }),
     });
     const { unmount } = renderApp(`/signin?next=${encodeURIComponent(next)}`);
     await userEvent.type(await screen.findByLabelText('Password'), 'right one{Enter}');

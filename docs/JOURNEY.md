@@ -259,6 +259,13 @@ places chosen in Q18) and the list API's stats query that only fed it (D71). Med
 employee page (peers) and the pay overview; the statistics tests now run through the pay
 overview, so the median and counting rules keep their tests. Spec and plan updated.
 
+### P8 (2026-10-05, during phase 7)
+
+> The assistant isn't available right now. Try again in a minute.
+>  getting this error
+
+**My reply:** investigated before changing anything (below in the build log).
+
 ---
 
 ## 3. Timeline
@@ -663,6 +670,7 @@ is done (hashes copied from `git log`).
 - Phase 7 · render.yaml Blueprint: one free web service in Singapore, build with dev dependencies, start the API (migrates, serves the web build), health check /api/health, secrets entered in Render (DATABASE_URL, APP_PASSWORD_HASH, OPENROUTER_API_KEY); fallbacks ordered by the smoke test (qwen last). Rehearsed locally in production mode on port 4799: health ok, pages served, API 401 signed out.
 - Phase 7 · README: what the app does, local set-up, the test commands, the Neon + Render steps, the project records, and a six-minute demo-recording script; the live link is added after the first deploy.
 - P7 logged; D71: the pay summary above the employee list goes (Nikhil). Red: the list shows no pay summary.
+- D71 · green: the employee list shows no pay summary and its API no longer computes one (one query fewer per list request); the statistics tests (median rounding, who is counted, relocation) now run through the pay overview; SPEC LIST-9 marked removed and STATS-2 reworded, REQUIREMENTS, plan map and QA row updated. 186 unit and API tests and 25 end-to-end tests pass.
 
 ---
 

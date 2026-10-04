@@ -156,7 +156,7 @@ try {
     WHERE s.country <> h.country AND e.leave_date IS NULL LIMIT 1`);
   const inNow = await call(`/api/employees?q=${moved.code}&country=${moved.now_country}`, { cookie });
   const inOld = await call(`/api/employees?q=${moved.code}&country=${moved.hire_country}`, { cookie });
-  check('STATS-4', inNow.json.total === 1 && inOld.json.total === 0 && inNow.json.stats.length === 1,
+  check('STATS-4', inNow.json.total === 1 && inOld.json.total === 0,
     `${moved.code} moved ${moved.hire_country} → ${moved.now_country}: listed and counted in ${moved.now_country} (${inNow.json.total}), not ${moved.hire_country} (${inOld.json.total})`);
 
   // SEED-1

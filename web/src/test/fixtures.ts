@@ -1,5 +1,5 @@
 /** A list response as GET /api/employees returns it. */
-export const listResponse = (over: Partial<{ rows: unknown[]; total: number; stats: unknown[] }> = {}) => ({
+export const listResponse = (over: Partial<{ rows: unknown[]; total: number }> = {}) => ({
   rows: [
     { code: 'E000123', firstName: 'Ana', lastName: 'Silva', country: 'BR', currency: 'BRL', department: 'Engineering', role: 'Software Engineer',
       level: 3, salary: 133000, hireDate: '2024-02-29', leaveDate: null, status: 'active' },
@@ -9,10 +9,6 @@ export const listResponse = (over: Partial<{ rows: unknown[]; total: number; sta
   total: 2,
   page: 1,
   pageSize: 25,
-  stats: [
-    { currency: 'BRL', median: 133000, min: 133000, max: 133000, headcount: 1 },
-    { currency: 'JPY', median: 6070000, min: 6070000, max: 6070000, headcount: 1 },
-  ],
   ...over,
 });
 

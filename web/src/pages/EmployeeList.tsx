@@ -16,8 +16,7 @@ type Row = {
   code: string; firstName: string; lastName: string; country: string; currency: Currency; department: string; role: string;
   level: number; salary: number; hireDate: string; leaveDate: string | null; status: string;
 };
-type Stats = { currency: Currency; median: number; min: number; max: number; headcount: number };
-type ListData = { rows: Row[]; total: number; page: number; pageSize: number; stats: Stats[] };
+type ListData = { rows: Row[]; total: number; page: number; pageSize: number };
 
 const label = (s: string) => s.charAt(0).toUpperCase() + s.slice(1).replace('_', '-');
 const STATUS_COLOR: Record<string, string> = { starting: 'blue', active: 'teal', leaving: 'yellow', left: 'gray' };
@@ -162,7 +161,6 @@ export function EmployeeList() {
       )}
       {data && data.total > 0 && (
         <>
-          <PaySummary stats={data.stats} />
           <EmployeeCards rows={data.rows} />
           <EmployeeTable
             rows={data.rows}
@@ -260,23 +258,6 @@ function EmployeeCards({ rows }: { rows: Row[] }) {
             </Stack>
           </Group>
         </Paper>
-      ))}
-    </Stack>
-  );
-}
-
-const grouped = (n: number) => n.toLocaleString('en-US');
-
-/** LIST-9: median, min, max and headcount for the whole filtered set, one line per currency. */
-function PaySummary({ stats }: { stats: Stats[] }) {
-  if (!stats.length) return null;
-  return (
-    <Stack component="ul" aria-label="Pay for these employees" gap={2} p={0} m={0} style={{ listStyle: 'none' }}>
-      {stats.map((s) => (
-        <Text component="li" key={s.currency} size="sm">
-          <Text span fw={600}>{s.currency}:</Text> median {grouped(s.median)}, min {grouped(s.min)}, max {grouped(s.max)},{' '}
-          {grouped(s.headcount)} {s.headcount === 1 ? 'person' : 'people'}
-        </Text>
       ))}
     </Stack>
   );

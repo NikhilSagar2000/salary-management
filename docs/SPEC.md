@@ -74,9 +74,8 @@ after today is *scheduled*.
   plain message naming the value.
 - **LIST-8** Each row shows code, full name, country, department, role, level, current salary
   with its currency, hire date and status.
-- **LIST-9** Above the list: for the whole filtered set (not just the page), one line per
-  currency with median, min, max and headcount, counting people as STATS-2 says (starting
-  people are listed but not counted).
+- **LIST-9** *Removed 2026-10-05 (P7, D71):* the list no longer shows a pay summary. Medians
+  are on each employee's page (against peers) and on the pay overview.
 - **LIST-10** At 375 px wide, rows show as cards, filters open in a drawer, and the page never
   scrolls sideways.
 - **LIST-11** On the seeded database, list requests (search + filters + sort) take at most
@@ -137,8 +136,8 @@ after today is *scheduled*.
 
 - **STATS-1** Median is Postgres `percentile_cont(0.5)` rounded half away from zero; shown with
   min, max and headcount. Stats are always per currency and never combine currencies.
-- **STATS-2** Stats count people whose status today is active or leaving (plus left when the
-  filter asks for it); starting people are not counted.
+- **STATS-2** Stats count people whose status today is active or leaving; starting people and
+  people who have left are not counted.
 - **STATS-3** The pay overview shows one country at a time: departments × levels, each cell
   with median, min, max and headcount ("—" when empty). A cell opens the list filtered to
   that country, department and level.

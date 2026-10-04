@@ -353,7 +353,7 @@ Every `docs/SPEC.md` id and where it is tested (task number; test names above).
 | LIST-6 | 21, 27 | LEAVE-6 | 11, 12 | AST-18 | 1 |
 | LIST-7 | 11 | STATS-1 | 12 | CSV-1 | 14, 21, 27 |
 | LIST-8 | 11, 21 | STATS-2 | 12 | CSV-2 | 14 |
-| LIST-9 | 12, 21 | STATS-3 | 12, 24 | CSV-3 | 15 |
+| LIST-9 | removed (D71) | STATS-3 | 12, 24 | CSV-3 | 15 |
 | LIST-10 | 27 | STATS-4 | 12 | CSV-4 | 15, 25, 27 |
 | LIST-11 | 19 | AST-1 | 18, 26 | CSV-5 | 15 |
 | EMP-1 | 5, 23 | AST-2 | 18 | CSV-6 | 15 |

@@ -1,6 +1,5 @@
 import { COUNTRY_NAMES, DEFAULT_STATUSES, type ListQuery } from '@acme/shared';
 import type pg from 'pg';
-import { CURRENCY_ORDER, PAY_STATS } from '../stats/peers.ts';
 
 /** SQL: a person's status on date $1 (matches statusOn in detail.ts). */
 export const STATUS_SQL = `CASE WHEN e.hire_date > $1 THEN 'starting' WHEN e.leave_date <= $1 THEN 'left'
@@ -58,7 +57,7 @@ export function listFilter(q: Filters, today: string) {
   return { params, fromWhere, orderBy: orderBy(q) };
 }
 
-/** One page of the employee list, the total match count and pay stats per currency. All done in Postgres. */
+/** One page of the employee list and the total match count. All done in Postgres. */
 export async function listEmployees(db: pg.Pool, q: ListQuery, today: string) {
   const { params, fromWhere, orderBy } = listFilter(q, today);
   const from = fromWhere();
@@ -69,11 +68,7 @@ export async function listEmployees(db: pg.Pool, q: ListQuery, today: string) {
      ${from} ORDER BY ${orderBy} LIMIT ${q.pageSize} OFFSET ${(q.page - 1) * q.pageSize}`,
     params,
   );
-  const { rows: stats } = await db.query(
-    `SELECT s.currency, ${PAY_STATS} ${fromWhere([`(${STATUS_SQL}) <> 'starting'`])} GROUP BY s.currency ORDER BY ${CURRENCY_ORDER}`,
-    params,
-  );
-  return { rows, total, page: q.page, pageSize: q.pageSize, stats };
+  return { rows, total, page: q.page, pageSize: q.pageSize };
 }
 
 /** ORDER BY for the chosen column and direction; ties always by code, so paging is stable. */
