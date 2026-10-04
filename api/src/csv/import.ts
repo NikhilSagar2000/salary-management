@@ -1,5 +1,6 @@
 import { CURRENCY, employeeCreateSchema, formatDate, MSG, type Country } from '@acme/shared';
 import type pg from 'pg';
+import { withTx } from '../db.ts';
 
 const MAX_ROWS = 10_000;
 
@@ -162,4 +163,34 @@ async function checkManagers(db: pg.Pool | pg.PoolClient, rows: ImportRow[]): Pr
     else if (m.hireDate > r.hireDate || (m.leaveDate && m.leaveDate <= r.hireDate)) problem(MSG.managerNotEmployed(m.name, formatDate(r.hireDate)));
   }
   return problems;
+}
+
+/**
+ * CSV-7: re-checks the file inside one transaction and saves every row (person + hire change), or nothing.
+ * Returns the number imported, or the problems.
+ */
+export async function runImport(db: pg.Pool, text: string): Promise<{ imported: number } | { problems: Problem[] }> {
+  return withTx(db, async (tx) => {
+    const { rows, problems } = await checkImport(tx, text);
+    if (problems.length) return { problems };
+    const { rows: inserted } = await tx.query(
+      `INSERT INTO employees (code, first_name, last_name, gender, work_email, hire_date)
+       SELECT * FROM unnest($1::text[], $2::text[], $3::text[], $4::text[], $5::text[], $6::date[]) RETURNING id, code`,
+      [rows.map((r) => r.code), rows.map((r) => r.firstName), rows.map((r) => r.lastName), rows.map((r) => r.gender),
+        rows.map((r) => r.workEmail), rows.map((r) => r.hireDate)],
+    );
+    const ids = new Map<string, number>(inserted.map((r) => [r.code, r.id]));
+    const managerCodes = rows.map((r) => r.managerCode).filter((c): c is string => c !== null);
+    for (const m of (await tx.query('SELECT id, code FROM employees WHERE code = ANY($1)', [managerCodes])).rows) ids.set(m.code, m.id);
+    await tx.query(
+      `INSERT INTO job_changes (employee_id, effective_date, country, department, role, level, manager_set, manager_id, salary, currency)
+       SELECT e, d, c, dep, r, l, true, m, s, cur
+       FROM unnest($1::int[], $2::date[], $3::text[], $4::text[], $5::text[], $6::smallint[], $7::int[], $8::bigint[], $9::text[])
+         AS t(e, d, c, dep, r, l, m, s, cur)`,
+      [rows.map((r) => ids.get(r.code)), rows.map((r) => r.hireDate), rows.map((r) => r.country), rows.map((r) => r.department),
+        rows.map((r) => r.role), rows.map((r) => r.level), rows.map((r) => (r.managerCode ? ids.get(r.managerCode) : null)),
+        rows.map((r) => r.salary), rows.map((r) => r.currency)],
+    );
+    return { imported: rows.length };
+  });
 }

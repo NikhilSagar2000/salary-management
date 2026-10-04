@@ -141,7 +141,7 @@ test('a duplicate code or email in the database or file flags every row involved
   expect(res.body.rows).toEqual([]);
 });
 
-test.fails('import saves all rows in one transaction or none, re-checking at commit', async () => {
+test('import saves all rows in one transaction or none, re-checking at commit', async () => {
   const { commit, preview, db } = await setup([{ code: 'E000500' }]);
   const count = async () => (await db.query('SELECT count(*)::int AS n FROM employees')).rows[0].n;
   const header = `${HEADER},manager_code`;
