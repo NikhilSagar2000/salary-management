@@ -1,4 +1,4 @@
-import { CURRENCY, formatDate, jobProblems, MSG, type Country, type JobChange } from '@acme/shared';
+import { COUNTRY_NAMES, CURRENCY, formatDate, jobProblems, MSG, type Country, type JobChange } from '@acme/shared';
 import type pg from 'pg';
 import { withTx } from '../db.ts';
 import { FieldProblem } from '../http.ts';
@@ -43,5 +43,8 @@ async function checkTimeline(tx: pg.PoolClient, employeeId: number, from: string
     const state = (await tx.query('SELECT * FROM employee_state($1) WHERE employee_id = $2', [d, employeeId])).rows[0];
     const prefix = d === from ? '' : `On ${formatDate(d)}: `;
     for (const p of jobProblems(state)) throw new FieldProblem({ [String(p.path[0])]: prefix + p.message });
+    if (state.currency !== CURRENCY[state.country as Country]) {
+      throw new FieldProblem({ country: MSG.laterSalaryWrongCurrency(formatDate(d), state.currency, COUNTRY_NAMES[state.country as Country]) });
+    }
   }
 }

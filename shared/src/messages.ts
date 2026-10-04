@@ -18,6 +18,8 @@ export const MSG = {
   roleNotInDepartment: (role: string, department: string) => `${role} isn't a role in ${department}.`,
   fixFields: 'Some fields need fixing.',
   moveNeedsSalary: 'Moving to another country needs a salary in the new currency.',
+  laterSalaryWrongCurrency: (date: string, currency: string, country: string) =>
+    `A salary change on ${date} is in ${currency}; cancel it before moving this person to ${country}.`,
   changeNothing: 'Change at least one of country, department, role, level, manager or salary.',
   changeBeforeHire: (hire: string) => `The change can't be dated before the hire date (${hire}).`,
   changeAfterLeave: (leave: string) => `The change can't be dated after the leave date (${leave}).`,
