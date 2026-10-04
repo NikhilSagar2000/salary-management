@@ -537,6 +537,7 @@ is done (hashes copied from `git log`).
 - Task 29 · ci: GitHub Actions workflow (Postgres 17 service on 4734, npm ci, create acme_test, migrate, npm test, build, Playwright with Chromium, report uploaded on failure). It runs only after Nikhil approves a push. Verified locally by running the same steps in order against a throwaway Postgres 17 container (fresh database on 4744): every migration applied, 154 unit and API tests and 22 end-to-end tests passed; the container was removed.
 - Final review fix 1 · red: a cancelled change says when it was cancelled, as a date in HR's timezone, and the page shows "Cancelled on <date>" (EMP-11).
 - Final review fix 1 · green: cancelling stamps the change with the app clock's time; the employee page returns cancelledOn as the date in the requesting browser's timezone and shows "Cancelled on <date>" (EMP-11). The timezone now rides on res.locals beside today.
+- Final review fix 6 · red: undoing leaving appears in history dated the day it was undone, in HR's timezone (LEAVE-2).
 
 ---
 
