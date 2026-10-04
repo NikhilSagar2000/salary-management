@@ -106,10 +106,38 @@ export async function checkImport(db: pg.Pool | pg.PoolClient, text: string): Pr
     if (problems.length > before) continue;
     rows.push({ line, ...e, currency: CURRENCY[e.country as Country], managerCode: e.managerCode ?? null });
   }
-  const managerProblems = await checkManagers(db, rows);
-  problems.push(...managerProblems);
-  const bad = new Set(managerProblems.map((p) => p.line));
+  const later = [...(await checkDuplicates(db, rows)), ...(await checkManagers(db, rows))];
+  problems.push(...later);
+  const bad = new Set(later.map((p) => p.line));
   return { rows: rows.filter((r) => !bad.has(r.line)), problems: problems.sort((a, b) => a.line - b.line) };
+}
+
+/** CSV-6: a code or work email already in the database, or repeated in the file, is a problem on every row involved. */
+async function checkDuplicates(db: pg.Pool | pg.PoolClient, rows: ImportRow[]): Promise<Problem[]> {
+  const email = (r: ImportRow) => r.workEmail.toLowerCase();
+  const { rows: taken } = await db.query(
+    'SELECT code, lower(work_email) AS email FROM employees WHERE code = ANY($1) OR lower(work_email) = ANY($2)',
+    [rows.map((r) => r.code), rows.map(email)],
+  );
+  const takenCodes = new Set(taken.map((t) => t.code));
+  const takenEmails = new Set(taken.map((t) => t.email));
+  const linesOf = (key: (r: ImportRow) => string) => {
+    const lines = new Map<string, number[]>();
+    for (const r of rows) lines.set(key(r), [...(lines.get(key(r)) ?? []), r.line]);
+    return lines;
+  };
+  const codeLines = linesOf((r) => r.code);
+  const emailLines = linesOf(email);
+  const problems: Problem[] = [];
+  for (const r of rows) {
+    if (takenCodes.has(r.code)) problems.push({ line: r.line, column: 'code', message: MSG.codeUsed(r.code) });
+    else if (codeLines.get(r.code)!.length > 1) problems.push({ line: r.line, column: 'code', message: MSG.importDuplicate(r.code, codeLines.get(r.code)!) });
+    if (takenEmails.has(email(r))) problems.push({ line: r.line, column: 'work_email', message: MSG.emailUsed });
+    else if (emailLines.get(email(r))!.length > 1) {
+      problems.push({ line: r.line, column: 'work_email', message: MSG.importDuplicate(email(r), emailLines.get(email(r))!) });
+    }
+  }
+  return problems;
 }
 
 /** CSV-5: a manager is an employee in the database or a row in this file, employed on the row's hire date, and not the person. */

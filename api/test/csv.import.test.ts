@@ -120,7 +120,7 @@ test('applies the add-employee rules, ISO dates, manager from the database or th
   ]);
 });
 
-test.fails('a duplicate code or email in the database or file flags every row involved', async () => {
+test('a duplicate code or email in the database or file flags every row involved', async () => {
   const { preview } = await setup([{ code: 'E000500', workEmail: 'taken@acme.example' }]);
   const res = await preview([
     HEADER,

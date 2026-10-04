@@ -20,6 +20,8 @@ export const MSG = {
   importTooLarge: 'The file is larger than 5 MB. Split it into smaller files and import each one.',
   importTooManyRows: (n: number) => `The file has ${n.toLocaleString('en-US')} rows; one import can take at most 10,000. Split it into smaller files.`,
   importUnclosedQuote: (line: number) => `The file couldn't be read: a quote opened on line ${line} is never closed.`,
+  importDuplicate: (value: string, lines: number[]) =>
+    `${value} appears more than once in the file (lines ${lines.slice(0, -1).join(', ')} and ${lines.at(-1)}).`,
   importLeaveEmpty: 'Leave this column empty: import only adds new employees.',
   importCurrency: (currency: string, country: string) => `Currency must be ${currency} for country ${country}.`,
   pageSize: (v: string) => `Page size must be 25, 50 or 100, not "${v}".`,
