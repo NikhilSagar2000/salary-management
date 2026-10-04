@@ -167,7 +167,7 @@ is written just before the task starts, from the interfaces that exist at that p
   password with a plain message" (AUTH-2) · "locks sign-in for 15 minutes after 5 wrong
   tries from one IP" (AUTH-3) · "sign-out makes the old cookie stop working" (AUTH-4) · "no
   response or log line contains the password hash, session secret or API key" (AUTH-6).
-- [ ] **Task 4: Employee tables and history guards.** Files: `001_init.sql` (or `002_…`).
+- [x] **Task 4: Employee tables and history guards.** Files: `001_init.sql` (or `002_…`).
   Tests: `db.test.ts` › "database refuses changing code or hire date" (EMP-5) · "database
   refuses UPDATE of change fields and any DELETE of history" (EMP-12).
 - [ ] **Task 5: Create employee.** Files: `api/src/employees/create.ts`, routes.
@@ -457,9 +457,9 @@ salary; `cancelled_at`), `leave_events` (left / undone). Triggers: code and hire
 change; employees, job changes and leave events are never deleted; a job change's fields never
 change, and `cancelled_at` can be set once.
 
-- [ ] Step 1: `db.test.ts` › "database refuses changing code or hire date" (EMP-5): updating
+- [x] Step 1: `db.test.ts` › "database refuses changing code or hire date" (EMP-5): updating
   either raises "The employee code and hire date can't be changed."; updating a name works.
-- [ ] Step 2: `db.test.ts` › "database refuses UPDATE of change fields and any DELETE of
+- [x] Step 2: `db.test.ts` › "database refuses UPDATE of change fields and any DELETE of
   history" (EMP-12): updating a change's salary, deleting a change, deleting an employee,
   updating or deleting a leave event all fail; setting `cancelled_at` once works, twice fails.
-- [ ] Task check: `npm test`, `npm run typecheck`.
+- [x] Task check: `npm test`, `npm run typecheck`.

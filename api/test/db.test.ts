@@ -19,7 +19,7 @@ test('database refuses changing code or hire date', async () => {
   expect((await db.query('SELECT first_name FROM employees WHERE id = $1', [id])).rows[0].first_name).toBe('Anna');
 });
 
-test.fails('database refuses UPDATE of change fields and any DELETE of history', async () => {
+test('database refuses UPDATE of change fields and any DELETE of history', async () => {
   const { db } = await testApp();
   const id = await insertEmployee(db);
   const { rows } = await db.query(
@@ -40,7 +40,7 @@ test.fails('database refuses UPDATE of change fields and any DELETE of history',
   await expect(db.query('UPDATE job_changes SET cancelled_at = now() WHERE id = $1', [changeId])).rejects.toThrow("History can't be edited.");
 });
 
-test.fails('a change stores a salary only with its currency, and a country only with a salary in that currency', async () => {
+test('a change stores a salary only with its currency, and a country only with a salary in that currency', async () => {
   const { db } = await testApp();
   const id = await insertEmployee(db);
   const insert = (cols: string, vals: string) =>
