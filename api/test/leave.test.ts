@@ -48,3 +48,26 @@ test('undo clears date and reason and both events show in history', async () => 
   expect(again.status).toBe(400);
   expect(again.body.fields).toEqual({ form: "This person isn't marked as leaving." });
 });
+
+test.fails('refuses every write except undo after leaving', async () => {
+  const { agent, db } = await setup(); // today 2026-10-01
+  await agent.post('/api/employees/E000123/changes').send({ version: 1, effectiveDate: '2027-01-01', salary: 150000 });
+  // Leaving later (notice period): still editable.
+  await agent.post('/api/employees/E000123/leave').send({ version: 2, leaveDate: '2026-12-31' });
+  expect((await agent.patch('/api/employees/E000123').send({ version: 3, firstName: 'Anna' })).status).toBe(200);
+  // Has left (leave date on or before today): only undo.
+  await agent.post('/api/employees/E000123/leave').send({ version: 4, leaveDate: '2026-09-30' });
+  const LEFT = { error: 'This person has left. Undo leaving first to make changes.' };
+  const attempts = [
+    agent.patch('/api/employees/E000123').send({ version: 5, firstName: 'Ann' }),
+    agent.post('/api/employees/E000123/changes').send({ version: 5, effectiveDate: '2026-09-01', level: 4 }),
+    agent.post('/api/employees/E000123/changes/2/cancel').send({ version: 5 }),
+    agent.post('/api/employees/E000123/leave').send({ version: 5, leaveDate: '2026-08-31' }),
+  ];
+  for (const res of await Promise.all(attempts)) {
+    expect(res.status).toBe(409);
+    expect(res.body).toEqual(LEFT);
+  }
+  expect(await person(db)).toEqual({ leave_date: '2026-09-30', leave_reason: null, version: 5 });
+  expect((await agent.post('/api/employees/E000123/undo-leave').send({ version: 5 })).status).toBe(200);
+});

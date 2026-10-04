@@ -317,6 +317,7 @@ is done (hashes copied from `git log`).
 - Task 9 · green: a leave date before the hire date gets "The leave date can't be before the hire date (…)." (LEAVE-1).
 - Task 9 · red: undo leaving (LEAVE-2).
 - Task 9 · green: `POST /api/employees/:code/undo-leave` clears date and reason and records an "undone" event; undoing someone not leaving gets a plain message (LEAVE-2).
+- Task 9 · red: after leaving, only undo is allowed (LEAVE-3).
 
 ---
 
