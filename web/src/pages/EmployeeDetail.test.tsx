@@ -200,3 +200,14 @@ test('a cancelled change says when it was cancelled', async () => {
   const items = within(await screen.findByRole('list', { name: 'History' })).getAllByRole('listitem');
   expect(items[0]).toHaveTextContent('Cancelled on 3 Oct 2026');
 });
+
+test.fails("a starting person's hire can't be cancelled, so it offers no Cancel", async () => {
+  const hire = { type: 'change', id: 1, date: '2027-01-01', hire: true, note: null, scheduled: true, cancelled: false, cancelledOn: null, wontApply: false,
+    changes: [{ field: 'country', from: null, to: 'BR' }] };
+  open(detailResponse({ status: 'starting', hireDate: '2027-01-01', timeline: [hire] }));
+  const [item] = within(await screen.findByRole('list', { name: 'History' })).getAllByRole('listitem');
+  expect(item).toHaveTextContent('Hired');
+  expect(item).toHaveTextContent('Starts');
+  expect(item).not.toHaveTextContent('Scheduled');
+  expect(within(item!).queryByRole('button', { name: /^Cancel/ })).not.toBeInTheDocument();
+});

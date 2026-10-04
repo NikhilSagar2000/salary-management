@@ -592,6 +592,7 @@ is done (hashes copied from `git log`).
 - Phase 6 · results: every screen and rule has been run; 13 findings queued for the fix batch (Stop also submits, refused actions losing their message, the hire's Cancel, misleading leave history and leaver pay comparison, overlap at 390, the chat not scrolling, stale field messages, job-change levels, pagination wrap).
 - Phase 6 QA fix 3 · red (found by QA, UI-4): a refusal that belongs to no field (e.g. cancelling a hire, undoing a leave that isn't there) answers with its own message; the page showed only "Some fields need fixing."
 - Phase 6 QA fix 3 · green: a 400 whose only problem is the whole request carries that message as its error, so buttons without a form (cancel, undo leaving) show it.
+- Phase 6 QA fix 4 · red (found by QA, EMP-11): a starting person's hire reads "Starts" and offers no Cancel (the server refuses to cancel a hire).
 
 ---
 
