@@ -48,7 +48,7 @@ test('dates round-trip unchanged under any server timezone', async () => {
   }
 });
 
-test.fails('a too-large request that is not an import gets its own plain message', async () => {
+test('a too-large request that is not an import gets its own plain message', async () => {
   const { app } = await testApp();
   const res = await request(app).post('/api/employees').send({ firstName: 'x'.repeat(200_000) });
   expect(res.status).toBe(413);

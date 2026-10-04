@@ -57,10 +57,10 @@ export function createApp(deps: { db: pg.Pool; clock: Clock; config: Config; mod
 }
 
 /** Errors answer in plain words; details go to the server log only, never to the browser. */
-const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
+const errorHandler: ErrorRequestHandler = (err, req, res, _next) => {
   if (err instanceof FieldProblem) return sendFieldErrors(res, err.fields);
   if (err?.type === 'entity.too.large') {
-    res.status(413).json({ error: MSG.importTooLarge });
+    res.status(413).json({ error: req.path.startsWith('/api/imports') ? MSG.importTooLarge : MSG.requestTooLarge });
     return;
   }
   if (err?.type === 'entity.parse.failed') {
