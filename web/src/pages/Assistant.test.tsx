@@ -203,7 +203,7 @@ test('the first question names the chat', async () => {
   expect(await screen.findByRole('heading', { name: 'What is the median pay in Brazil?' })).toBeInTheDocument();
 });
 
-test.fails('a source group the list cannot show is named without a link', async () => {
+test('a source group the list cannot show is named without a link', async () => {
   start('/assistant/2', {
     'GET /api/chats/2': () => ({
       status: 200,

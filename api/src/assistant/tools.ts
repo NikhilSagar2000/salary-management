@@ -7,7 +7,8 @@ import { employeeDetail } from '../employees/detail.ts';
 import { listFilter, STATUS_SQL, type Filters } from '../employees/list.ts';
 import { CURRENCY_ORDER, PAY_STATS } from '../stats/peers.ts';
 
-export type Source = { kind: 'group'; label: string; query: string; headcount: number } | { kind: 'person'; code: string; name: string };
+/** A group's `query` opens the employee list on exactly those people, or is null when the list can't show them (AST-8). */
+export type Source = { kind: 'group'; label: string; query: string | null; headcount: number } | { kind: 'person'; code: string; name: string };
 type ToolResult = { result: unknown; sources: Source[] };
 
 const MAX_ROWS = 200;
@@ -70,8 +71,9 @@ export function describeFilters(f: ToolFilters): string {
   return parts.length ? parts.join(' · ') : 'Everyone';
 }
 
-/** The employee-list URL query for the filters the list supports. */
-export function listQueryOf(f: ToolFilters): string {
+/** The employee-list URL query for these filters, or null when the list has no filter for one of them. */
+export function listQueryOf(f: ToolFilters): string | null {
+  if (f.codes || f.hiredFrom || f.hiredTo || f.leftFrom || f.leftTo || f.managerCode) return null;
   const pairs: [string, unknown[] | string | number | undefined][] = [
     ['q', f.search], ['country', f.country], ['department', f.department], ['role', f.role], ['level', f.level],
     ['gender', f.gender], ['status', f.status], ['salaryMin', f.salaryMin], ['salaryMax', f.salaryMax],
@@ -179,7 +181,8 @@ async function queryChanges(db: Db, today: string, args: z.infer<typeof queryCha
   return {
     result: { total: count.n, rows: out },
     sources: [
-      { kind: 'group', label, query: listQueryOf(f), headcount: count.people },
+      // People with matching changes, which the list (current state only) can't show.
+      { kind: 'group', label, query: null, headcount: count.people },
       ...people.map(([code, name]) => ({ kind: 'person' as const, code, name })),
     ],
   };
@@ -259,7 +262,9 @@ async function aggregate(db: Db, today: string, args: z.infer<typeof aggregateSc
     sources: rows.slice(0, PEOPLE_IN_SOURCES).map((g) => {
       const merged = groupFilters(g);
       const label = [describeFilters(merged), g.hire_year && `hired in ${g.hire_year}`].filter(Boolean).join(' · ');
-      return { kind: 'group' as const, label, query: listQueryOf(merged), headcount: (g.headcount ?? g.count) as number };
+      // The list shows people as they are today, with no hire-year or manager filter (a "no manager" group included).
+      const listed = args.metric !== 'raise_pct' && asOf === today && !args.groupBy.some((k) => k === 'hire_year' || k === 'manager');
+      return { kind: 'group' as const, label, query: listed ? listQueryOf(merged) : null, headcount: (g.headcount ?? g.count) as number };
     }),
   };
 }

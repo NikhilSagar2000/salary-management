@@ -89,7 +89,7 @@ test('query_changes classifies kinds and caps at 200', async () => {
   const raises = await tool('query_changes', { kinds: ['raise'], from: '2025-04-01', to: '2025-04-01', limit: 500 });
   expect(raises.result).toMatchObject({ total: 231 });
   expect((raises.result as { rows: unknown[] }).rows).toHaveLength(200);
-  expect(raises.sources[0]).toEqual({ kind: 'group', label: 'Everyone · raise · 2025-04-01 to 2025-04-01', query: '', headcount: 231 });
+  expect(raises.sources[0]).toEqual({ kind: 'group', label: 'Everyone · raise · 2025-04-01 to 2025-04-01', query: null, headcount: 231 });
 });
 
 test('aggregate computes exact stats split by currency', async () => {
@@ -181,7 +181,7 @@ test('no tool parameter accepts SQL or free-form expressions', () => {
   expect(loose).toEqual([]);
 });
 
-test.fails('a group links to the list only when the list can show exactly those people (AST-8)', async () => {
+test('a group links to the list only when the list can show exactly those people (AST-8)', async () => {
   const { tool } = await setup([
     { code: 'E000001', country: 'US', level: 3, hireDate: '2025-03-01' },
     { code: 'E000002', country: 'US', level: 3, hireDate: '2024-03-01' },

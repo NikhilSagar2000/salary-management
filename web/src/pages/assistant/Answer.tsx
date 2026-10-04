@@ -4,7 +4,7 @@ import { Link } from 'react-router';
 import remarkGfm from 'remark-gfm';
 
 export type Sources = {
-  groups: { label: string; query: string; headcount: number }[];
+  groups: { label: string; query: string | null; headcount: number }[];
   people: { code: string; name: string }[];
   morePeople: number;
 };
@@ -53,14 +53,14 @@ function ModelText({ text }: { text: string }) {
 
 /** AST-8: built by the server from the lookups the model made. */
 function BasedOn({ sources }: { sources: Sources }) {
-  const list = sources.groups[0] && `/employees?${sources.groups[0].query}`;
+  const list = sources.groups[0]?.query != null ? `/employees?${sources.groups[0].query}` : null;
   return (
     <Box component="section" aria-label="Based on" mt="xs">
       <Text size="xs" fw={600} c="dimmed">Based on</Text>
       <Group gap="xs" mt={2}>
-        {sources.groups.map((g, i) => (
-          <Anchor key={i} component={Link} to={`/employees?${g.query}`} size="xs">{g.label} ({people(g.headcount)})</Anchor>
-        ))}
+        {sources.groups.map((g, i) => (g.query === null
+          ? <Text key={i} span size="xs">{g.label} ({people(g.headcount)})</Text>
+          : <Anchor key={i} component={Link} to={`/employees?${g.query}`} size="xs">{g.label} ({people(g.headcount)})</Anchor>))}
         {sources.people.map((p) => (
           <Anchor key={p.code} component={Link} to={`/employees/${p.code}`} size="xs">{p.name} ({p.code})</Anchor>
         ))}

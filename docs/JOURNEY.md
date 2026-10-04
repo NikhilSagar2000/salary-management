@@ -546,6 +546,7 @@ is done (hashes copied from `git log`).
 - Final review fix 4 · red: the CSV export link carries the browser's timezone as ?tz=, and the API uses it when no X-Timezone header comes (a plain link can't send headers), so status and current pay follow HR's date (TIME-1).
 - Final review fix 4 · green: the export link adds tz=<browser timezone>; the API reads the X-Timezone header, or ?tz= when there is no header, through the same validation (unknown zones fall back to UTC) (TIME-1).
 - Final review fix 5 · red: a "Based on" group links to the employee list only when the list can show exactly those people; groups with hire or leave dates, a manager, named people, a past date or change history are named without a link (AST-8).
+- Final review fix 5 · green: listQueryOf returns null for filters the list doesn't have (named people, hire or leave dates, manager); change-history groups, raise-% groups, past-date groups and hire-year or manager groupings carry no list link; the page names such a group (with its headcount) as plain text, and "and N more" is a link only when the first group has one (AST-8).
 
 ---
 
