@@ -1,8 +1,9 @@
-import { formatDate } from '@acme/shared';
-import { Alert, Badge, Group, SimpleGrid, Skeleton, Stack, Text, Title } from '@mantine/core';
-import { useCallback, useEffect, useState } from 'react';
-import { useParams } from 'react-router';
+import { COUNTRY_NAMES, formatDate, formatMoney, type Country } from '@acme/shared';
+import { Alert, Anchor, Badge, Group, Paper, SimpleGrid, Skeleton, Stack, Text, Title } from '@mantine/core';
+import { useCallback, useEffect, useState, type ReactNode } from 'react';
+import { Link, useParams } from 'react-router';
 import { api } from '../api.ts';
+import { Timeline } from './employee/Timeline.tsx';
 import type { Detail } from './employee/types.ts';
 
 const STATUS_COLOR: Record<string, string> = { starting: 'blue', active: 'teal', leaving: 'yellow', left: 'gray' };
@@ -36,7 +37,66 @@ export function EmployeeDetail() {
         <Fact label="Gender" value={capital(d.gender)} />
         {d.leaveDate && <Fact label={d.status === 'left' ? 'Left' : 'Leaving'} value={formatDate(d.leaveDate)} />}
       </SimpleGrid>
+
+      <SimpleGrid cols={{ base: 1, md: 3 }} spacing="md">
+        <Section title="Current job">
+          <Text>{d.current.role}, L{d.current.level}</Text>
+          <Text size="sm" c="dimmed">{d.current.department}, {COUNTRY_NAMES[d.current.country as Country]}</Text>
+          <Text fw={600}>{formatMoney(d.current.salary, d.current.currency)}</Text>
+          <Text size="sm">
+            Manager:{' '}
+            {d.current.manager ? (
+              <>
+                <Anchor component={Link} to={`/employees/${d.current.manager.code}`}>{d.current.manager.name}</Anchor>
+                {d.current.manager.hasLeft && ' (has left)'}
+              </>
+            ) : 'none'}
+          </Text>
+        </Section>
+        <Section title="Pay against peers">
+          {d.peers ? (
+            <>
+              <Text>{peerPosition(d.peers.position, d.peers.headcount)}</Text>
+              <Text size="sm" c="dimmed">
+                Same country, role and level. {d.peers.currency}: median {grouped(d.peers.median)}, min {grouped(d.peers.min)}, max {grouped(d.peers.max)}
+              </Text>
+            </>
+          ) : <Text size="sm" c="dimmed">No one else has this country, role and level today.</Text>}
+        </Section>
+        <Section title="Direct reports">
+          {d.reports.length ? (
+            <Stack gap={2}>
+              {d.reports.map((r) => <Anchor key={r.code} component={Link} to={`/employees/${r.code}`} size="sm">{r.name}</Anchor>)}
+            </Stack>
+          ) : <Text size="sm" c="dimmed">None</Text>}
+        </Section>
+      </SimpleGrid>
+
+      <Stack gap="xs">
+        <Title order={2} size="h4">History</Title>
+        <Timeline entries={d.timeline} />
+      </Stack>
     </Stack>
+  );
+}
+
+const grouped = (n: number) => n.toLocaleString('en-US');
+
+function peerPosition(position: number, headcount: number) {
+  const of = `the median of ${grouped(headcount)} ${headcount === 1 ? 'peer' : 'peers'}`;
+  if (position === 0) return `At ${of}`;
+  return `${Math.abs(position)}% ${position > 0 ? 'above' : 'below'} ${of}`;
+}
+
+function Section({ title, children }: { title: string; children: ReactNode }) {
+  const id = `section-${title.toLowerCase().replace(/\W+/g, '-')}`;
+  return (
+    <Paper component="section" aria-labelledby={id} withBorder p="md">
+      <Stack gap={6}>
+        <Title order={2} size="h5" id={id}>{title}</Title>
+        {children}
+      </Stack>
+    </Paper>
   );
 }
 

@@ -23,7 +23,7 @@ test('code and hire date are read-only', async () => {
   expect(screen.queryByRole('textbox', { name: /code|hire/i })).not.toBeInTheDocument();
 });
 
-test.fails("shows peers' position, manager flag, reports and the history timeline", async () => {
+test("shows peers' position, manager flag, reports and the history timeline", async () => {
   open();
   const job = await screen.findByRole('region', { name: 'Current job' });
   expect(job).toHaveTextContent('Software Engineer, L4');
