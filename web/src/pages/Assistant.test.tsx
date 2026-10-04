@@ -31,7 +31,7 @@ const ask = async (question: string) => {
   await userEvent.click(screen.getByRole('button', { name: 'Send' }));
 };
 
-test.fails('chat list, rename, and delete after confirming', async () => {
+test('chat list, rename, and delete after confirming', async () => {
   let list = [...CHATS];
   const calls = start('/assistant', {
     'GET /api/chats': () => ({ status: 200, body: list }),
@@ -81,7 +81,7 @@ test.fails('chat list, rename, and delete after confirming', async () => {
   await waitFor(() => expect(within(nav).queryByRole('link', { name: 'Brazil pay' })).not.toBeInTheDocument());
 });
 
-test.fails('sources link to people and filtered lists', async () => {
+test('sources link to people and filtered lists', async () => {
   start('/assistant/2', {
     'GET /api/chats/2': () => ({
       status: 200,
@@ -112,7 +112,7 @@ test.fails('sources link to people and filtered lists', async () => {
   expect(within(second!).queryByRole('region', { name: 'Based on' })).not.toBeInTheDocument();
 });
 
-test.fails('model HTML shows as text, never runs', async () => {
+test('model HTML shows as text, never runs', async () => {
   const content = 'Pay is **higher** in Engineering.\n\n| Level | Median |\n|---|---|\n| L4 | BRL 145,000 |\n\n'
     + '<img src="x" onerror="window.hacked = true"> <script>window.hacked = true</script>\n\n![tracker](https://evil.example/pixel.png)';
   start('/assistant/2', {
@@ -126,7 +126,7 @@ test.fails('model HTML shows as text, never runs', async () => {
   expect((window as { hacked?: boolean }).hacked).toBeUndefined();
 });
 
-test.fails('Stop ends the stream and shows Stopped', async () => {
+test('Stop ends the stream and shows Stopped', async () => {
   const hold = gate();
   const calls = start('/assistant/2', {
     'POST /api/chats/2/messages': () => ({
@@ -153,7 +153,7 @@ test.fails('Stop ends the stream and shows Stopped', async () => {
   hold.open();
 });
 
-test.fails('free requests left are shown when known', async () => {
+test('free requests left are shown when known', async () => {
   const calls = start('/assistant/2');
   await screen.findByRole('heading', { name: 'Median pay in Brazil' });
   await waitFor(() => expect(calls.some((c) => c.url.pathname === '/api/assistant/status')).toBe(true));
@@ -164,7 +164,7 @@ test.fails('free requests left are shown when known', async () => {
   expect(await screen.findByText('37 free model requests left today')).toBeInTheDocument();
 });
 
-test.fails('announces once when the answer finishes', async () => {
+test('announces once when the answer finishes', async () => {
   const hold = gate();
   start('/assistant/2', {
     'POST /api/chats/2/messages': () => ({
