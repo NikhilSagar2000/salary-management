@@ -14,3 +14,17 @@ test('list summary gives median, min, max and headcount per currency for the who
   expect(await stats('?pageSize=25')).toEqual([{ currency: 'USD', median: 95000, min: 50000, max: 140000, headcount: 10 }]);
   expect(await stats('?country=US&salaryMin=100000')).toEqual([{ currency: 'USD', median: 120000, min: 100000, max: 140000, headcount: 5 }]);
 });
+
+test('median is percentile_cont rounded half away from zero', async () => {
+  const { stats } = await setup([
+    { code: 'E000001', country: 'US', salary: 100000 },
+    { code: 'E000002', country: 'US', salary: 100001 },
+    { code: 'E000003', country: 'IN', salary: 2000000 },
+    { code: 'E000004', country: 'IN', salary: 2000003 },
+    { code: 'E000005', country: 'IN', salary: 9000000 },
+  ]);
+  const [usd] = await stats('?country=US');
+  expect(usd.median).toBe(100001); // 100,000.5 rounds up, not to the even 100,000
+  const [inr] = await stats('?country=IN');
+  expect(inr.median).toBe(2000003); // odd count: the middle value
+});
