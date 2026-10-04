@@ -258,13 +258,15 @@ Nikhil (sign-ups need him).
 places chosen in Q18) and the list API's stats query that only fed it (D71). Medians stay on the
 employee page (peers) and the pay overview; the statistics tests now run through the pay
 overview, so the median and counting rules keep their tests. Spec and plan updated.
+Commits 5b3f80f, 81a2ebb.
 
 ### P8 (2026-10-05, during phase 7)
 
 > The assistant isn't available right now. Try again in a minute.
 >  getting this error
 
-**My reply:** investigated before changing anything (below in the build log).
+**My reply:** investigated before changing anything (below in the build log). Cause: the app sent
+four models and OpenRouter takes three. Commits 332e2ab, 4eda584, 0545fb0, 5eccbe5, be02d19.
 
 ### P9 (2026-10-05, during phase 7)
 
@@ -272,7 +274,7 @@ overview, so the median and counting rules keep their tests. Spec and plan updat
 
 **My reply:** removed the "N free model requests left today" line under the question box
 (AST-16) and the API endpoint that only fed it (D72). `npm run smoke:model` still prints the
-quota for whoever runs it.
+quota for whoever runs it. Commits dcce929, 846dd0e.
 
 ### P10 (2026-10-05, during phase 7; sent while P9 was in progress)
 
@@ -283,7 +285,7 @@ matching "Shubham"…".)
 
 **My reply:** the lookup steps now show only while an answer is being worked out and go away
 when it finishes, stops or fails (D73). Saved answers never kept their steps, so a live answer
-now looks the same as a reopened one.
+now looks the same as a reopened one. Commits 08f5cfe, 8f33ac0.
 
 ### P11 (2026-10-05, during phase 7; sent while P9 was in progress)
 
@@ -294,7 +296,7 @@ all move with one page scroll.)
 
 **My reply:** the assistant page now fills the window below the top bar. The chat list scrolls
 on its own, the messages scroll on their own, and the question box stays below the messages
-(D74, new criterion AST-19).
+(D74, new criterion AST-19). Commits 79228d4, 71d030b.
 
 ---
 
@@ -712,6 +714,7 @@ is done (hashes copied from `git log`).
 - D73 · green: an answer lists its lookup steps only while it streams; finished, stopped and failed answers show none, as reopened ones never did. The narration test now checks its step mid-answer; the end-to-end answer test checks the steps are gone. SPEC AST-3, QA row and plan updated.
 - Red (end to end): the chat list and the messages scroll separately; the question box stays in view (AST-19, D74).
 - D74 · green: the assistant page fills the window below the top bar (480 px at least); the chat list and the messages each scroll, and the question box sits below the messages instead of sticking to the page. The first run still scrolled the page by 25 px: the hidden "Answer finished." status is absolutely positioned and escaped the scrolling box, so the box is now its positioning parent. Screenshots at 1280 px and 390 px checked by eye. SPEC AST-19 added; QA row and plan map updated; README no longer mentions the list's stats line (stale since D71). 190 unit and API tests and 26 end-to-end tests pass.
+- Commit hashes added to the replies for P7–P11 (P7 and P8 had none); pushed master.
 
 ---
 
