@@ -91,3 +91,16 @@ test("timeline lists each change with from → to, and marks scheduled, cancelle
     },
   ]);
 });
+
+test.fails("a cancelled change says when it was cancelled, as a date in HR's timezone (EMP-11)", async () => {
+  const { app, db } = await testApp({ now: '2026-10-01T20:00:00Z' }); // already 2 Oct in Tokyo
+  const agent = await signIn(app);
+  await agent.post('/api/employees').send(newEmployee);
+  await agent.post('/api/employees/E000123/changes').send({ version: 1, effectiveDate: '2027-01-01', salary: 150000 });
+  const id = (await db.query("SELECT id FROM job_changes WHERE effective_date = '2027-01-01'")).rows[0].id;
+  await agent.post(`/api/employees/E000123/changes/${id}/cancel`).send({ version: 2 });
+  const cancelledOn = async (tz: string) =>
+    (await agent.get('/api/employees/E000123').set('X-Timezone', tz)).body.timeline.find((e: { cancelled?: boolean }) => e.cancelled).cancelledOn;
+  expect(await cancelledOn('UTC')).toBe('2026-10-01');
+  expect(await cancelledOn('Asia/Tokyo')).toBe('2026-10-02');
+});

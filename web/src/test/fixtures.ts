@@ -35,7 +35,7 @@ export const detailResponse = (over: Record<string, unknown> = {}) => ({
       changes: [{ field: 'level', from: 3, to: 4 }, { field: 'salary', from: brl(133000), to: brl(145000) }] },
     { type: 'change', id: 3, date: '2027-01-01', hire: false, note: null, scheduled: true, cancelled: false, wontApply: false,
       changes: [{ field: 'salary', from: brl(145000), to: brl(150000) }] },
-    { type: 'change', id: 4, date: '2027-02-01', hire: false, note: null, scheduled: true, cancelled: true, wontApply: false,
+    { type: 'change', id: 4, date: '2027-02-01', hire: false, note: null, scheduled: true, cancelled: true, cancelledOn: '2026-10-03', wontApply: false,
       changes: [{ field: 'manager', from: { code: 'E000200', name: 'Bruno Lima' }, to: null }] },
   ],
   ...over,
