@@ -1,6 +1,7 @@
 // npm run smoke:model [-- model ...]: checks free OpenRouter models against D44 with the real key from .env.
 // Not part of npm test (tests never call the real model, AST-18). Uses the dev database read-only, through the
-// assistant's own tools. About five free requests per model; `--data-cant-answer` adds the AST-10 check (two more).
+// assistant's own tools. About five free requests per model; `--data-cant-answer` adds the AST-10 check (two more);
+// `--only-data-cant-answer` runs just that check.
 import { systemPrompt } from './assistant/prompt.ts';
 import { freeRequestsLeft, openRouterModel, type ModelEvent } from './assistant/model.ts';
 import { answerQuestion } from './assistant/run.ts';
@@ -14,7 +15,8 @@ if (!cfg.apiKey) {
   process.exit(1);
 }
 const args = process.argv.slice(2);
-const dataCantAnswer = args.includes('--data-cant-answer');
+const onlyAst10 = args.includes('--only-data-cant-answer');
+const dataCantAnswer = onlyAst10 || args.includes('--data-cant-answer');
 const named = args.filter((a) => !a.startsWith('--'));
 const candidates = named.length
   ? named
@@ -34,7 +36,7 @@ for (const model of candidates) {
   let extra = '';
 
   // 1. A tool call arrives while streaming.
-  try {
+  if (!onlyAst10) try {
     const events: ModelEvent[] = [];
     const messages = [{ role: 'system' as const, content: systemPrompt(today) }, { role: 'user' as const, content: 'How many people work in Engineering in Germany? Look it up.' }];
     for await (const e of llm({ messages, tools: TOOLS, signal: minutes(90_000) })) events.push(e);
@@ -45,7 +47,7 @@ for (const model of candidates) {
   }
 
   // 2. Several tool rounds inside one streamed answer, with the real tools on the dev database.
-  try {
+  if (!onlyAst10) try {
     const steps: string[] = [];
     let tokens = 0;
     const answer = await answerQuestion({
@@ -62,7 +64,7 @@ for (const model of candidates) {
 
   // 3. The `models` list the app sends (this model first, then another candidate) is accepted and answered. OpenRouter
   // refuses unknown ids (400), and only fails over when a listed model fails at the time, which can't be forced from here.
-  try {
+  if (!onlyAst10) try {
     let text = '';
     const viaFallback = openRouterModel({ ...cfg, models: [model, ...candidates.filter((c) => c !== model).slice(0, 1)] });
     for await (const e of viaFallback({ messages: [{ role: 'user', content: 'Reply with the word ready.' }], tools: [], signal: minutes(90_000) })) {

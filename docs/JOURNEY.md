@@ -633,6 +633,7 @@ is done (hashes copied from `git log`).
 - Phase 6 QA fix 13 · green: each round's words are kept separately; if the round ends in a lookup, the server sends reset and the words as a step, and the saved answer is the final round's words (a stopped answer keeps only words after the last reset).
 - Phase 6 QA fix 14 · red (found with the real model): the system prompt asks for money as currency code and amount ("EUR 71,000"), as the app shows it; models wrote "€71,000".
 - Phase 6 QA fix 14 · green: one system-prompt rule for money: currency code and amount with separators, no symbols.
+- AST-10 rechecked with the real model after the fix: the answer starts "The data can't answer this because…". npm run smoke:model gained --only-data-cant-answer. 5 free requests left today.
 
 ---
 
