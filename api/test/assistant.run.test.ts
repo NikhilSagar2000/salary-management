@@ -127,7 +127,7 @@ test('words written before a lookup become a step, so the answer is only the fin
   expect(answer.text).toBe("The data can't answer this because there is no bonus data.");
 });
 
-test.fails('system prompt asks for money as a currency code and amount, as the app shows it (UI-2)', async () => {
+test('system prompt asks for money as a currency code and amount, as the app shows it (UI-2)', async () => {
   const { requests } = await ask([[{ type: 'token', text: 'Hi.' }, { type: 'done' }]]);
   expect(String(requests[0]!.messages[0]!.content)).toContain(
     '- Write money as the currency code and the amount with thousands separators, like EUR 71,000; never currency symbols such as €.',
