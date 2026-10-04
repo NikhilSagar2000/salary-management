@@ -155,7 +155,7 @@ test('about 30 listed outliers and nobody else beyond the limits', async () => {
   expect(outliers.size - high).toBeGreaterThan(5);
 });
 
-test.fails('every person starts with a hire change; raises, promotions, relocations with new-currency salaries and leavers exist', () => {
+test('every person starts with a hire change; raises, promotions, relocations with new-currency salaries and leavers exist', () => {
   const byCode = new Map<string, typeof seed.changes>();
   for (const c of seed.changes) byCode.set(c.code, [...(byCode.get(c.code) ?? []), c]);
   let raises = 0, promotions = 0, relocations = 0;

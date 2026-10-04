@@ -1,5 +1,5 @@
 // The seed (SEED-1…10): exactly 10,000 employees, identical every run, with realistic pay (D59–D62).
-import { CURRENCY, ROLES, type Country, type Currency, type Department, type Gender, type Role } from '@acme/shared';
+import { COUNTRY_NAMES, CURRENCY, ROLES, type Country, type Currency, type Department, type Gender, type Role } from '@acme/shared';
 import { band, MARKET_SPREAD, SAME_JOB_GAP } from './bands.ts';
 import { NAMES } from './names.ts';
 import { between, mulberry32, normal, pick, shuffle, weighted, type Rng } from './random.ts';
@@ -73,7 +73,10 @@ const emailOf = (first: string, last: string) =>
     .replace(/ß/g, 'ss').replace(/ı/g, 'i').replace(/[^A-Za-z.]/g, '')
     .toLowerCase() + '@acme.example';
 
-type Person = SeedEmployee & { country: Country; department: Department; role: Role; level: number; salary: number };
+type Person = SeedEmployee & {
+  hireCountry: Country; country: Country; department: Department; role: Role; hireLevel: number; level: number;
+  salary: number; gapFactor: number; events: CareerEvent[];
+};
 
 export function generateSeed(): Seed {
   const rng = mulberry32(SEED_NUMBER);
@@ -98,11 +101,14 @@ export function generateSeed(): Seed {
     const role = weighted(rng, ROLE_WEIGHTS[department]);
     const { minLevel, maxLevel } = ROLES[role];
     const level = weighted(rng, LEVEL_WEIGHTS.map((w, i) => [i + 1, i + 1 >= minLevel && i + 1 <= maxLevel ? w : 0] as const));
-    const gap = gender === 'male' ? 0 : SAME_JOB_GAP[country];
-    const salary = roundPay(band(country, role, department, level) * (1 - gap) * noise(rng, country), CURRENCY[country]);
+    const gapFactor = gender === 'male' ? 1 : 1 - SAME_JOB_GAP[country];
+    const hire = hireDate(rng);
+    const { leaveDate, leaveReason } = leaving(rng, hire);
+    const { events, hireLevel, now } = career(rng, { country, level, minLevel, hire, end: leaveDate ?? SEED_ANCHOR });
+    const salary = roundPay(band(now, role, department, level) * gapFactor * noise(rng, now), CURRENCY[now]);
     return {
-      code: '', firstName, lastName, gender, workEmail, hireDate: hireDate(rng), leaveDate: null, leaveReason: null,
-      country, department, role, level, salary,
+      code: '', firstName, lastName, gender, workEmail, hireDate: hire, leaveDate, leaveReason,
+      hireCountry: country, country: now, department, role, hireLevel, level, salary, gapFactor, events,
     };
   });
 
@@ -110,16 +116,104 @@ export function generateSeed(): Seed {
   people.sort((a, b) => (a.hireDate < b.hireDate ? -1 : a.hireDate > b.hireDate ? 1 : 0));
   people.forEach((p, i) => (p.code = `E${String(i + 1).padStart(6, '0')}`));
 
-  const outliers = placeOutliers(rng, people.filter((p) => p.hireDate <= SEED_ANCHOR && (p.leaveDate === null || p.leaveDate > SEED_ANCHOR)));
+  const outliers = placeOutliers(rng, people.filter((p) => p.leaveDate === null || p.leaveDate > SEED_ANCHOR));
 
-  const changes: SeedChange[] = people.map((p) => ({
-    code: p.code, effectiveDate: p.hireDate, country: p.country, department: p.department, role: p.role, level: p.level,
-    managerSet: true, managerCode: null, salary: p.salary, currency: CURRENCY[p.country], note: null,
-  }));
+  const changes = people.flatMap(history);
   const employees = people.map(({ code, firstName, lastName, gender, workEmail, hireDate, leaveDate, leaveReason }) => ({
     code, firstName, lastName, gender, workEmail, hireDate, leaveDate, leaveReason,
   }));
-  return { employees, changes, leaveEvents: [], outliers };
+  const leaveEvents: SeedLeaveEvent[] = people
+    .filter((p) => p.leaveDate)
+    .map((p) => ({ code: p.code, kind: 'left', leaveDate: p.leaveDate!, reason: p.leaveReason }));
+  return { employees, changes, leaveEvents, outliers };
+}
+
+// ---- careers ----
+type CareerEvent =
+  | { day: number; kind: 'raise'; pct: number }
+  | { day: number; kind: 'promotion'; pct: number }
+  | { day: number; kind: 'move'; from: Country; to: Country; fromNoise: number };
+
+const RAISE: Record<Country, [number, number]> = {
+  US: [0.03, 0.05], GB: [0.03, 0.05], DE: [0.02, 0.04], JP: [0.01, 0.03], IN: [0.07, 0.11], BR: [0.05, 0.09],
+};
+const LEAVE_REASONS = ['Resigned', 'Moved to another company', 'Relocated', 'Retired', 'End of contract', 'Career change', 'Personal reasons', null];
+
+/** About 12% of people hired before March 2026 have left, at least six months after joining (D62). */
+function leaving(rng: Rng, hire: string) {
+  if (!(hire < '2026-03-01' && rng() < 0.12)) return { leaveDate: null, leaveReason: null };
+  const leaveDate = fromDays(Math.floor(between(rng, toDays(hire) + 180, toDays(SEED_ANCHOR) + 1)));
+  return { leaveDate, leaveReason: pick(rng, LEAVE_REASONS) };
+}
+
+/**
+ * Promotions every 2–4 years (as many as the level allows), a raise every 1 April after the first nine months,
+ * and for about 1% of people with 2+ years a move to another country (D62). `level` is the level at `end`.
+ */
+function career(rng: Rng, p: { country: Country; level: number; minLevel: number; hire: string; end: string }) {
+  const hireDay = toDays(p.hire);
+  const endDay = toDays(p.end);
+  const events: CareerEvent[] = [];
+
+  const chances: number[] = [];
+  for (let day = hireDay + Math.floor(between(rng, 730, 1460)); day <= endDay - 30; day += Math.floor(between(rng, 730, 1460))) {
+    chances.push(fromDays(day).endsWith('-04-01') ? day + 1 : day);
+  }
+  const promotions = shuffle(rng, chances).slice(0, p.level - p.minLevel).sort((a, b) => a - b);
+  for (const day of promotions) events.push({ day, kind: 'promotion', pct: between(rng, 0.08, 0.15) });
+
+  let move: { day: number; to: Country } | null = null;
+  if (endDay - hireDay > 730 && rng() < 0.012) {
+    const to = pick(rng, (Object.keys(COUNTS) as Country[]).filter((c) => c !== p.country));
+    move = { day: Math.floor(between(rng, hireDay + 365, endDay - 180)), to };
+    events.push({ day: move.day, kind: 'move', from: p.country, to, fromNoise: 0 });
+  }
+
+  for (let year = Number(p.hire.slice(0, 4)); year <= 2026; year++) {
+    const day = toDays(`${year}-04-01`);
+    if (day <= hireDay + 270 || day > endDay) continue;
+    const country = move && day >= move.day ? move.to : p.country;
+    events.push({ day, kind: 'raise', pct: between(rng, ...RAISE[country]) });
+  }
+  for (const e of events) if (e.kind === 'move') e.fromNoise = noise(rng, e.from);
+
+  const order = { raise: 0, promotion: 1, move: 2 };
+  events.sort((a, b) => a.day - b.day || order[a.kind] - order[b.kind]);
+  return { events, hireLevel: p.level - promotions.length, now: move ? move.to : p.country };
+}
+
+/** The person's job changes: the hire, then each event, with salaries worked back from today's pay. */
+function history(p: Person): SeedChange[] {
+  // Walk backwards from current pay to find the pay in force after each event and at hire.
+  const after: number[] = new Array(p.events.length);
+  let salary = p.salary;
+  let level = p.level;
+  for (let i = p.events.length - 1; i >= 0; i--) {
+    const e = p.events[i]!;
+    after[i] = salary;
+    if (e.kind === 'raise') salary /= 1 + e.pct;
+    if (e.kind === 'promotion') {
+      salary /= 1 + e.pct;
+      level -= 1;
+    }
+    if (e.kind === 'move') salary = band(e.from, p.role, p.department, level) * p.gapFactor * e.fromNoise;
+  }
+  const base = { code: p.code, country: null, department: null, role: null, level: null, managerSet: false, managerCode: null, note: null };
+  const changes: SeedChange[] = [{
+    ...base, effectiveDate: p.hireDate, country: p.hireCountry, department: p.department, role: p.role, level: p.hireLevel,
+    managerSet: true, salary: roundPay(salary, CURRENCY[p.hireCountry]), currency: CURRENCY[p.hireCountry],
+  }];
+  let country = p.hireCountry;
+  level = p.hireLevel;
+  p.events.forEach((e, i) => {
+    const date = fromDays(e.day);
+    if (e.kind === 'move') country = e.to;
+    const pay = { salary: roundPay(after[i]!, CURRENCY[country]), currency: CURRENCY[country] };
+    if (e.kind === 'raise') changes.push({ ...base, ...pay, effectiveDate: date, note: 'Annual raise' });
+    if (e.kind === 'promotion') changes.push({ ...base, ...pay, effectiveDate: date, level: ++level, note: `Promotion to L${level}` });
+    if (e.kind === 'move') changes.push({ ...base, ...pay, effectiveDate: date, country, note: `Moved to ${COUNTRY_NAMES[country]}` });
+  });
+  return changes;
 }
 
 const OUTLIER_COUNT = 30;
@@ -133,7 +227,11 @@ function medianOf(xs: number[]): number {
 
 function peerMedians(people: Person[]) {
   const groups = new Map<string, number[]>();
-  for (const p of people) groups.set(peerKey(p), [...(groups.get(peerKey(p)) ?? []), p.salary]);
+  for (const p of people) {
+    const xs = groups.get(peerKey(p)) ?? [];
+    xs.push(p.salary);
+    groups.set(peerKey(p), xs);
+  }
   return new Map([...groups].map(([k, xs]) => [k, { median: medianOf(xs), n: xs.length }]));
 }
 
