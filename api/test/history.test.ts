@@ -54,7 +54,7 @@ test('refuses a change before hire, after leaving, or changing nothing', async (
   expect((await db.query('SELECT count(*) AS n, max(version) AS v FROM job_changes, employees')).rows[0]).toEqual({ n: 1, v: 1 });
 });
 
-test.fails('refuses a department, role and level combination not allowed on that date', async () => {
+test('refuses a department, role and level combination not allowed on that date', async () => {
   const { db, change } = await setup();
   const wrongDept = await change({ effectiveDate: '2025-01-01', department: 'Sales' });
   expect(wrongDept.status).toBe(400);

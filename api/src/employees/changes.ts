@@ -1,4 +1,4 @@
-import { CURRENCY, formatDate, MSG, type Country, type JobChange } from '@acme/shared';
+import { CURRENCY, formatDate, jobProblems, MSG, type Country, type JobChange } from '@acme/shared';
 import type pg from 'pg';
 import { withTx } from '../db.ts';
 import { FieldProblem } from '../http.ts';
@@ -25,6 +25,23 @@ export async function addChange(db: pg.Pool, code: string, c: JobChange): Promis
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
       [id, c.effectiveDate, c.country, c.department, c.role, c.level, c.salary, currency, c.note],
     );
+    await checkTimeline(tx, id, c.effectiveDate);
     return version as number;
   });
+}
+
+/** Re-checks the person's state on the change's date and every later change date; throws on the first problem. */
+async function checkTimeline(tx: pg.PoolClient, employeeId: number, from: string) {
+  const { rows: dates } = await tx.query(
+    `SELECT DISTINCT c.effective_date AS d FROM job_changes c JOIN employees e ON e.id = c.employee_id
+     WHERE c.employee_id = $1 AND c.cancelled_at IS NULL AND c.effective_date >= $2
+       AND (e.leave_date IS NULL OR c.effective_date <= e.leave_date)
+     ORDER BY 1`,
+    [employeeId, from],
+  );
+  for (const { d } of dates) {
+    const state = (await tx.query('SELECT * FROM employee_state($1) WHERE employee_id = $2', [d, employeeId])).rows[0];
+    const prefix = d === from ? '' : `On ${formatDate(d)}: `;
+    for (const p of jobProblems(state)) throw new FieldProblem({ [String(p.path[0])]: prefix + p.message });
+  }
 }
