@@ -93,7 +93,7 @@ test('sign out ends the session and returns to sign-in', async () => {
   expect(calls.some((c) => c.method === 'DELETE' && c.url.pathname === '/api/session')).toBe(true);
 });
 
-test.fails('after sign-in, a next address on another site is ignored', async () => {
+test('after sign-in, a next address on another site is ignored', async () => {
   for (const next of ['//evil.example/x', '/\\evil.example/x']) {
     fakeApi({
       'GET /api/session': () => ({ status: 401, body: { error: 'Please sign in.' } }),

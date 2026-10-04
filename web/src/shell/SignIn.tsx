@@ -16,8 +16,9 @@ export function SignIn() {
     setError(null);
     try {
       await api('/api/session', { method: 'POST', body: { password } });
+      // Only a path on this site: "//host" and "/\host" would leave it.
       const next = params.get('next');
-      navigate(next?.startsWith('/') ? next : '/employees', { replace: true });
+      navigate(next && /^\/(?![/\\])/.test(next) ? next : '/employees', { replace: true });
     } catch (err) {
       setError(err instanceof ApiError ? err.message : String(err));
     } finally {
