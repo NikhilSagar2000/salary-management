@@ -324,6 +324,7 @@ is done (hashes copied from `git log`).
 - Task 10 · red: detail with status, current job and peers (EMP-14).
 - Task 10 · green: `GET /api/employees/:code` returns personal details, status (starting/active/leaving/left as of today), the current job and pay, and peers' median/min/max/headcount with the person's % position (EMP-14).
 - Task 10 · red: manager with has-left flag and direct reports (EMP-14).
+- Task 10 · green: detail shows the current manager (with "has left" flag) and current direct reports who haven't left (EMP-14).
 
 ---
 

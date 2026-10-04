@@ -36,7 +36,7 @@ test('returns status, current job and pay against peers', async () => {
   expect((await agent.get('/api/employees/E000999')).status).toBe(404);
 });
 
-test.fails('shows the manager with a has-left flag and the direct reports', async () => {
+test('shows the manager with a has-left flag and the direct reports', async () => {
   const { agent, hire } = await setup();
   const bruno = await hire({ firstName: 'Bruno', lastName: 'Lima', level: 5, role: 'Engineering Manager' });
   await agent.post('/api/employees').send({ ...newEmployee, managerCode: bruno });
