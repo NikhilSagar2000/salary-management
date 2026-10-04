@@ -2,11 +2,22 @@ import { MSG } from '@acme/shared';
 import type { Response } from 'express';
 import type pg from 'pg';
 
-/** 400 with one plain message per field: { error, fields: { field: message } }. */
-export function fieldErrors(res: Response, issues: { path: PropertyKey[]; message: string }[]) {
+type Issue = { path: PropertyKey[]; message: string };
+const fieldsOf = (issues: Issue[]) => {
   const fields: Record<string, string> = {};
   for (const issue of issues) fields[issue.path.join('.') || 'form'] ??= issue.message;
-  sendFieldErrors(res, fields);
+  return fields;
+};
+
+/** 400 with one plain message per field: { error, fields: { field: message } }. */
+export function fieldErrors(res: Response, issues: Issue[]) {
+  sendFieldErrors(res, fieldsOf(issues));
+}
+
+/** 400 for a bad address (list, export, overview): no form to show messages beside, so `error` is the messages themselves. */
+export function queryErrors(res: Response, issues: Issue[]) {
+  const fields = fieldsOf(issues);
+  res.status(400).json({ error: [...new Set(Object.values(fields))].join(' '), fields });
 }
 
 export function sendFieldErrors(res: Response, fields: Record<string, string>) {

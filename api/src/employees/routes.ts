@@ -2,7 +2,7 @@ import { employeeCreateSchema, employeeDetailsSchema, jobChangeSchema, leaveSche
 import { Router, type RequestHandler } from 'express';
 import type pg from 'pg';
 import type { Clock } from '../clock.ts';
-import { fieldErrors, sendFieldErrors, sendStaleOrMissing } from '../http.ts';
+import { fieldErrors, queryErrors, sendFieldErrors, sendStaleOrMissing } from '../http.ts';
 import { createEmployee, duplicateField, nextCode } from './create.ts';
 import { addChange, cancelChange } from './changes.ts';
 import { employeeDetail } from './detail.ts';
@@ -27,13 +27,13 @@ export function employeeRoutes({ db, clock }: { db: pg.Pool; clock: Clock }) {
 
   router.get('/api/employees', async (req, res) => {
     const parsed = listQuerySchema.safeParse(req.query);
-    if (!parsed.success) return fieldErrors(res, parsed.error.issues);
+    if (!parsed.success) return queryErrors(res, parsed.error.issues);
     res.json(await listEmployees(db, parsed.data, res.locals.today));
   });
 
   router.get('/api/employees.csv', async (req, res) => {
     const parsed = listQuerySchema.safeParse({ ...req.query, page: undefined, pageSize: undefined });
-    if (!parsed.success) return fieldErrors(res, parsed.error.issues);
+    if (!parsed.success) return queryErrors(res, parsed.error.issues);
     res
       .type('text/csv; charset=utf-8')
       .attachment(`employees-${res.locals.today}.csv`)

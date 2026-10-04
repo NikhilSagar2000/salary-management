@@ -129,7 +129,7 @@ test('rejects invalid query values naming the value', async () => {
   for (const [q, fields] of cases) {
     const res = await list(q);
     expect(res.status, q).toBe(400);
-    expect(res.body, q).toEqual({ error: 'Some fields need fixing.', fields });
+    expect(res.body, q).toEqual({ error: Object.values(fields)[0], fields });
   }
 });
 
@@ -161,7 +161,7 @@ test('no matches gives an empty page, not an error', async () => {
   expect((await list('?page=9')).body.total).toBe(1);
 });
 
-test.fails('a bad list address answers with the message itself, for the page to show (LIST-5, LIST-7)', async () => {
+test('a bad list address answers with the message itself, for the page to show (LIST-5, LIST-7)', async () => {
   const { list } = await setup();
   expect((await list('?pageSize=1000')).body.error).toBe('Page size must be 25, 50 or 100, not "1000".');
   expect((await list('?sort=salary')).body.error).toBe('Choose one country to sort or filter by salary, because salaries are in different currencies.');
