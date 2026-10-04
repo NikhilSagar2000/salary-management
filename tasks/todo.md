@@ -783,6 +783,7 @@ next to the same fields; 409 keeps the input and offers Reload; Save is disabled
 - [ ] Step 3: "invalid fields show their messages and focus the first" (EMP-3, A11Y-3).
 - [ ] Step 4: "a 409 keeps the typed input and offers Reload" (EMP-13).
 - [ ] Step 5: "cancel appears only on scheduled changes" (EMP-11).
-- [ ] Step 6: "after leaving only Undo is offered" (LEAVE-3).
-- [ ] Step 7: "save button can't submit twice".
+- [ ] Step 6: "change job or pay sends a dated change with only what changed" (EMP-7, EMP-9; needed by A11Y-2).
+- [ ] Step 7: "mark as leaving, then only Undo is offered" (LEAVE-1, LEAVE-3).
+- [ ] Step 8: "save button can't submit twice".
 - [ ] Task check: `npm test`.

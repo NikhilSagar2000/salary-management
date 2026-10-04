@@ -25,7 +25,7 @@ export function DetailsForm({ detail, onSaved, onReload }: { detail: Detail; onS
   return (
     <form ref={form.ref} onSubmit={submit} noValidate>
       <Stack>
-        <FormAlert error={form.formError} onReload={onReload} />
+        <FormAlert error={form.formError} onReload={() => { form.clearFormError(); onReload(); }} />
         <TextInput label="First name" value={values.firstName} onChange={(e) => set('firstName')(e.currentTarget.value)} error={form.fields.firstName} />
         <TextInput label="Last name" value={values.lastName} onChange={(e) => set('lastName')(e.currentTarget.value)} error={form.fields.lastName} />
         <Select label="Gender" data={GENDERS.map((g) => ({ value: g, label: g === 'non_binary' ? 'Non-binary' : g[0]!.toUpperCase() + g.slice(1) }))}

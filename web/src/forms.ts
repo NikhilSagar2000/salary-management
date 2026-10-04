@@ -37,5 +37,5 @@ export function useFormErrors() {
       setSaving(false);
     }
   };
-  return { ref, fields, setFields, formError, saving, save };
+  return { ref, fields, setFields, formError, clearFormError: () => setFormError(null), saving, save };
 }

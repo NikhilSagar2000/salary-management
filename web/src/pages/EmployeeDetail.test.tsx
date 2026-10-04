@@ -87,7 +87,7 @@ test('invalid fields show their messages and focus the first', async () => {
   });
 });
 
-test.fails('a 409 keeps the typed input and offers Reload', async () => {
+test('a 409 keeps the typed input and offers Reload', async () => {
   let version = 4;
   const calls = open(undefined, {
     'GET /api/employees/E000123': () => ({ status: 200, body: detailResponse({ version }) }),

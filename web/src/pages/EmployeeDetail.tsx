@@ -37,7 +37,8 @@ export function EmployeeDetail() {
         </Group>
       </Group>
       <Modal opened={form === 'details'} onClose={() => setForm(null)} title="Edit details">
-        <DetailsForm detail={d} onSaved={() => { setForm(null); load(); }} onReload={() => { setForm(null); load(); }} />
+        {/* EMP-13: Reload refreshes the page behind the form; what was typed stays, now on the latest version. */}
+        <DetailsForm detail={d} onSaved={() => { setForm(null); load(); }} onReload={load} />
       </Modal>
       {/* EMP-5: code and hire date are facts, never inputs. */}
       <SimpleGrid component="ul" aria-label="Employee facts" cols={{ base: 2, sm: 4 }} p={0} m={0} style={{ listStyle: 'none' }}>
