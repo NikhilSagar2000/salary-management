@@ -259,6 +259,7 @@ is done (hashes copied from `git log`).
 - Task 3 · green: every `/api` route except health answers 401 "Please sign in." without a session (AUTH-1).
 - Task 3 · red: sign-in cookie tests (AUTH-2).
 - Task 3 · green: `POST /api/session` checks the scrypt hash and sets a random 32-byte token in an httpOnly, SameSite=Lax, 7-day cookie (Secure in production); Postgres keeps only its SHA-256 and expiry (AUTH-2).
+- Task 3 · test: wrong password gets 401 "That password isn't right." and no cookie (AUTH-2). Passed on first run because sign-in already had this branch; a mutation (accept any password) made it fail, then reverted.
 
 ---
 

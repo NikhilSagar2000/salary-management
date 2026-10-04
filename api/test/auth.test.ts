@@ -34,3 +34,13 @@ test('the session cookie is Secure in production', async () => {
   const res = await request(app).post('/api/session').send({ password: PASSWORD });
   expect(res.headers['set-cookie']![0]).toContain('Secure');
 });
+
+test('rejects a wrong password with a plain message', async () => {
+  const { app } = await testApp();
+  for (const body of [{ password: 'wrong' }, {}, { password: 42 }]) {
+    const res = await request(app).post('/api/session').send(body);
+    expect(res.status).toBe(401);
+    expect(res.body).toEqual({ error: "That password isn't right." });
+    expect(res.headers['set-cookie']).toBeUndefined();
+  }
+});
