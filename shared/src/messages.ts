@@ -17,6 +17,7 @@ export const MSG = {
   salaryTooLarge: 'That salary is too large. The most allowed is 10,000,000,000.',
   roleNotInDepartment: (role: string, department: string) => `${role} isn't a role in ${department}.`,
   fixFields: 'Some fields need fixing.',
+  unknownValue: (label: string, value: string) => `There's no ${label} called "${value}".`,
   moveNeedsSalary: 'Moving to another country needs a salary in the new currency.',
   laterSalaryWrongCurrency: (date: string, currency: string, country: string) =>
     `A salary change on ${date} is in ${currency}; cancel it before moving this person to ${country}.`,

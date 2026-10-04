@@ -333,6 +333,7 @@ is done (hashes copied from `git log`).
 - Task 11 · green: `q` matches part of the full name, work email or code, ignoring case and accents (trigram-indexed); blank search is no search (LIST-2).
 - Task 11 · test: apostrophes, hyphens and accented names are found; a typed `%` or `_` is literal (review focus 2). Passed first run (escaping came with search); removing the escaping made it fail.
 - Task 11 · red: filters AND across fields, OR within one (LIST-3).
+- Task 11 · green: country, department, role, level and gender filters as comma lists in the URL; AND across filters, OR within one; unknown values are named (LIST-3).
 
 ---
 

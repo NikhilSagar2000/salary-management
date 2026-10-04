@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { MSG } from './messages.ts';
-import { COUNTRIES, DEPARTMENTS, GENDERS, MAX_SALARY, ROLE_NAMES, ROLES, type Role } from './reference.ts';
+import { COUNTRIES, DEPARTMENTS, GENDERS, LEVELS, MAX_SALARY, ROLE_NAMES, ROLES, type Role } from './reference.ts';
 
 /** A salary typed by a person (number or text) → whole number, or a plain message. */
 export const salarySchema = z.unknown().transform((value, ctx) => {
@@ -105,9 +105,35 @@ export const leaveSchema = z.object({
 });
 export type Leave = z.infer<typeof leaveSchema>;
 
+/** A comma-separated list in the URL, each value one of `allowed`; unknown values are named in the message. */
+function csvOf<T extends string | number>(allowed: readonly T[], label: string) {
+  return z
+    .string()
+    .optional()
+    .transform((s, ctx) => {
+      if (!s) return undefined;
+      const values = s.split(',').map((v) => v.trim()).filter(Boolean);
+      const out: T[] = [];
+      for (const v of values) {
+        const match = allowed.find((a) => String(a) === v);
+        if (match === undefined) {
+          ctx.addIssue({ code: 'custom', message: MSG.unknownValue(label, v) });
+          return z.NEVER;
+        }
+        out.push(match);
+      }
+      return out.length ? out : undefined;
+    });
+}
+
 /** Employee list query (URL state): filters, sort and paging. */
 export const listQuerySchema = z.object({
   q: z.string().trim().max(100).optional().transform((s) => s || undefined),
+  country: csvOf(COUNTRIES, 'country'),
+  department: csvOf(DEPARTMENTS, 'department'),
+  role: csvOf(ROLE_NAMES, 'role'),
+  level: csvOf(LEVELS, 'level'),
+  gender: csvOf(GENDERS, 'gender'),
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().pipe(z.union([z.literal(25), z.literal(50), z.literal(100)])).default(25),
 });

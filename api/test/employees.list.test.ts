@@ -50,7 +50,7 @@ test('names with apostrophes and hyphens are found', async () => {
   expect(codes(await list('?q=_'))).toEqual(['E000003']);
 });
 
-test.fails('filters combine with AND across fields and OR within one', async () => {
+test('filters combine with AND across fields and OR within one', async () => {
   const { list } = await setup([
     { code: 'E000001', country: 'US', department: 'Engineering', level: 3, gender: 'female' },
     { code: 'E000002', country: 'US', department: 'Sales', role: 'Account Executive', level: 3, gender: 'male' },
