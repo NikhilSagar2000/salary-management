@@ -133,3 +133,11 @@ test('the search box takes at most 100 characters, as the search does', async ()
   renderApp('/employees');
   expect(await screen.findByLabelText('Search')).toHaveAttribute('maxlength', '100');
 });
+
+test.fails('the list shows no pay summary (removed, D71)', async () => {
+  signedInWith();
+  renderApp('/employees');
+  await screen.findByRole('table');
+  expect(screen.queryByRole('list', { name: 'Pay for these employees' })).not.toBeInTheDocument();
+  expect(screen.queryByText(/median/)).not.toBeInTheDocument();
+});

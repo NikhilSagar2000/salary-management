@@ -249,6 +249,16 @@ free daily quota.
 pushing: checked history for secrets and the work email. Account and repo creation stays with
 Nikhil (sign-ups need him).
 
+### P7 (2026-10-05, during phase 7)
+
+> [Image: the six per-currency pay lines above the employee list, e.g. "USD: median 113,750, min
+> 36,900, max 392,400, 2,660 people"] we dont need this
+
+**My reply:** removed the pay summary above the employee list (LIST-9; it was one of the three
+places chosen in Q18) and the list API's stats query that only fed it (D71). Medians stay on the
+employee page (peers) and the pay overview; the statistics tests now run through the pay
+overview, so the median and counting rules keep their tests. Spec and plan updated.
+
 ---
 
 ## 3. Timeline
@@ -652,6 +662,7 @@ is done (hashes copied from `git log`).
 - Phase 7 · Q43–Q44 logged (D70); history checked (one author, personal email; no work email, keys or hashes); remote origin added with the personal key; pushed master to GitHub.
 - Phase 7 · render.yaml Blueprint: one free web service in Singapore, build with dev dependencies, start the API (migrates, serves the web build), health check /api/health, secrets entered in Render (DATABASE_URL, APP_PASSWORD_HASH, OPENROUTER_API_KEY); fallbacks ordered by the smoke test (qwen last). Rehearsed locally in production mode on port 4799: health ok, pages served, API 401 signed out.
 - Phase 7 · README: what the app does, local set-up, the test commands, the Neon + Render steps, the project records, and a six-minute demo-recording script; the live link is added after the first deploy.
+- P7 logged; D71: the pay summary above the employee list goes (Nikhil). Red: the list shows no pay summary.
 
 ---
 
@@ -732,6 +743,7 @@ accepted when Nikhil approved the plan (P4).
 | D68 | Reviewer's minor findings | Final review left nine Minor items | Fix all · user-facing only · leave | Fix all nine test-first before manual QA | Small, contained fixes; QA then starts from a cleaner base | N (Q41) |
 | D69 | When the code leaves this machine | No remote yet; CI unproven on GitHub | Push now · keep local until deploy | Keep local until the deploy approval; CI first runs then | Nikhil's choice | N (Q42) |
 | D70 | Phase 7 go-ahead | Phase 6 done; deploy needs GitHub, Neon, Render | Push + deploy · push only · not yet | Push master to GitHub, then deploy on Neon + Render free tiers; Nikhil creates accounts and keys | Nikhil's approval | N (Q43, Q44) |
+| D71 | Pay summary on the employee list | Nikhil: "we dont need this" (P7) | Keep · remove from the page · remove page and API | Remove it from the page and the list API (no other user); statistics tests move to the pay overview | Nikhil's call; the API work had no other use | N (P7, replaces part of Q18) |
 
 ---
 
