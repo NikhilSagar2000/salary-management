@@ -493,6 +493,7 @@ is done (hashes copied from `git log`).
 - Task 22 · red: the employee page shows current job, manager (flagged if left), pay against peers, direct reports and the history newest first (EMP-14).
 - Task 22 · green: the employee page shows the current job, manager (flagged when they have left), pay against peers ("12% above the median of 48 peers"), direct reports and the history newest first with from → to values and Hired/Scheduled/Cancelled/Won't apply markers (EMP-14).
 - Task 22 · red: Edit details shows each field's message, linked to the field, and focuses the first invalid one, for client and server errors (EMP-3, A11Y-3).
+- Task 22 · green: Edit details form — the shared schema checks fields before sending; client and server messages show next to their fields (linked for screen readers) and the first invalid field gets focus (EMP-3, EMP-6, A11Y-3).
 
 ---
 

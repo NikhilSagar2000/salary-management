@@ -1,8 +1,9 @@
 import { COUNTRY_NAMES, formatDate, formatMoney, type Country } from '@acme/shared';
-import { Alert, Anchor, Badge, Group, Paper, SimpleGrid, Skeleton, Stack, Text, Title } from '@mantine/core';
+import { Alert, Anchor, Badge, Button, Group, Modal, Paper, SimpleGrid, Skeleton, Stack, Text, Title } from '@mantine/core';
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { Link, useParams } from 'react-router';
 import { api } from '../api.ts';
+import { DetailsForm } from './employee/DetailsForm.tsx';
 import { Timeline } from './employee/Timeline.tsx';
 import type { Detail } from './employee/types.ts';
 
@@ -14,6 +15,7 @@ export function EmployeeDetail() {
   const { code } = useParams();
   const [detail, setDetail] = useState<Detail | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [form, setForm] = useState<'details' | null>(null);
   const load = useCallback(() => {
     setError(null);
     api<Detail>(`/api/employees/${code}`).then(setDetail, (e: Error) => setError(e.message));
@@ -25,10 +27,18 @@ export function EmployeeDetail() {
   const d = detail;
   return (
     <Stack gap="lg">
-      <Group gap="sm">
-        <Title order={1} size="h2">{d.firstName} {d.lastName}</Title>
-        <Badge variant="light" color={STATUS_COLOR[d.status]}>{capital(d.status)}</Badge>
+      <Group justify="space-between">
+        <Group gap="sm">
+          <Title order={1} size="h2">{d.firstName} {d.lastName}</Title>
+          <Badge variant="light" color={STATUS_COLOR[d.status]}>{capital(d.status)}</Badge>
+        </Group>
+        <Group gap="xs">
+          <Button variant="default" onClick={() => setForm('details')}>Edit details</Button>
+        </Group>
       </Group>
+      <Modal opened={form === 'details'} onClose={() => setForm(null)} title="Edit details">
+        <DetailsForm detail={d} onSaved={() => { setForm(null); load(); }} onReload={() => { setForm(null); load(); }} />
+      </Modal>
       {/* EMP-5: code and hire date are facts, never inputs. */}
       <SimpleGrid component="ul" aria-label="Employee facts" cols={{ base: 2, sm: 4 }} p={0} m={0} style={{ listStyle: 'none' }}>
         <Fact label="Employee code" value={d.code} />

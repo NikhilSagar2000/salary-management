@@ -57,7 +57,7 @@ test("shows peers' position, manager flag, reports and the history timeline", as
   expect(items[3]).toHaveTextContent('Country: Brazil');
 });
 
-test.fails('invalid fields show their messages and focus the first', async () => {
+test('invalid fields show their messages and focus the first', async () => {
   const calls = open(detailResponse(), {
     'PATCH /api/employees/E000123': () => ({ status: 400, body: { error: 'Some fields need fixing.', fields: { workEmail: 'That work email is already used.' } } }),
   });
