@@ -11,4 +11,6 @@ export const MSG = {
   role: 'Choose a role.',
   level: 'Choose a level from L1 to L7.',
   salary: 'Enter the salary as a whole number, like 95000.',
+  roleNotInDepartment: (role: string, department: string) => `${role} isn't a role in ${department}.`,
+  levelOutOfRange: (role: string, min: number, max: number) => `${role} goes from L${min} to L${max}.`,
 } as const;

@@ -31,7 +31,7 @@ const valid = {
   hireDate: '2024-02-29', country: 'BR', department: 'Engineering', role: 'Software Engineer', level: 3, salary: 133000,
 };
 
-test.fails('role must belong to the department and the level be allowed', () => {
+test('role must belong to the department and the level be allowed', () => {
   expect(errorsOf(valid)).toEqual({});
   expect(errorsOf({ ...valid, department: 'Sales' })).toEqual({ role: "Software Engineer isn't a role in Sales." });
   expect(errorsOf({ ...valid, department: 'Sales', role: 'Sales Development Representative', level: 5 })).toEqual({

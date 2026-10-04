@@ -248,6 +248,7 @@ is done (hashes copied from `git log`).
 - Task 2 · red: shared reference data (countries, currencies, 19 roles with level ranges, genders) and the required-fields test (`schemas.test.ts`); D57 corrects the role count.
 - Task 2 · green: `employeeCreateSchema` with one plain message per missing field, messages kept in `shared/src/messages.ts`.
 - Task 2 · red: role/department/level combination test.
+- Task 2 · green: `jobProblems()` checks role-in-department and level range; the create schema uses it.
 
 ---
 
