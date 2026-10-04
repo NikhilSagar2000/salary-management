@@ -33,7 +33,7 @@ test('signed-out visit goes to sign-in and returns afterwards', async () => {
 const signedIn = () => fakeApi({ 'GET /api/session': () => ({ status: 200, body: { signedIn: true } }) });
 const scheme = () => document.documentElement.getAttribute('data-mantine-color-scheme');
 
-test.fails('theme follows the device and the toggle is remembered', async () => {
+test('theme follows the device and the toggle is remembered', async () => {
   signedIn();
   setPrefersDark(true);
   const first = renderApp('/employees');

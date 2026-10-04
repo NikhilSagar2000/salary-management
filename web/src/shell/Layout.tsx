@@ -1,6 +1,7 @@
 import { AppShell, Burger, Group, NavLink, Text } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { NavLink as RouterLink, Outlet } from 'react-router';
+import { ThemeToggle } from './ThemeToggle.tsx';
 
 const LINKS = [
   { to: '/employees', label: 'Employees' },
@@ -20,6 +21,7 @@ export function Layout() {
             <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" aria-label="Menu" />
             <Text fw={600}>ACME Pay</Text>
           </Group>
+          <ThemeToggle />
         </Group>
       </AppShell.Header>
       <AppShell.Navbar p="xs" aria-label="Main">

@@ -468,6 +468,7 @@ is done (hashes copied from `git log`).
 - Task 20 · red: a signed-out visit goes to sign-in and returns to the page asked for (AUTH-5); fake fetch and app render helpers; web uses bundler module resolution.
 - Task 20 · green: app shell with routes, a session guard that sends signed-out visits to `/signin?next=…` and back afterwards, the sign-in page, a sidebar layout with a skip link, and an `api()` client that turns failures into plain messages (AUTH-5).
 - Task 20 · red: the theme follows the device and a remembered toggle overrides it (UI-1).
+- Task 20 · green: a theme toggle in the header; the theme starts from the device setting and the choice is remembered (UI-1).
 
 ---
 
