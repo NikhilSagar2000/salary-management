@@ -128,3 +128,14 @@ test('aggregate computes exact stats split by currency', async () => {
     groups: [{ country: 'US', median: 7.5, min: 5, max: 10, count: 2 }, { country: 'IN', median: 10, min: 10, max: 10, count: 1 }],
   });
 });
+
+test.fails('bad arguments and unknown tools return an error result', async () => {
+  const { tool } = await setup([]);
+  expect(await tool('drop_table', {})).toEqual({ result: { error: 'There is no tool called "drop_table".' }, sources: [] });
+  const badCountry = await tool('query_employees', { filters: { country: ['XX'] } });
+  expect(badCountry.sources).toEqual([]);
+  expect((badCountry.result as { error: string }).error).toMatch(/filters\.country/);
+  expect(((await tool('aggregate', 'not an object')).result as { error: string }).error).toBeTypeOf('string');
+  expect(((await tool('get_employee', { code: 'E1; DROP TABLE employees' })).result as { error: string }).error).toMatch(/code/);
+  expect(((await tool('query_employees', { filters: { sql: 'SELECT 1' } })).result as { error: string }).error).toMatch(/sql/);
+});
