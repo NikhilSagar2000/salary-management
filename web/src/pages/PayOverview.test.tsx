@@ -10,7 +10,7 @@ const overview = {
   BR: { country: 'BR', currency: 'BRL', cells: [{ department: 'Sales', level: 2, median: 80000, min: 80000, max: 80000, headcount: 1 }] },
 };
 
-test.fails('one country at a time, empty cells show —, a cell opens the matching list', async () => {
+test('one country at a time, empty cells show —, a cell opens the matching list', async () => {
   const calls = fakeApi({
     'GET /api/session': () => ({ status: 200, body: { signedIn: true } }),
     'GET /api/pay-overview': ({ url }) => ({ status: 200, body: overview[url.searchParams.get('country') as 'US' | 'BR'] }),
