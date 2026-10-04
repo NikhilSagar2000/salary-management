@@ -154,7 +154,7 @@ test("the hire change can't be cancelled", async () => {
   expect(res.body.fields).toEqual({ form: "The hire record can't be cancelled." });
 });
 
-test.fails("no route edits a change's fields", async () => {
+test("no route edits a change's fields", async () => {
   const { agent } = await setup();
   for (const method of ['patch', 'put', 'delete'] as const) {
     const res = await agent[method]('/api/employees/E000123/changes/1').send({ version: 1, salary: 1 });

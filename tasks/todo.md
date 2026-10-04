@@ -187,7 +187,7 @@ is written just before the task starts, from the interfaces that exist at that p
   salary in the new currency" · "refuses a relocation that would leave a later salary in the
   old currency" (EMP-9) · "manager must exist, not be the person, be employed on the date, and
   not form a loop" (EMP-10) · `concurrency.test.ts` › job change case (EMP-13).
-- [ ] **Task 8: Cancel scheduled changes.** Tests: `history.test.ts` › "a cancelled scheduled
+- [x] **Task 8: Cancel scheduled changes.** Tests: `history.test.ts` › "a cancelled scheduled
   change stays in history and stops applying" · "refuses to cancel a change dated today or
   earlier" (EMP-11) · `concurrency.test.ts` › cancel case (EMP-13) · "no route edits a change's
   fields" (EMP-12).
@@ -530,10 +530,28 @@ routes), `api/src/employees/changes.ts` (`cancelChange`), routes, `api/test/hist
 Only changes dated after today (in the browser's timezone) can be cancelled; the hire change
 never; the timeline is re-checked after cancelling.
 
-- [ ] Step 1: "a cancelled scheduled change stays in history and stops applying" (EMP-11).
-- [ ] Step 2: "refuses to cancel a change dated today or earlier", where "today" follows
+- [x] Step 1: "a cancelled scheduled change stays in history and stops applying" (EMP-11).
+- [x] Step 2: "refuses to cancel a change dated today or earlier", where "today" follows
   `X-Timezone` (EMP-11, TIME-1 at request level; replaces the Task 11 ruling).
-- [ ] Step 3: "the hire change can't be cancelled".
-- [ ] Step 4: `concurrency.test.ts` cancel case (EMP-13).
-- [ ] Step 5: "no route edits a change's fields": PATCH/PUT/DELETE on a change → 404 JSON (EMP-12).
+- [x] Step 3: "the hire change can't be cancelled".
+- [x] Step 4: `concurrency.test.ts` cancel case (EMP-13).
+- [x] Step 5: "no route edits a change's fields": PATCH/PUT/DELETE on a change → 404 JSON (EMP-12).
+- [x] Task check: `npm test`.
+
+### Task 9: Leavers
+
+Files: `shared/src/schemas.ts` (`leaveSchema`), `api/src/employees/leave.ts`, routes,
+`api/test/leave.test.ts`, `api/test/concurrency.test.ts`.
+`POST /api/employees/:code/leave` `{ version, leaveDate, reason? }` and
+`POST /api/employees/:code/undo-leave` `{ version }`; each also writes a `leave_events` row.
+"Has left" = leave date on or before today (browser timezone).
+
+- [ ] Step 1: "marks leaving with a date and optional reason" (LEAVE-1).
+- [ ] Step 2: "refuses a leave date before hire or a reason over 500 characters" (LEAVE-1).
+- [ ] Step 3: "undo clears date and reason and both events show in history" (LEAVE-2).
+- [ ] Step 4: "refuses every write except undo after leaving" (LEAVE-3): details, job change,
+  cancel and a second leave answer 409 "This person has left. Undo leaving first to make changes."
+- [ ] Step 5: "DELETE on an employee URL answers 404" (LEAVE-4).
+- [ ] Step 6: "scheduled changes after the leave date stop applying and return on undo" (LEAVE-5).
+- [ ] Step 7: `concurrency.test.ts` leave and undo cases (EMP-13).
 - [ ] Task check: `npm test`.

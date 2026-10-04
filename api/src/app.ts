@@ -33,6 +33,9 @@ export function createApp(deps: { db: pg.Pool; clock: Clock; config: Config }) {
     res.clearCookie(SESSION_COOKIE, { path: '/' }).status(204).end();
   });
   app.use(employeeRoutes(deps));
+  app.use('/api', (_req, res) => {
+    res.status(404).json({ error: 'Not found.' });
+  });
   app.use(errorHandler);
   return app;
 }
