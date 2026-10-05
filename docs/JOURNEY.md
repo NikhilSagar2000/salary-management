@@ -346,6 +346,12 @@ fix commit after it.
 live JavaScript has the new "All statuses" box; said a visit before then would have shown the
 old refusal, and asked what he saw (the message was the link alone).
 
+### P17 (2026-10-05, after the deploy)
+
+> yes add the security headers
+
+**My reply:** _(filled in once done)_
+
 ---
 
 ## 3. Timeline
@@ -769,6 +775,8 @@ is done (hashes copied from `git log`).
 - P14 logged · Neon checked without printing its address (direct, Singapore, Postgres 17.11; Render's first start had applied all 7 migrations; no employees), then seeded: 10,000 employees, 63,154 job changes, 1,093 leavers, 30 outliers (write 5,091 ms). Live site https://acme-salary-aqw1.onrender.com runs 6070f77: health 200, pages served, API 401 signed out, no secrets in the JavaScript. README links it; section 11 written.
 - P15 logged · cause: the Status box shows the default three whenever the address has no `status`, and removing all three deletes it. Q48 asked and answered (D76). Red: `status=all` lists everyone, leavers included (API); removing every status keeps the box empty and lists everyone (page).
 - D76 · green: the list schema reads `status=all` as every status (unknown values still get their plain message; the CSV export uses the same schema); the Status box writes `all` when emptied, shows "All statuses" and stays empty; Clear filters still restores the default three. SPEC LIST-3, QA row and plan updated; lesson 10 added. 193 unit and API tests and 26 end-to-end tests pass.
+- P16 logged: the D76 fix was live at 06:29:55 UTC (Render deploy of 55fc20a; CI passed); asked what Nikhil saw.
+- P17 logged (D77). Red: every response carries the security headers, HSTS only in production (API); every screen works under the content security policy (end to end, including a markdown answer and the theme switch).
 
 ---
 
@@ -855,6 +863,7 @@ accepted when Nikhil approved the plan (P4).
 | D74 | Scrolling on the assistant page | Nikhil: chat list and chat "should have seperate scroll" (P11) | One page scroll · separate scroll areas | The page fills the window; the chat list and the messages scroll separately; the question box stays below the messages | Nikhil's call | N (P11, new AST-19) |
 | D75 | Deploy hand-off | Accounts exist (P12); secrets must not pass through me | I seed Neon from .env · Nikhil seeds; new live password · reuse local; Nikhil clicks Render · I drive Chrome | Nikhil puts NEON_DATABASE_URL in .env and I seed it without printing it; a new live password hashed by Nikhil; Nikhil sets up the Render Blueprint from my steps and pastes the secrets | Keeps every secret out of the chat and out of web forms I fill | N (Q45–Q47) |
 | D76 | An emptied Status filter | Removing all three default statuses brought them straight back (P15): no `status` in the address means the default | Everyone · nobody · keep at least one | Empty means everyone, leavers included; the address says `status=all`; the box stays empty with "All statuses"; Clear filters still restores the default three | Nikhil's call (Q48); matches the other filters, where empty means no filter | N (Q48, adds to LIST-3) |
+| D77 | Security headers | The live site sent none (found after the deploy); Nikhil: "yes add the security headers" (P17) | A library (helmet) · a few headers set in the API | Set in the API on every response, no new dependency: a content security policy (own scripts only; inline styles allowed because Mantine injects them; no plugins; no framing), nosniff, same-origin referrer, HSTS in production only, and no X-Powered-By | Covers clickjacking and injected scripts with a few lines; HSTS only where the site is on HTTPS | N (P17, new AUTH-7) |
 
 ---
 

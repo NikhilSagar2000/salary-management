@@ -29,3 +29,24 @@ test('the built web bundle holds no secret', async ({ request }) => {
     expect(text).not.toMatch(/scrypt:[\w-]{16,}:/); // a password hash
   }
 });
+
+test.fail('every screen works under the content security policy (AUTH-7)', async ({ page }) => {
+  const blocked: string[] = [];
+  page.on('console', (m) => {
+    if (/content.security.policy/i.test(m.text())) blocked.push(m.text());
+  });
+  page.on('pageerror', (e) => blocked.push(e.message));
+  // An answer with a table, a list and raw HTML from the fake model, so the assistant's rendering runs too.
+  const chat = await (await page.request.post('/api/chats')).json();
+  await page.request.post(`/api/chats/${chat.id}/messages`, { data: { question: 'Show me [html]' } });
+
+  const first = await page.goto('/employees');
+  expect(first!.headers()['content-security-policy']).toContain("frame-ancestors 'none'");
+  for (const path of ['/employees', '/employees/E000001', '/employees/new', '/pay', '/import', `/assistant/${chat.id}`]) {
+    await page.goto(path);
+    await page.waitForLoadState('networkidle');
+  }
+  await page.getByRole('button', { name: /Switch to (dark|light) theme/ }).click();
+  await expect(page.getByRole('article', { name: 'Answer' })).toBeVisible();
+  expect(blocked).toEqual([]);
+});

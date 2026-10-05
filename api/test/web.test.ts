@@ -24,3 +24,22 @@ test('serves the built web app: its files, index.html for app routes, JSON under
   expect(missing.status).toBe(404);
   expect(missing.body).toEqual({ error: 'Not found.' });
 });
+
+test.fails('every response carries the security headers; HSTS only in production (AUTH-7)', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'acme-web-'));
+  writeFileSync(join(dir, 'index.html'), '<!doctype html><title>ACME Pay</title>');
+  for (const production of [false, true]) {
+    const { app } = await testApp({ production, webDir: dir });
+    for (const path of ['/employees', '/api/health', '/api/employees']) {
+      const h = (await request(app).get(path)).headers;
+      const csp = h['content-security-policy'] ?? '';
+      expect(csp, path).toContain("script-src 'self'");
+      expect(csp, path).toContain("frame-ancestors 'none'");
+      expect(csp, path).toContain("object-src 'none'");
+      expect(h['x-content-type-options'], path).toBe('nosniff');
+      expect(h['referrer-policy'], path).toBe('same-origin');
+      expect(h['x-powered-by'], path).toBeUndefined();
+      expect(h['strict-transport-security'], path).toBe(production ? 'max-age=31536000' : undefined);
+    }
+  }
+});
