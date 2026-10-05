@@ -32,3 +32,7 @@ Rules learned from Nikhil's corrections and preferences. Read at session start.
    so every question failed for Nikhil (P8). Build smoke and integration checks from the app's
    own configuration and request code, not a hand-made variant.
 
+10. **Every input with a default needs its "emptied" state decided and tested.** The Status
+    filter showed its default when the address had no status, so removing all three brought them
+    straight back (P15), and QA only tried adding and narrowing. For any field that falls back to a
+    default, ask what emptying it means, test that path, and include it in QA.

@@ -333,7 +333,10 @@ API answers and the live JavaScript for secrets; README now links the live site 
 (Image #4: the employee list's Status filter showing Starting, Active and Leaving, each with
 its remove cross.)
 
-**My reply:** _(filled in once fixed)_
+**My reply:** found the cause (the box shows the default whenever the address has no status, so
+emptying it brought the default back) and asked what an empty Status filter should mean (Q48):
+everyone, leavers included (D76). Fixed test-first; lesson 10 added. Commits ae15d5a and the
+fix commit after it.
 
 ---
 
@@ -757,6 +760,7 @@ is done (hashes copied from `git log`).
 - P13 logged; step-by-step deploy guide given in the chat.
 - P14 logged · Neon checked without printing its address (direct, Singapore, Postgres 17.11; Render's first start had applied all 7 migrations; no employees), then seeded: 10,000 employees, 63,154 job changes, 1,093 leavers, 30 outliers (write 5,091 ms). Live site https://acme-salary-aqw1.onrender.com runs 6070f77: health 200, pages served, API 401 signed out, no secrets in the JavaScript. README links it; section 11 written.
 - P15 logged · cause: the Status box shows the default three whenever the address has no `status`, and removing all three deletes it. Q48 asked and answered (D76). Red: `status=all` lists everyone, leavers included (API); removing every status keeps the box empty and lists everyone (page).
+- D76 · green: the list schema reads `status=all` as every status (unknown values still get their plain message; the CSV export uses the same schema); the Status box writes `all` when emptied, shows "All statuses" and stays empty; Clear filters still restores the default three. SPEC LIST-3, QA row and plan updated; lesson 10 added. 193 unit and API tests and 26 end-to-end tests pass.
 
 ---
 

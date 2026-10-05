@@ -149,7 +149,7 @@ test('a filter picked while the search is still waiting to apply is kept', async
   expect(screen.getByTestId('location')).toHaveTextContent('country=DE');
 });
 
-test.fails('removing every status keeps the box empty and lists everyone (D76)', async () => {
+test('removing every status keeps the box empty and lists everyone (D76)', async () => {
   const calls = signedInWith();
   renderApp('/employees');
   const status = await screen.findByRole('combobox', { name: 'Status' });

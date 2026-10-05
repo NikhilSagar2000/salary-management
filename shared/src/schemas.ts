@@ -138,7 +138,9 @@ export const listQuerySchema = z.object({
   role: csvOf(ROLE_NAMES, 'role'),
   level: csvOf(LEVELS, 'level'),
   gender: csvOf(GENDERS, 'gender'),
-  status: csvOf(STATUSES, 'status').transform((s) => s ?? DEFAULT_STATUSES),
+  // No status means the default three; "all" is what an emptied Status filter writes (D76).
+  status: z.string().optional().transform((s) => (s === 'all' ? STATUSES.join(',') : s))
+    .pipe(csvOf(STATUSES, 'status')).transform((s) => s ?? DEFAULT_STATUSES),
   sort: z.enum(SORTS, { error: (i) => MSG.unknownValue('sort', String(i.input)) }).default('name'),
   dir: z.enum(['asc', 'desc'], { error: (i) => MSG.unknownValue('sort direction', String(i.input)) }).default('asc'),
   salaryMin: salarySchema.optional(),

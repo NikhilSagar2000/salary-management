@@ -110,8 +110,10 @@ export function EmployeeList() {
       <MultiSelect
         label="Status"
         data={STATUSES.map((s) => ({ value: s, label: label(s) }))}
-        value={params.get('status') ? list('status') : [...DEFAULT_STATUSES]}
-        onChange={setList('status')}
+        placeholder="All statuses"
+        // No status in the address means the default three; emptying the box means everyone (D76).
+        value={params.get('status') === 'all' ? [] : params.get('status') ? list('status') : [...DEFAULT_STATUSES]}
+        onChange={(values) => update({ status: values.join(',') || 'all' })}
       />
       <Group grow align="flex-start" gap="xs">
         <NumberInput label="Salary from" disabled={!oneCountry} min={1} thousandSeparator="," allowDecimal={false}

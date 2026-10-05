@@ -593,6 +593,7 @@ starting), `shared/src/schemas.ts` (`listQuerySchema`, shared with the web URL s
 - [x] Step 2: "search matches part of name, email or code ignoring case and accents" (LIST-2).
 - [x] Step 3: "names with apostrophes and hyphens are found" (review focus 2; `%`/`_` typed literally).
 - [x] Step 4: "filters combine with AND across fields and OR within one" (LIST-3).
+- [x] Added after deploy (P15, D76): "status=all lists everyone, leavers included" (API) and "removing every status keeps the box empty and lists everyone" (page) (LIST-3).
 - [x] Step 5: "default status filter hides people who have left" (LIST-3, LEAVE-6).
 - [x] Step 6: "sorts by each column both ways, ties broken by code" (LIST-4).
 - [x] Step 7: "salary sort and range need exactly one country" (LIST-5).

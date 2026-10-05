@@ -79,7 +79,7 @@ test('default status filter hides people who have left', async () => {
   expect(await sorted('?status=starting')).toEqual(['E000002']);
 });
 
-test.fails('status=all lists everyone, leavers included (D76)', async () => {
+test('status=all lists everyone, leavers included (D76)', async () => {
   const { list } = await setup([
     { code: 'E000001' }, // active
     { code: 'E000002', hireDate: '2026-12-01' }, // starting

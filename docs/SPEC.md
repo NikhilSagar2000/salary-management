@@ -62,7 +62,8 @@ after today is *scheduled*.
   accents ("muller" finds "Müller", "jose" finds "José").
 - **LIST-3** Filters: country, department, role, level, gender (each multi-select) and status.
   Different filters combine with AND, values within one filter with OR. Default status
-  filter: starting, active, leaving.
+  filter: starting, active, leaving. Removing every status shows everyone, leavers included;
+  the box stays empty with "All statuses" (P15, D76).
 - **LIST-4** Sort by name, code, country, department, role, level or hire date, ascending or
   descending, with ties broken by code.
 - **LIST-5** Salary sort and the salary min/max filter work only when exactly one country is
