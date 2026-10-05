@@ -148,3 +148,14 @@ test('a filter picked while the search is still waiting to apply is kept', async
   await waitFor(() => expect(screen.getByTestId('location')).toHaveTextContent('q=Albrecht'));
   expect(screen.getByTestId('location')).toHaveTextContent('country=DE');
 });
+
+test.fails('removing every status keeps the box empty and lists everyone (D76)', async () => {
+  const calls = signedInWith();
+  renderApp('/employees');
+  const status = await screen.findByRole('combobox', { name: 'Status' });
+  await userEvent.click(status);
+  await userEvent.keyboard('{Backspace}{Backspace}{Backspace}');
+  await waitFor(() => expect(screen.getByTestId('location')).toHaveTextContent('/employees?status=all'));
+  expect(status).toHaveAttribute('placeholder', 'All statuses');
+  await waitFor(() => expect(calls.filter((c) => c.url.pathname === '/api/employees').at(-1)!.url.search).toBe('?status=all'));
+});

@@ -247,6 +247,7 @@ free daily quota.
 | Q45 | How should the 10,000-person seed get into Neon (project on Postgres 17 in AWS Singapore, direct connection string)? | I'll put it in .env (Recommended) · I'll run the seed myself | "I'll put it in .env (Recommended)" |
 | Q46 | Which sign-in password should the live site use? | A new one (Recommended) · Same as local | "A new one (Recommended)" |
 | Q47 | Who clicks through Render (New › Blueprint, pick the repo, paste the three secrets)? | I'll do it from your steps (Recommended) · Drive my Chrome for the clicks | "I'll do it from your steps (Recommended)" |
+| Q48 | When you remove every status from the Status filter, what should the employee list show? | Everyone (Recommended) · Nobody · Keep at least one | "Everyone (Recommended)" |
 
 **My reply:** approval recorded for the GitHub push and the Neon + Render deploy (D70). Before
 pushing: checked history for secrets and the work email. Account and repo creation stays with
@@ -324,6 +325,15 @@ with the three secrets; send me the URL so I can check it. No commits (guidance 
 **My reply:** seeded Neon from `.env` without printing its address and checked the counts on
 Neon; found the live address in GitHub's deployment record; checked health, pages, signed-out
 API answers and the live JavaScript for secrets; README now links the live site (section 11).
+
+### P15 (2026-10-05, after the deploy)
+
+> btw when i clean all three of these filters, they get added back [Image #4]
+
+(Image #4: the employee list's Status filter showing Starting, Active and Leaving, each with
+its remove cross.)
+
+**My reply:** _(filled in once fixed)_
 
 ---
 
@@ -746,6 +756,7 @@ is done (hashes copied from `git log`).
 - Fix · green: the list keeps the address it last wrote and builds every change (and Clear filters) on that; the router's next render brings it back in line, as do back/forward. 191 unit and API tests and 26 end-to-end tests pass.
 - P13 logged; step-by-step deploy guide given in the chat.
 - P14 logged · Neon checked without printing its address (direct, Singapore, Postgres 17.11; Render's first start had applied all 7 migrations; no employees), then seeded: 10,000 employees, 63,154 job changes, 1,093 leavers, 30 outliers (write 5,091 ms). Live site https://acme-salary-aqw1.onrender.com runs 6070f77: health 200, pages served, API 401 signed out, no secrets in the JavaScript. README links it; section 11 written.
+- P15 logged · cause: the Status box shows the default three whenever the address has no `status`, and removing all three deletes it. Q48 asked and answered (D76). Red: `status=all` lists everyone, leavers included (API); removing every status keeps the box empty and lists everyone (page).
 
 ---
 
@@ -831,6 +842,7 @@ accepted when Nikhil approved the plan (P4).
 | D73 | Lookup steps after an answer finishes | Nikhil: "hide these once the thinking and processing part is done" (P10) | Keep · collapse behind a toggle · hide | Hide when the answer finishes, stops or fails | Nikhil asked to hide them; saved answers never had steps, so live and reopened answers now match | N (P10, amends AST-3) |
 | D74 | Scrolling on the assistant page | Nikhil: chat list and chat "should have seperate scroll" (P11) | One page scroll · separate scroll areas | The page fills the window; the chat list and the messages scroll separately; the question box stays below the messages | Nikhil's call | N (P11, new AST-19) |
 | D75 | Deploy hand-off | Accounts exist (P12); secrets must not pass through me | I seed Neon from .env · Nikhil seeds; new live password · reuse local; Nikhil clicks Render · I drive Chrome | Nikhil puts NEON_DATABASE_URL in .env and I seed it without printing it; a new live password hashed by Nikhil; Nikhil sets up the Render Blueprint from my steps and pastes the secrets | Keeps every secret out of the chat and out of web forms I fill | N (Q45–Q47) |
+| D76 | An emptied Status filter | Removing all three default statuses brought them straight back (P15): no `status` in the address means the default | Everyone · nobody · keep at least one | Empty means everyone, leavers included; the address says `status=all`; the box stays empty with "All statuses"; Clear filters still restores the default three | Nikhil's call (Q48); matches the other filters, where empty means no filter | N (Q48, adds to LIST-3) |
 
 ---
 

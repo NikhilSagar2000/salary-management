@@ -79,6 +79,18 @@ test('default status filter hides people who have left', async () => {
   expect(await sorted('?status=starting')).toEqual(['E000002']);
 });
 
+test.fails('status=all lists everyone, leavers included (D76)', async () => {
+  const { list } = await setup([
+    { code: 'E000001' }, // active
+    { code: 'E000002', hireDate: '2026-12-01' }, // starting
+    { code: 'E000003', leaveDate: '2026-12-31' }, // leaving
+    { code: 'E000004', leaveDate: '2026-09-15' }, // left
+  ]);
+  const res = await list('?status=all');
+  expect(res.status).toBe(200);
+  expect(codes(res).sort()).toEqual(['E000001', 'E000002', 'E000003', 'E000004']);
+});
+
 test('sorts by each column both ways, ties broken by code', async () => {
   const { list } = await setup([
     { code: 'E000001', lastName: 'Costa', country: 'BR', department: 'Sales', role: 'Account Executive', level: 2, hireDate: '2021-05-01' },
