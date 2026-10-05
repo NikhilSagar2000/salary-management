@@ -307,6 +307,15 @@ on its own, the messages scroll on their own, and the question box stays below t
 
 **My reply:** _(filled in as the deploy goes)_
 
+### P13 (2026-10-05, during phase 7)
+
+> guide me step by step to deploy on neon and render what do i need to do ?
+
+**My reply:** a numbered walk-through in the chat: create the Neon project (Postgres 17, AWS
+Singapore) and put its direct connection string in `.env` as `NEON_DATABASE_URL` (I seed it);
+make a new live password hash in his own terminal; Render New › Blueprint from the GitHub repo
+with the three secrets; send me the URL so I can check it. No commits (guidance only).
+
 ---
 
 ## 3. Timeline
