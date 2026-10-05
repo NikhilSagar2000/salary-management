@@ -783,6 +783,7 @@ is done (hashes copied from `git log`).
 - While making AUTH-7 green, the full end-to-end run failed `keyboard: add an employee` again (the test that failed now and then before, cause never confirmed): Enter on the highlighted "Software Engineer" left Role empty and submitted the form. The saved trace showed the list open and the option highlighted just before Enter. Mantine's searchable select keeps its own selected-option index, updated on timers, and it can disagree with the highlight on screen. Measured with a throwaway test (20 tries each, a 400 ms pause before Enter): searchable Role failed 10 of 20; Role as a plain select failed 0 of 20 (Department and Country, plain, never failed). A keyboard user could hit this, not only the test. Departments have at most four roles, so search adds nothing there. The AUTH-7 work was stashed to keep each commit's suite green. Red: keyboard: Enter picks the highlighted role every time (10 tries).
 - Fix · green: the add form's Role is a plain select like Department and Country (the job-change form's already was). 191 unit and API tests and 28 end-to-end tests pass (the AUTH-7 tests still marked expected-to-fail while stashed).
 - D77 · green (AUTH-7 work restored): every response carries the content security policy (`default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'`), `X-Content-Type-Options: nosniff` and `Referrer-Policy: same-origin`; production adds `Strict-Transport-Security: max-age=31536000`; Express no longer says `X-Powered-By`. The end-to-end policy check passes on every screen, including a markdown answer and the theme switch, and fails when inline styles are blocked (checked once). SPEC AUTH-7, QA rows and plan updated; lesson 11 added. 194 unit and API tests and 28 end-to-end tests pass.
+- Pushed; Render deployed 528962c; live headers checked (section 11); CI passed.
 
 ---
 
@@ -1258,6 +1259,9 @@ created by Nikhil, P12; hand-off in D75).
 - **Not verified by me:** signing in on the live site, the Secure flag on the live cookie (set
   from `NODE_ENV=production` in the code), live assistant answers, and cold-start time. Signing in
   is Nikhil's (his password).
+- **Security headers (D77, AUTH-7), checked on the live site after the deploy of 528962c:** pages
+  and API answers carry the content security policy, `nosniff`, `Referrer-Policy: same-origin` and
+  `Strict-Transport-Security: max-age=31536000`; no `X-Powered-By`. CI passed.
 
 ---
 
