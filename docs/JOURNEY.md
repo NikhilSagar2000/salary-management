@@ -248,6 +248,7 @@ free daily quota.
 | Q46 | Which sign-in password should the live site use? | A new one (Recommended) · Same as local | "A new one (Recommended)" |
 | Q47 | Who clicks through Render (New › Blueprint, pick the repo, paste the three secrets)? | I'll do it from your steps (Recommended) · Drive my Chrome for the clicks | "I'll do it from your steps (Recommended)" |
 | Q48 | When you remove every status from the Status filter, what should the employee list show? | Everyone (Recommended) · Nobody · Keep at least one | "Everyone (Recommended)" |
+| Q49 | How should Salary from / Salary to behave before exactly one country is chosen? | Hide them, keep the note (Recommended) · Hide them and the note · Keep as is | Declined; then "leave it" (P19): kept as is |
 
 **My reply:** approval recorded for the GitHub push and the Neon + Render deploy (D70). Before
 pushing: checked history for secrets and the work email. Account and repo creation stays with
@@ -354,6 +355,20 @@ old refusal, and asked what he saw (the message was the link alone).
 same-origin referrer policy, HSTS in production, no X-Powered-By; checked on the live site after
 the deploy. On the way, found and fixed the keyboard bug behind the flaky add-employee test (the
 searchable Role select). Commits 7ed87af, 11208ed, 843ba54 and the headers commit after them.
+
+### P18 (2026-10-05, after the deploy)
+
+> Also the salary from and salary to filter is applied for country right? so why show it at first place if it cane be aplied
+
+**My reply:** confirmed they work only with exactly one country (LIST-5, D17) and that they show
+disabled under a note that also explains the unsortable Salary column; asked how they should
+behave (Q49). Nikhil declined the question and answered in P19.
+
+### P19 (2026-10-05, after the deploy)
+
+> leave it
+
+**My reply:** left the salary boxes as they are (disabled with the note, D17). No code change.
 
 ---
 
@@ -784,6 +799,7 @@ is done (hashes copied from `git log`).
 - Fix · green: the add form's Role is a plain select like Department and Country (the job-change form's already was). 191 unit and API tests and 28 end-to-end tests pass (the AUTH-7 tests still marked expected-to-fail while stashed).
 - D77 · green (AUTH-7 work restored): every response carries the content security policy (`default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'`), `X-Content-Type-Options: nosniff` and `Referrer-Policy: same-origin`; production adds `Strict-Transport-Security: max-age=31536000`; Express no longer says `X-Powered-By`. The end-to-end policy check passes on every screen, including a markdown answer and the theme switch, and fails when inline styles are blocked (checked once). SPEC AUTH-7, QA rows and plan updated; lesson 11 added. 194 unit and API tests and 28 end-to-end tests pass.
 - Pushed; Render deployed 528962c; live headers checked (section 11); CI passed.
+- P18 logged; Q49 asked and declined; P19 "leave it": the salary boxes stay as they are (D17 unchanged).
 
 ---
 
