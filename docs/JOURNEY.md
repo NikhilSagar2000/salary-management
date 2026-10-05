@@ -778,6 +778,7 @@ is done (hashes copied from `git log`).
 - P16 logged: the D76 fix was live at 06:29:55 UTC (Render deploy of 55fc20a; CI passed); asked what Nikhil saw.
 - P17 logged (D77). Red: every response carries the security headers, HSTS only in production (API); every screen works under the content security policy (end to end, including a markdown answer and the theme switch).
 - While making AUTH-7 green, the full end-to-end run failed `keyboard: add an employee` again (the test that failed now and then before, cause never confirmed): Enter on the highlighted "Software Engineer" left Role empty and submitted the form. The saved trace showed the list open and the option highlighted just before Enter. Mantine's searchable select keeps its own selected-option index, updated on timers, and it can disagree with the highlight on screen. Measured with a throwaway test (20 tries each, a 400 ms pause before Enter): searchable Role failed 10 of 20; Role as a plain select failed 0 of 20 (Department and Country, plain, never failed). A keyboard user could hit this, not only the test. Departments have at most four roles, so search adds nothing there. The AUTH-7 work was stashed to keep each commit's suite green. Red: keyboard: Enter picks the highlighted role every time (10 tries).
+- Fix · green: the add form's Role is a plain select like Department and Country (the job-change form's already was). 191 unit and API tests and 28 end-to-end tests pass (the AUTH-7 tests still marked expected-to-fail while stashed).
 
 ---
 

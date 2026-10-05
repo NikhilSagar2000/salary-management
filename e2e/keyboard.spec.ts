@@ -118,7 +118,7 @@ test('keyboard: ask a question', async ({ page }) => {
 
 // Mantine's searchable select sometimes ignored Enter on the highlighted option and submitted the form instead
 // (10 of 20 tries, even after a pause); the add-employee keyboard test failed now and then because of it.
-test.fail('keyboard: Enter picks the highlighted role every time', async ({ page }) => {
+test('keyboard: Enter picks the highlighted role every time', async ({ page }) => {
   test.setTimeout(90_000);
   for (let i = 0; i < 10; i++) {
     await page.goto('/employees/new');

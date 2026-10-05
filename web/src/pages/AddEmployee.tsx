@@ -64,7 +64,7 @@ export function AddEmployee() {
                   form.clearField('department');
                   setV((s) => ({ ...s, department: d ?? '', role: roleChoices(d ?? '').includes(s.role) ? s.role : '' }));
                 }} />
-              <Select label="Role" data={roleChoices(v.department)} value={v.role || null} error={form.fields.role} allowDeselect={false} searchable
+              <Select label="Role" data={roleChoices(v.department)} value={v.role || null} error={form.fields.role} allowDeselect={false}
                 onChange={(r) => {
                   form.clearField('role');
                   setV((s) => ({ ...s, role: r ?? '', level: levelChoices(r ?? '').some((l) => l.value === s.level) ? s.level : '' }));
