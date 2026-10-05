@@ -15,8 +15,22 @@ import { statsRoutes } from './stats/routes.ts';
 /** `webDir` is the built web app to serve (D66); without it the API serves only /api. */
 export type Config = { passwordHash: string; production: boolean; openRouter: { baseUrl: string; apiKey: string }; webDir?: string };
 
+/**
+ * AUTH-7: the page runs only its own scripts and can't be shown inside another site. Styles may be inline because Mantine
+ * injects them; data: images cover icons drawn in CSS.
+ */
+const CSP = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; object-src 'none'; " +
+  "base-uri 'none'; form-action 'self'; frame-ancestors 'none'";
+
 export function createApp(deps: { db: pg.Pool; clock: Clock; config: Config; model: ModelFn }) {
   const app = express();
+  app.disable('x-powered-by');
+  app.use((_req, res, next) => {
+    res.set({ 'Content-Security-Policy': CSP, 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'same-origin' });
+    // Only where the site is served over HTTPS (Render); on localhost it would pin the browser to HTTPS.
+    if (deps.config.production) res.set('Strict-Transport-Security', 'max-age=31536000');
+    next();
+  });
   // Render puts one proxy in front; trust it so req.ip is the browser's address.
   if (deps.config.production) app.set('trust proxy', 1);
   app.use(express.json());

@@ -36,3 +36,7 @@ Rules learned from Nikhil's corrections and preferences. Read at session start.
     filter showed its default when the address had no status, so removing all three brought them
     straight back (P15), and QA only tried adding and narrowing. For any field that falls back to a
     default, ask what emptying it means, test that path, and include it in QA.
+11. **A flaky test is a bug report: measure it, don't nudge it.** The add-employee keyboard test
+    failed now and then for days; scoping the helper didn't fix it. Reading the saved trace and
+    counting outcomes over 20 tries (10 of 20 failed with a searchable select, 0 of 20 with a plain
+    one) found a real keyboard bug in a few minutes. Keep traces on failure and count before changing.

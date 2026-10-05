@@ -350,7 +350,10 @@ old refusal, and asked what he saw (the message was the link alone).
 
 > yes add the security headers
 
-**My reply:** _(filled in once done)_
+**My reply:** added the headers test-first (D77, AUTH-7): a content security policy, nosniff, a
+same-origin referrer policy, HSTS in production, no X-Powered-By; checked on the live site after
+the deploy. On the way, found and fixed the keyboard bug behind the flaky add-employee test (the
+searchable Role select). Commits 7ed87af, 11208ed, 843ba54 and the headers commit after them.
 
 ---
 
@@ -779,6 +782,7 @@ is done (hashes copied from `git log`).
 - P17 logged (D77). Red: every response carries the security headers, HSTS only in production (API); every screen works under the content security policy (end to end, including a markdown answer and the theme switch).
 - While making AUTH-7 green, the full end-to-end run failed `keyboard: add an employee` again (the test that failed now and then before, cause never confirmed): Enter on the highlighted "Software Engineer" left Role empty and submitted the form. The saved trace showed the list open and the option highlighted just before Enter. Mantine's searchable select keeps its own selected-option index, updated on timers, and it can disagree with the highlight on screen. Measured with a throwaway test (20 tries each, a 400 ms pause before Enter): searchable Role failed 10 of 20; Role as a plain select failed 0 of 20 (Department and Country, plain, never failed). A keyboard user could hit this, not only the test. Departments have at most four roles, so search adds nothing there. The AUTH-7 work was stashed to keep each commit's suite green. Red: keyboard: Enter picks the highlighted role every time (10 tries).
 - Fix · green: the add form's Role is a plain select like Department and Country (the job-change form's already was). 191 unit and API tests and 28 end-to-end tests pass (the AUTH-7 tests still marked expected-to-fail while stashed).
+- D77 · green (AUTH-7 work restored): every response carries the content security policy (`default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'`), `X-Content-Type-Options: nosniff` and `Referrer-Policy: same-origin`; production adds `Strict-Transport-Security: max-age=31536000`; Express no longer says `X-Powered-By`. The end-to-end policy check passes on every screen, including a markdown answer and the theme switch, and fails when inline styles are blocked (checked once). SPEC AUTH-7, QA rows and plan updated; lesson 11 added. 194 unit and API tests and 28 end-to-end tests pass.
 
 ---
 

@@ -30,7 +30,7 @@ test('the built web bundle holds no secret', async ({ request }) => {
   }
 });
 
-test.fail('every screen works under the content security policy (AUTH-7)', async ({ page }) => {
+test('every screen works under the content security policy (AUTH-7)', async ({ page }) => {
   const blocked: string[] = [];
   page.on('console', (m) => {
     if (/content.security.policy/i.test(m.text())) blocked.push(m.text());

@@ -25,7 +25,7 @@ test('serves the built web app: its files, index.html for app routes, JSON under
   expect(missing.body).toEqual({ error: 'Not found.' });
 });
 
-test.fails('every response carries the security headers; HSTS only in production (AUTH-7)', async () => {
+test('every response carries the security headers; HSTS only in production (AUTH-7)', async () => {
   const dir = mkdtempSync(join(tmpdir(), 'acme-web-'));
   writeFileSync(join(dir, 'index.html'), '<!doctype html><title>ACME Pay</title>');
   for (const production of [false, true]) {

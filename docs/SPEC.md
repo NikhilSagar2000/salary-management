@@ -53,6 +53,10 @@ after today is *scheduled*.
   returns to the page first asked for.
 - **AUTH-6** The password hash, session tokens' stored hashes and the OpenRouter key never
   appear in an API response, a log line or the web bundle.
+- **AUTH-7** Every response carries security headers: a content security policy (the page runs
+  only its own scripts, loads no plugins and can't be shown inside another site),
+  `X-Content-Type-Options: nosniff` and `Referrer-Policy: same-origin`; in production also
+  `Strict-Transport-Security`. No `X-Powered-By`. Every screen works under the policy (P17, D77).
 
 ## LIST: find employees
 
