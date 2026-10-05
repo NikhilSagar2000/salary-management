@@ -126,7 +126,7 @@ test('the list shows no pay summary (removed, D71)', async () => {
   expect(screen.queryByText(/median/)).not.toBeInTheDocument();
 });
 
-test.fails('a filter picked while the search is still waiting to apply is kept', async () => {
+test('a filter picked while the search is still waiting to apply is kept', async () => {
   signedInWith();
   renderApp('/employees');
   const search = await screen.findByLabelText('Search');

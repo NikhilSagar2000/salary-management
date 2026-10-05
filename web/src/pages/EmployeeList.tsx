@@ -45,15 +45,25 @@ export function EmployeeList() {
     };
   }, [query]);
 
+  // The address as last written. The router hands this render the new params only after it re-renders, so a second
+  // change before then (the search's delayed write) builds on this, not on `params`, and keeps the first.
+  const latest = useRef(params);
+  useEffect(() => {
+    latest.current = params;
+  }, [params]);
+  const write = (next: URLSearchParams) => {
+    latest.current = next;
+    setParams(next);
+  };
   /** Changes some parameters; any filter change goes back to page 1. */
   const update = (changes: Record<string, string | null>) => {
-    const next = new URLSearchParams(params);
+    const next = new URLSearchParams(latest.current);
     for (const [k, v] of Object.entries(changes)) {
       if (v) next.set(k, v);
       else next.delete(k);
     }
     if (!('page' in changes)) next.delete('page');
-    setParams(next);
+    write(next);
   };
   const list = (key: string) => params.get(key)?.split(',').filter(Boolean) ?? [];
   const setList = (key: string) => (values: string[]) => update({ [key]: values.join(',') || null });
@@ -156,7 +166,7 @@ export function EmployeeList() {
         <Stack align="flex-start" gap="xs" py="xl">
           <Text fw={600}>No employees match these filters.</Text>
           <Text size="sm" c="dimmed">Try a shorter search, fewer filters, or include people who have left.</Text>
-          <Button variant="default" onClick={() => setParams(new URLSearchParams())}>Clear filters</Button>
+          <Button variant="default" onClick={() => write(new URLSearchParams())}>Clear filters</Button>
         </Stack>
       )}
       {data && data.total > 0 && (
