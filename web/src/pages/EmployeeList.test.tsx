@@ -1,6 +1,6 @@
-import { screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
-import { expect, test } from 'vitest';
+import { expect, test, vi } from 'vitest';
 import { fakeApi } from '../test/fakeApi.ts';
 import { listResponse } from '../test/fixtures.ts';
 import { renderApp } from '../test/render.tsx';
@@ -124,4 +124,27 @@ test('the list shows no pay summary (removed, D71)', async () => {
   await screen.findByRole('table');
   expect(screen.queryByRole('list', { name: 'Pay for these employees' })).not.toBeInTheDocument();
   expect(screen.queryByText(/median/)).not.toBeInTheDocument();
+});
+
+test.fails('a filter picked while the search is still waiting to apply is kept', async () => {
+  signedInWith();
+  renderApp('/employees');
+  const search = await screen.findByLabelText('Search');
+  await userEvent.click(screen.getByRole('combobox', { name: 'Country' }));
+  const germany = await screen.findByRole('option', { name: 'Germany' });
+  vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+  try {
+    act(() => {
+      fireEvent.change(search, { target: { value: 'Albrecht' } });
+    });
+    // The search's delayed write lands before the router has re-rendered with the country (the CI failure's timing).
+    act(() => {
+      fireEvent.click(germany);
+      vi.advanceTimersByTime(300);
+    });
+  } finally {
+    vi.useRealTimers();
+  }
+  await waitFor(() => expect(screen.getByTestId('location')).toHaveTextContent('q=Albrecht'));
+  expect(screen.getByTestId('location')).toHaveTextContent('country=DE');
 });

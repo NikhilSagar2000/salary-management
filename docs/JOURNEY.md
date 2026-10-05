@@ -244,6 +244,9 @@ free daily quota.
 |---|---|---|---|
 | Q43 | Phase 7 deploys to Neon (Postgres) and Render (one web service), which needs the code on GitHub first. What do you approve? | Push, then deploy (Recommended) · Push only for now · Not yet | "Push, then deploy (Recommended)" |
 | Q44 | Do you already have Neon and Render accounts, and the empty GitHub repo NikhilSagar2000/salary-management? | All three exist · Some are missing | "Some are missing" |
+| Q45 | How should the 10,000-person seed get into Neon (project on Postgres 17 in AWS Singapore, direct connection string)? | I'll put it in .env (Recommended) · I'll run the seed myself | "I'll put it in .env (Recommended)" |
+| Q46 | Which sign-in password should the live site use? | A new one (Recommended) · Same as local | "A new one (Recommended)" |
+| Q47 | Who clicks through Render (New › Blueprint, pick the repo, paste the three secrets)? | I'll do it from your steps (Recommended) · Drive my Chrome for the clicks | "I'll do it from your steps (Recommended)" |
 
 **My reply:** approval recorded for the GitHub push and the Neon + Render deploy (D70). Before
 pushing: checked history for secrets and the work email. Account and repo creation stays with
@@ -297,6 +300,12 @@ all move with one page scroll.)
 **My reply:** the assistant page now fills the window below the top bar. The chat list scrolls
 on its own, the messages scroll on their own, and the question box stays below the messages
 (D74, new criterion AST-19). Commits 79228d4, 71d030b.
+
+### P12 (2026-10-05, during phase 7)
+
+> I created the Neon and Render accounts
+
+**My reply:** _(filled in as the deploy goes)_
 
 ---
 
@@ -715,6 +724,7 @@ is done (hashes copied from `git log`).
 - Red (end to end): the chat list and the messages scroll separately; the question box stays in view (AST-19, D74).
 - D74 · green: the assistant page fills the window below the top bar (480 px at least); the chat list and the messages each scroll, and the question box sits below the messages instead of sticking to the page. The first run still scrolled the page by 25 px: the hidden "Answer finished." status is absolutely positioned and escaped the scrolling box, so the box is now its positioning parent. Screenshots at 1280 px and 390 px checked by eye. SPEC AST-19 added; QA row and plan map updated; README no longer mentions the list's stats line (stale since D71). 190 unit and API tests and 26 end-to-end tests pass.
 - Commit hashes added to the replies for P7–P11 (P7 and P8 had none); pushed master.
+- CI failed on that docs-only push (run 37234794581): `keyboard: search, filter and open an employee` ended on `/employees?q=Albrecht` without `country=DE`; the code commit before it passed. Cause: the list builds each address change from the `params` of its last render; the search writes `q` 300 ms after typing, and when that lands before the router re-renders with a just-picked country, it writes over it. A real user typing then quickly picking a filter could lose the filter. P12 logged; Q45–Q47 asked and answered (D75). Red: a filter picked while the search is still waiting to apply is kept (reproduces the CI address exactly with fake timers).
 
 ---
 
@@ -799,6 +809,7 @@ accepted when Nikhil approved the plan (P4).
 | D72 | Free requests left in the chat | Nikhil: "hide these lines" (P9) | Keep · hide in the page · remove page line and endpoint | Remove the line and `/api/assistant/status`; the quota reader stays for the smoke test | Nikhil's call; nothing else used the endpoint | N (P9, replaces AST-16) |
 | D73 | Lookup steps after an answer finishes | Nikhil: "hide these once the thinking and processing part is done" (P10) | Keep · collapse behind a toggle · hide | Hide when the answer finishes, stops or fails | Nikhil asked to hide them; saved answers never had steps, so live and reopened answers now match | N (P10, amends AST-3) |
 | D74 | Scrolling on the assistant page | Nikhil: chat list and chat "should have seperate scroll" (P11) | One page scroll · separate scroll areas | The page fills the window; the chat list and the messages scroll separately; the question box stays below the messages | Nikhil's call | N (P11, new AST-19) |
+| D75 | Deploy hand-off | Accounts exist (P12); secrets must not pass through me | I seed Neon from .env · Nikhil seeds; new live password · reuse local; Nikhil clicks Render · I drive Chrome | Nikhil puts NEON_DATABASE_URL in .env and I seed it without printing it; a new live password hashed by Nikhil; Nikhil sets up the Render Blueprint from my steps and pastes the secrets | Keeps every secret out of the chat and out of web forms I fill | N (Q45–Q47) |
 
 ---
 
