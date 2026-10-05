@@ -5,7 +5,8 @@ A web app that replaces ACME's Excel salary sheets for one HR manager, on a phon
 history, pay statistics, an Excel round trip, and a read-only pay assistant that answers
 questions from the data and shows what each answer is based on.
 
-**Live demo:** _added after the first deploy_ (sign-in password: ask Nikhil)
+**Live demo:** https://acme-salary-aqw1.onrender.com (sign-in password: ask Nikhil). It runs on free
+plans: after a quiet spell the first visit takes about a minute to wake up.
 
 ## What it does
 

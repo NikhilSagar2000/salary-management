@@ -305,7 +305,8 @@ on its own, the messages scroll on their own, and the question box stays below t
 
 > I created the Neon and Render accounts
 
-**My reply:** _(filled in as the deploy goes)_
+**My reply:** asked how the seed, the live password and Render should be handled (Q45–Q47, D75);
+meanwhile fixed the CI failure from the last push (commits 5b0c616, 6070f77).
 
 ### P13 (2026-10-05, during phase 7)
 
@@ -315,6 +316,14 @@ on its own, the messages scroll on their own, and the question box stays below t
 Singapore) and put its direct connection string in `.env` as `NEON_DATABASE_URL` (I seed it);
 make a new live password hash in his own terminal; Render New › Blueprint from the GitHub repo
 with the three secrets; send me the URL so I can check it. No commits (guidance only).
+
+### P14 (2026-10-05, during phase 7)
+
+> Neon is in .env and render is deploying
+
+**My reply:** seeded Neon from `.env` without printing its address and checked the counts on
+Neon; found the live address in GitHub's deployment record; checked health, pages, signed-out
+API answers and the live JavaScript for secrets; README now links the live site (section 11).
 
 ---
 
@@ -735,6 +744,8 @@ is done (hashes copied from `git log`).
 - Commit hashes added to the replies for P7–P11 (P7 and P8 had none); pushed master.
 - CI failed on that docs-only push (run 37234794581): `keyboard: search, filter and open an employee` ended on `/employees?q=Albrecht` without `country=DE`; the code commit before it passed. Cause: the list builds each address change from the `params` of its last render; the search writes `q` 300 ms after typing, and when that lands before the router re-renders with a just-picked country, it writes over it. A real user typing then quickly picking a filter could lose the filter. P12 logged; Q45–Q47 asked and answered (D75). Red: a filter picked while the search is still waiting to apply is kept (reproduces the CI address exactly with fake timers).
 - Fix · green: the list keeps the address it last wrote and builds every change (and Clear filters) on that; the router's next render brings it back in line, as do back/forward. 191 unit and API tests and 26 end-to-end tests pass.
+- P13 logged; step-by-step deploy guide given in the chat.
+- P14 logged · Neon checked without printing its address (direct, Singapore, Postgres 17.11; Render's first start had applied all 7 migrations; no employees), then seeded: 10,000 employees, 63,154 job changes, 1,093 leavers, 30 outliers (write 5,091 ms). Live site https://acme-salary-aqw1.onrender.com runs 6070f77: health 200, pages served, API 401 signed out, no secrets in the JavaScript. README links it; section 11 written.
 
 ---
 
@@ -1183,8 +1194,31 @@ employees, editing history rows, UI translations.
 
 ## 11. Deployment
 
-Not started. Planned: one Render web service + Neon Postgres (D33), only after Nikhil's
-approval, including any account sign-ups.
+Live at **https://acme-salary-aqw1.onrender.com** since 2026-10-05 (approved in Q43; accounts
+created by Nikhil, P12; hand-off in D75).
+
+- **Database:** Neon project `acme-salary`, Postgres 17.11, AWS Singapore (`ap-southeast-1`),
+  direct (unpooled) connection. Its address lives only in Nikhil's git-ignored `.env`
+  (`NEON_DATABASE_URL`) and in Render's secret settings.
+- **App:** Render Blueprint from `render.yaml`: one free web service `acme-salary` in Singapore,
+  Node 24, built with `npm ci --include=dev && npm run build -w web`, started with
+  `npm start -w api` (applies migrations, serves the web build), health check `/api/health`.
+  Auto-deploys on every push to `master`. First deploy: commit `6070f77`.
+- **Secrets** (entered by Nikhil in Render, never in the chat or the repo): `DATABASE_URL`,
+  `APP_PASSWORD_HASH` (a new live-only password, hashed in his own terminal), `OPENROUTER_API_KEY`
+  (shared with local: 50 free requests a day between them).
+- **Seed:** loaded from this machine with `npm run seed` pointed at Neon: 10,000 employees
+  (US 3,000 · IN 3,000 · GB 1,200 · DE 1,200 · BR 800 · JP 800), 63,154 job changes, 1,093
+  leavers, 30 outliers; generate 1,525 ms, write 5,091 ms (measured). Render's first start had
+  already applied all 7 migrations.
+- **Checked from outside (2026-10-05, measured from Nikhil's machine, warm service):**
+  `/api/health` 200 in 0.30 s; `/`, `/employees`, `/assistant/3` serve the app (0.26–0.40 s);
+  `/api/employees`, `/api/chats`, `/api/employees.csv`, `/api/assistant/status` answer 401
+  "Please sign in." The live JavaScript (1.07 MB) holds no OpenRouter key, no `sk-or-` prefix,
+  no OpenRouter or Neon address and no password hash.
+- **Not verified by me:** signing in on the live site, the Secure flag on the live cookie (set
+  from `NODE_ENV=production` in the code), live assistant answers, and cold-start time. Signing in
+  is Nikhil's (his password).
 
 ---
 
