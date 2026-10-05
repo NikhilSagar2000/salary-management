@@ -116,6 +116,29 @@ test('keyboard: ask a question', async ({ page }) => {
   await expect(page.getByRole('article', { name: 'Answer' })).toContainText('Here are the engineers in Brazil.');
 });
 
+// Mantine's searchable select sometimes ignored Enter on the highlighted option and submitted the form instead
+// (10 of 20 tries, even after a pause); the add-employee keyboard test failed now and then because of it.
+test.fail('keyboard: Enter picks the highlighted role every time', async ({ page }) => {
+  test.setTimeout(90_000);
+  for (let i = 0; i < 10; i++) {
+    await page.goto('/employees/new');
+    await tabTo(page, page.getByRole('combobox', { name: 'Department' }));
+    await chooseWithKeys(page, 'Engineering');
+    const role = page.getByRole('combobox', { name: 'Role' });
+    await tabTo(page, role);
+    let highlighted: string | undefined;
+    for (let k = 0; k < 5 && !highlighted; k++) {
+      await page.keyboard.press('ArrowDown');
+      const list = await role.getAttribute('aria-controls');
+      const option = page.locator(`[id="${list}"] [data-combobox-selected]`);
+      if (list && (await option.count())) highlighted = (await option.first().textContent())?.trim();
+    }
+    await page.waitForTimeout(300); // about as long as a person takes to read the option
+    await page.keyboard.press('Enter');
+    await expect(role, `try ${i + 1}`).toHaveValue(highlighted!);
+  }
+});
+
 // A11Y-3
 test('focus is visible, skip link works, errors are announced', async ({ page }) => {
   await page.goto('/employees');
