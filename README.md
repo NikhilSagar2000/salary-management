@@ -43,11 +43,13 @@ npm run dev:api                # API on http://localhost:4732
 npm run dev:web                # in a second terminal: the app on http://localhost:4731
 ```
 
-The assistant needs a free [OpenRouter](https://openrouter.ai) key in `.env`
-(`OPENROUTER_API_KEY`), a model in `OPENROUTER_MODEL` and optional backups in
-`OPENROUTER_FALLBACK_MODELS`. Without a key, everything else works and the assistant says it
-isn't available. The free models log prompts; the seed data is made up, but before using real
-salaries switch to a paid model that doesn't keep data.
+The assistant needs an [OpenRouter](https://openrouter.ai) key in `.env` (`OPENROUTER_API_KEY`),
+a model in `OPENROUTER_MODEL` and optional backups in `OPENROUTER_FALLBACK_MODELS`. The live site
+asks free models first and falls back to `qwen/qwen3.7-flash`, a paid model at about $0.0004 a
+question, when they're busy or limited; that needs OpenRouter credit, and buying $10 also raises
+the free limit from 50 to 1,000 requests a day. Without a key, everything else works and the
+assistant says it isn't available. The free models log prompts; the seed data is made up, but
+before using real salaries switch to a paid model that doesn't keep data.
 
 ## Tests
 

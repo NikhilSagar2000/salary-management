@@ -26,4 +26,6 @@ services:
       - key: OPENROUTER_MODEL
         value: apodex/apodex-1.1-mini:free
       - key: OPENROUTER_FALLBACK_MODELS
-        value: nvidia/nemotron-3-ultra-550b-a55b:free,liquid/lfm-2.5-2.6b:free
+        # Free first; qwen3.7-flash is paid (needs OpenRouter credit) and only answers when the free ones are busy
+        # or limited (D78).
+        value: nvidia/nemotron-3-ultra-550b-a55b:free,qwen/qwen3.7-flash

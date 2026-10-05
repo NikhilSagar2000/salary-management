@@ -249,6 +249,7 @@ free daily quota.
 | Q47 | Who clicks through Render (New › Blueprint, pick the repo, paste the three secrets)? | I'll do it from your steps (Recommended) · Drive my Chrome for the clicks | "I'll do it from your steps (Recommended)" |
 | Q48 | When you remove every status from the Status filter, what should the employee list show? | Everyone (Recommended) · Nobody · Keep at least one | "Everyone (Recommended)" |
 | Q49 | How should Salary from / Salary to behave before exactly one country is chosen? | Hide them, keep the note (Recommended) · Hide them and the note · Keep as is | Declined; then "leave it" (P19): kept as is |
+| Q50 | Where should qwen/qwen3.7-flash sit? | Paid backup after free (Recommended) · Only model, always paid | "Paid backup after free (Recommended)" |
 
 **My reply:** approval recorded for the GitHub push and the Neon + Render deploy (D70). Before
 pushing: checked history for secrets and the work email. Account and repo creation stays with
@@ -369,6 +370,17 @@ behave (Q49). Nikhil declined the question and answered in P19.
 > leave it
 
 **My reply:** left the salary boxes as they are (disabled with the note, D17). No code change.
+
+### P20 (2026-10-05, after the deploy)
+
+> lets use qwen/qwen3.7-flash. no need for smoke tests. i'll add 10$
+
+(It followed an exploration exchange about cheaper models that Nikhil asked not to log: free-model
+limits, prices per question, and whether mistral-nemo could do the work.)
+
+**My reply:** asked where qwen3.7-flash should sit (Q50): as the paid backup after the free
+models (D78). Set it as the last of the three models in `render.yaml`, the example env and the
+local `.env`; README updated. No smoke test, as asked.
 
 ---
 
@@ -800,6 +812,7 @@ is done (hashes copied from `git log`).
 - D77 · green (AUTH-7 work restored): every response carries the content security policy (`default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'`), `X-Content-Type-Options: nosniff` and `Referrer-Policy: same-origin`; production adds `Strict-Transport-Security: max-age=31536000`; Express no longer says `X-Powered-By`. The end-to-end policy check passes on every screen, including a markdown answer and the theme switch, and fails when inline styles are blocked (checked once). SPEC AUTH-7, QA rows and plan updated; lesson 11 added. 194 unit and API tests and 28 end-to-end tests pass.
 - Pushed; Render deployed 528962c; live headers checked (section 11); CI passed.
 - P18 logged; Q49 asked and declined; P19 "leave it": the salary boxes stay as they are (D17 unchanged).
+- P20 logged; Q50 answered (D78): qwen/qwen3.7-flash is the paid third model in render.yaml and the local .env (lfm-2.5 dropped); .env.example and README say so. Config only, no code change; no smoke test (Nikhil's call).
 
 ---
 
@@ -887,6 +900,7 @@ accepted when Nikhil approved the plan (P4).
 | D75 | Deploy hand-off | Accounts exist (P12); secrets must not pass through me | I seed Neon from .env · Nikhil seeds; new live password · reuse local; Nikhil clicks Render · I drive Chrome | Nikhil puts NEON_DATABASE_URL in .env and I seed it without printing it; a new live password hashed by Nikhil; Nikhil sets up the Render Blueprint from my steps and pastes the secrets | Keeps every secret out of the chat and out of web forms I fill | N (Q45–Q47) |
 | D76 | An emptied Status filter | Removing all three default statuses brought them straight back (P15): no `status` in the address means the default | Everyone · nobody · keep at least one | Empty means everyone, leavers included; the address says `status=all`; the box stays empty with "All statuses"; Clear filters still restores the default three | Nikhil's call (Q48); matches the other filters, where empty means no filter | N (Q48, adds to LIST-3) |
 | D77 | Security headers | The live site sent none (found after the deploy); Nikhil: "yes add the security headers" (P17) | A library (helmet) · a few headers set in the API | Set in the API on every response, no new dependency: a content security policy (own scripts only; inline styles allowed because Mantine injects them; no plugins; no framing), nosniff, same-origin referrer, HSTS in production only, and no X-Powered-By | Covers clickjacking and injected scripts with a few lines; HSTS only where the site is on HTTPS | N (P17, new AUTH-7) |
+| D78 | A paid backup model | Free models allow 50 requests a day (1,000 once $10 of credit is bought); Nikhil adds $10 (P20) | Free only · free then paid backup · paid only | Models in order: apodex-1.1-mini:free, nemotron-3-ultra:free, qwen/qwen3.7-flash (paid, $0.03 / $0.13 per million tokens in / out, about $0.0004 a question measured from prompt and tool-result sizes); lfm-2.5 dropped (three models at most) | Nikhil's choice (Q50); OpenRouter falls back on rate limits and downtime and bills the model that answered; whether its account-wide daily free limit also triggers the fallback is unverified | N (P20, Q50) |
 
 ---
 
