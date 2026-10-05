@@ -338,6 +338,14 @@ emptying it brought the default back) and asked what an empty Status filter shou
 everyone, leavers included (D76). Fixed test-first; lesson 10 added. Commits ae15d5a and the
 fix commit after it.
 
+### P16 (2026-10-05, after the deploy)
+
+> https://acme-salary-aqw1.onrender.com/employees?status=all
+
+**My reply:** checked that Render deployed the D76 fix (55fc20a, live 06:29:55 UTC) and that the
+live JavaScript has the new "All statuses" box; said a visit before then would have shown the
+old refusal, and asked what he saw (the message was the link alone).
+
 ---
 
 ## 3. Timeline
